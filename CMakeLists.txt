@@ -6,16 +6,25 @@ set (CMAKE_CXX_STANDARD 17)
 set (CMAKE_CXX_STANDARD_REQUIRED ON)
 set (CMAKE_CXX_EXTENSIONS OFF)
 set (CMAKE_EXPORT_COMPILE_COMMANDS ON)
+set (CMAKE_POSITION_INDEPENDENT_CODE ON)
+message ("CMake version: ${CMAKE_VERSION}")
+
+set (DEFAULT_COMPILE_OPTIONS -Wall -Wextra -Werror)
+#add_compile_options(-Wall -Wextra -pedantic -Werror) Do not use.
+message("Compile flags: ")
+foreach (c ${DEFAULT_COMPILE_OPTIONS})
+  message(${c})
+endforeach()
+
+if("${CMAKE_SOURCE_DIR}" STREQUAL "${CMAKE_BINARY_DIR}")
+  message(FATAL_ERROR "In-source builds are not allowed.")
+endif()
+
 
 find_package(drake CONFIG REQUIRED PATHS /opt/drake)
+find_package(gflags REQUIRED)
 
-set (list 2 3 7)
-set (list "h;i")
-foreach (n ${list})
-  message ("Element: ${n}")
-endforeach ()
-message (${list})
-message (${CMAKE_VERSION})
-message (${drake_DIR})
-add_executable (Hello h.cpp hh.cpp)
+message ("Drake found at: ${drake_DIR}")
+
+add_subdirectory(src)
 

@@ -15,6 +15,7 @@ using drake::solvers::Binding;
 using drake::solvers::LinearCost;
 using drake::solvers::MathematicalProgram;
 using drake::solvers::QuadraticCost;
+using drake::solvers::LinearConstraint;
 using drake::symbolic::Variable;
 using Eigen::MatrixXd;
 using Eigen::VectorXd;
@@ -36,9 +37,12 @@ void RunMProg1() {
   MatrixXd q(3, 3);
   q << 0.55, -0.6, 0.3, 0.9, 7.6, -0.34, -4.5, 9.06, 0.1;
   auto quadratic_cost = std::make_shared<QuadraticCost>(q, VectorXd::Zero(3));
+  auto linear_constraint = std::make_shared<LinearConstraint>(MatrixXd::Identity(3, 3), VectorXd::Constant(3, 7.), VectorXd::Constant(3, 13.));
   std::cout << "Quadratic cost is convex? " << quadratic_cost->is_convex() << std::endl;
-  Binding quadratic_binding{quadratic_cost, u};
-  quadratic_program.AddCost(quadratic_binding);
+  Binding quadratic_cost_binding{quadratic_cost, u};
+  Binding<LinearConstraint> linear_constraint_binding{linear_constraint, u};
+  quadratic_program.AddCost(quadratic_cost_binding);
+  quadratic_program.AddConstraint(linear_constraint_binding);
 
   // auto custom_program = MathematicalProgram();
   // auto x = custom_program.NewContinuousVariables(25, 3, "X");

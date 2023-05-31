@@ -2,10 +2,10 @@
 
 #include <gflags/gflags.h>
 
-#include "drake_test.h"
 #include "drake/systems/analysis/simulator.h"
 #include "drake/systems/framework/diagram_builder.h"
 #include "drake/systems/primitives/vector_log_sink.h"
+#include "drake_test.h"
 
 DEFINE_int32(steps, 10, "Length of Fibonacci sequence to generate.");
 
@@ -16,7 +16,7 @@ namespace {
 
 // Use Drake's hybrid Simulator to produce the Fibonacci sequence up to
 // the step number supplied on the command line (default 10).
-int main(int argc, char* argv[]) {
+int main(int argc, char *argv[]) {
   // Handle the command line "steps" argument.
   gflags::SetUsageMessage("usage: run_fibonacci [--steps=n]");
   gflags::ParseCommandLineFlags(&argc, &argv, true);
@@ -34,20 +34,19 @@ int main(int argc, char* argv[]) {
   simulator.AdvanceTo(FLAGS_steps * FibonacciDifferenceEquation::kPeriod);
 
   // Print out the contents of the log.
-  const auto& log = logger->FindLog(simulator.get_context());
+  const auto &log = logger->FindLog(simulator.get_context());
   for (int n = 0; n < log.sample_times().size(); ++n) {
     const double t = log.sample_times()[n];
-    std::cout << n << ": " << log.data()(0, n)
-              << " (t=" << t << ")\n";
+    std::cout << n << ": " << log.data()(0, n) << " (t=" << t << ")\n";
   }
 
   return 0;
 }
 
-}  // namespace
-}  // namespace fibonacci
-}  // namespace examples
-}  // namespace drake
+} // namespace
+} // namespace fibonacci
+} // namespace examples
+} // namespace drake
 
 int main(int argc, char **argv) {
   return drake::examples::fibonacci::main(argc, argv);

@@ -53,7 +53,10 @@
       <xacro:property name="mesh_path" value="file://$(arg xarm_description)/meshes" scope="parent"/>
     </xacro:if>
     <xacro:unless value="${ros2_control_plugin == 'gazebo_ros2_control/GazeboSystem'}">
+      <!--
       <xacro:property name="mesh_path" value="package://xarm_description/meshes" scope="parent"/>
+      -->
+      <xacro:property name="mesh_path" value="$(arg xarm_description)/meshes" scope="parent"/>
     </xacro:unless> 
 
     <!-- include common.link.xacro -->

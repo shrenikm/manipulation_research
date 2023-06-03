@@ -31,14 +31,14 @@
     </inertial>
     <visual>
       <geometry>
-        <mesh filename="package://xarm_description/meshes/lite6/visual/base.stl"/>
+        <mesh filename="/home/shrenikm/Projects/manipulation_research/src/xarm_description/meshes/lite6/visual/base.obj"/>
       </geometry>
       <origin rpy="0 0 0" xyz="0 0 0"/>
       <material name="White"/>
     </visual>
     <collision>
       <geometry>
-        <mesh filename="package://xarm_description/meshes/lite6/visual/base.stl"/>
+        <mesh filename="/home/shrenikm/Projects/manipulation_research/src/xarm_description/meshes/lite6/visual/base.obj"/>
       </geometry>
       <origin rpy="0 0 0" xyz="0 0 0"/>
     </collision>
@@ -51,14 +51,14 @@
     </inertial>
     <visual>
       <geometry>
-        <mesh filename="package://xarm_description/meshes/lite6/visual/link1.stl"/>
+        <mesh filename="/home/shrenikm/Projects/manipulation_research/src/xarm_description/meshes/lite6/visual/link1.obj"/>
       </geometry>
       <origin rpy="0 0 0" xyz="0 0 0"/>
       <material name="White"/>
     </visual>
     <collision>
       <geometry>
-        <mesh filename="package://xarm_description/meshes/lite6/visual/link1.stl"/>
+        <mesh filename="/home/shrenikm/Projects/manipulation_research/src/xarm_description/meshes/lite6/visual/link1.obj"/>
       </geometry>
       <origin rpy="0 0 0" xyz="0 0 0"/>
     </collision>
@@ -79,14 +79,14 @@
     </inertial>
     <visual>
       <geometry>
-        <mesh filename="package://xarm_description/meshes/lite6/visual/link2.stl"/>
+        <mesh filename="/home/shrenikm/Projects/manipulation_research/src/xarm_description/meshes/lite6/visual/link2.obj"/>
       </geometry>
       <origin rpy="0 0 0" xyz="0 0 0"/>
       <material name="White"/>
     </visual>
     <collision>
       <geometry>
-        <mesh filename="package://xarm_description/meshes/lite6/visual/link2.stl"/>
+        <mesh filename="/home/shrenikm/Projects/manipulation_research/src/xarm_description/meshes/lite6/visual/link2.obj"/>
       </geometry>
       <origin rpy="0 0 0" xyz="0 0 0"/>
     </collision>
@@ -107,14 +107,14 @@
     </inertial>
     <visual>
       <geometry>
-        <mesh filename="package://xarm_description/meshes/lite6/visual/link3.stl"/>
+        <mesh filename="/home/shrenikm/Projects/manipulation_research/src/xarm_description/meshes/lite6/visual/link3.obj"/>
       </geometry>
       <origin rpy="0 0 0" xyz="0 0 0"/>
       <material name="White"/>
     </visual>
     <collision>
       <geometry>
-        <mesh filename="package://xarm_description/meshes/lite6/visual/link3.stl"/>
+        <mesh filename="/home/shrenikm/Projects/manipulation_research/src/xarm_description/meshes/lite6/visual/link3.obj"/>
       </geometry>
       <origin rpy="0 0 0" xyz="0 0 0"/>
     </collision>
@@ -135,14 +135,14 @@
     </inertial>
     <visual>
       <geometry>
-        <mesh filename="package://xarm_description/meshes/lite6/visual/link4.stl"/>
+        <mesh filename="/home/shrenikm/Projects/manipulation_research/src/xarm_description/meshes/lite6/visual/link4.obj"/>
       </geometry>
       <origin rpy="0 0 0" xyz="0 0 0"/>
       <material name="White"/>
     </visual>
     <collision>
       <geometry>
-        <mesh filename="package://xarm_description/meshes/lite6/visual/link4.stl"/>
+        <mesh filename="/home/shrenikm/Projects/manipulation_research/src/xarm_description/meshes/lite6/visual/link4.obj"/>
       </geometry>
       <origin rpy="0 0 0" xyz="0 0 0"/>
     </collision>
@@ -163,14 +163,14 @@
     </inertial>
     <visual>
       <geometry>
-        <mesh filename="package://xarm_description/meshes/lite6/visual/link5.stl"/>
+        <mesh filename="/home/shrenikm/Projects/manipulation_research/src/xarm_description/meshes/lite6/visual/link5.obj"/>
       </geometry>
       <origin rpy="0 0 0" xyz="0 0 0"/>
       <material name="White"/>
     </visual>
     <collision>
       <geometry>
-        <mesh filename="package://xarm_description/meshes/lite6/visual/link5.stl"/>
+        <mesh filename="/home/shrenikm/Projects/manipulation_research/src/xarm_description/meshes/lite6/visual/link5.obj"/>
       </geometry>
       <origin rpy="0 0 0" xyz="0 0 0"/>
     </collision>
@@ -191,14 +191,14 @@
     </inertial>
     <visual>
       <geometry>
-        <mesh filename="package://xarm_description/meshes/lite6/visual/link6.stl"/>
+        <mesh filename="/home/shrenikm/Projects/manipulation_research/src/xarm_description/meshes/lite6/visual/link6.obj"/>
       </geometry>
       <origin rpy="0 0 0" xyz="0 0 0"/>
       <material name="Silver"/>
     </visual>
     <collision>
       <geometry>
-        <mesh filename="package://xarm_description/meshes/lite6/visual/link6.stl"/>
+        <mesh filename="/home/shrenikm/Projects/manipulation_research/src/xarm_description/meshes/lite6/visual/link6.obj"/>
       </geometry>
       <origin rpy="0 0 0" xyz="0 0 0"/>
     </collision>
@@ -252,7 +252,7 @@
     <joint name="joint4">
       <hardwareInterface>hardware_interface/PositionJointInterface</hardwareInterface>
     </joint>
-    <actuator name="motor3">
+    <actuator name="motor4">
       <hardwareInterface>hardware_interface/PositionJointInterface</hardwareInterface>
       <mechanicalReduction>100</mechanicalReduction>
     </actuator>

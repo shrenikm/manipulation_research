@@ -1,7 +1,13 @@
+#include <drake/geometry/drake_visualizer.h>
 #include <drake/multibody/plant/multibody_plant.h>
 #include <drake/systems/framework/diagram_builder.h>
 #include <drake/multibody/parsing/parser.h>
 #include <gflags/gflags.h>
+#include "drake/systems/primitives/constant_vector_source.h"
+#include "drake/systems/analysis/simulator.h"
+#include "drake/systems/lcm/lcm_interface_system.h"
+#include "drake/systems/lcm/lcm_publisher_system.h"
+#include "drake/systems/lcm/lcm_subscriber_system.h"
 #include <iostream>
 
 DEFINE_double(simulation_sec, std::numeric_limits<double>::infinity(),
@@ -17,6 +23,7 @@ namespace simulation {
 using drake::multibody::AddMultibodyPlantSceneGraph;
 using drake::multibody::Parser;
 using drake::systems::DiagramBuilder;
+using drake::systems::Simulator;
 
 int DoMain() {
 
@@ -27,11 +34,31 @@ int DoMain() {
   auto [plant, scene_graph] =
       AddMultibodyPlantSceneGraph(&builder, FLAGS_sim_dt);
 
-  const std::string urdf = "/home/shrenikm/Projects/manipulation_research/src/xarm_description/urdf/lite6/lite6.urdf.xacro";
+  const std::string urdf = "/home/shrenikm/Projects/manipulation_research/src/xarm_description/urdf/lite6.urdf";
   auto xarm_instance = Parser(&plant, &scene_graph).AddModels(urdf).at(0);
   //plant.WeldFrames(plant.world_frame(), plant.
   plant.Finalize();
 
+  auto lcm = builder.AddSystem<drake::systems::lcm::LcmInterfaceSystem>();
+  drake::geometry::DrakeVisualizerd::AddToBuilder(&builder, scene_graph, lcm);
+
+  const int num_joints = plant.num_positions();
+  std::cout << "Num joints: " << num_joints << std::endl;
+
+  auto zero_actuation = builder.AddSystem<drake::systems::ConstantVectorSource<double>>(Eigen::VectorXd::Zero(num_joints));
+
+  // Connect zero actuation.
+  builder.Connect(zero_actuation->get_output_port(), plant.get_actuation_input_port());
+
+  auto sys = builder.Build();
+
+  Simulator<double> simulator(*sys);
+
+  simulator.set_publish_every_time_step(false);
+  simulator.set_target_realtime_rate(FLAGS_target_realtime_rate);
+  simulator.Initialize();
+
+  simulator.AdvanceTo(FLAGS_simulation_sec);
 
   return 0;
 }

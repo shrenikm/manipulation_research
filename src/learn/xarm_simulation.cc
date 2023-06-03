@@ -14,7 +14,7 @@ DEFINE_double(simulation_sec, std::numeric_limits<double>::infinity(),
               "Number of seconds to simulate.");
 DEFINE_string(urdf, "", "Name of the urdf to load.");
 DEFINE_double(target_realtime_rate, 1.0, "Simulation playback speed.");
-DEFINE_double(sim_dt, 3e-3, "Time step for the MultibodyPlant model.");
+DEFINE_double(sim_dt, 1e-4, "Time step for the MultibodyPlant model.");
 
 namespace manr {
 namespace xarm {
@@ -36,7 +36,8 @@ int DoMain() {
 
   const std::string urdf = "/home/shrenikm/Projects/manipulation_research/src/xarm_description/urdf/lite6.urdf";
   auto xarm_instance = Parser(&plant, &scene_graph).AddModels(urdf).at(0);
-  //plant.WeldFrames(plant.world_frame(), plant.
+  // Can't weld, already welded in the urdf.
+  //plant.WeldFrames(plant.world_frame(), plant.GetFrameByName("link_base"));
   plant.Finalize();
 
   auto lcm = builder.AddSystem<drake::systems::lcm::LcmInterfaceSystem>();

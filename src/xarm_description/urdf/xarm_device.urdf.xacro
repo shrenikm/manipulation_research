@@ -16,7 +16,11 @@
   <xacro:arg name="report_type" default="normal"/>
 
   <xacro:arg name="ros2_control_plugin" default="uf_robot_hardware/UFRobotSystemHardware"/>
+  <!--
   <xacro:arg name="ros2_control_params" default="$(find xarm_controller)/config/xarm$(arg dof)_controllers.yaml"/>
+  -->
+  <xacro:arg name="ros2_control_params" default="/home/shrenikm/Projects/manipulation_research/src/xarm_controller/config/xarm$(arg dof)_controllers.yaml"/>
+  <xacro:arg name="xarm_description" default="/home/shrenikm/Projects/manipulation_research/src/xarm_description"/>
 
   <xacro:arg name="add_realsense_d435i" default="false"/>
   <xacro:arg name="add_d435i_links" default="true"/>
@@ -43,7 +47,10 @@
   <xacro:arg name="attach_rpy" default="0 0 0"/>
 
   <!-- load xarm device -->
+  <!--
   <xacro:include filename="$(find xarm_description)/urdf/xarm_device_macro.xacro" />
+  -->
+  <xacro:include filename="$(arg xarm_description)/urdf/xarm_device_macro.xacro" />
   <xacro:xarm_device prefix="$(arg prefix)" hw_ns="$(arg hw_ns)" limited="$(arg limited)" 
     effort_control="$(arg effort_control)" velocity_control="$(arg velocity_control)"
     add_gripper="$(arg add_gripper)" add_vacuum_gripper="$(arg add_vacuum_gripper)" dof="$(arg dof)" 

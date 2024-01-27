@@ -13,11 +13,13 @@ from pydrake.all import (
 )
 from pydrake.visualization import AddDefaultVisualization
 
+from python.common.robot_model_utils import add_robot_models_to_package_map
+
 
 # Start the visualizer.
 meshcat = StartMeshcat()
 
-MANIPULATOR_DESCRIPTION_FILE_PATH = "lite6_description/drake_urdf/robot_with_gripper/lite6_robot_with_reverse_parallel_gripper.urdf"
+MANIPULATOR_DESCRIPTION_FILE_PATH = "robot_models/lite6_description/drake_urdf/robot_with_gripper/lite6_robot_with_reverse_parallel_gripper.urdf"
 
 
 def visualize_manipulator():
@@ -26,11 +28,8 @@ def visualize_manipulator():
     plant, _ = AddMultibodyPlantSceneGraph(builder, time_step=0)
     parser = Parser(plant)
     package_map = parser.package_map()
-    package_map.Add(
-        package_name="lite6_description",
-        package_path="/home/shrenikm/Projects/drake_exp/experiment/lite6_description",
-    )
 
+    add_robot_models_to_package_map(package_map=package_map)
     parser.AddModels(MANIPULATOR_DESCRIPTION_FILE_PATH)
 
     print(plant.GetFrameIndices())

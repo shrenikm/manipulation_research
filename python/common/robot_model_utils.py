@@ -5,6 +5,7 @@ from pydrake.multibody.parsing import PackageMap
 from python.common.custom_types import DirPath, FileName, FilePath
 
 ROBOT_MODELS_DIRNAME = "robot_models"
+LITE6_DESCRIPTION_DIRNAME = "lite6_description"
 ROBOT_MODELS_DRAKE_URDF_DIRNAME = "drake_urdf"
 
 LITE6_GRIPPER_URDF_FILENAME_PREFIXES = (
@@ -26,7 +27,6 @@ def get_robot_models_directory_path() -> DirPath:
         "..",
         ROBOT_MODELS_DIRNAME,
     )
-    # return robot_models_directory_path
     return os.path.realpath(robot_models_directory_path)
 
 
@@ -48,10 +48,6 @@ def add_robot_models_to_package_map(package_map: PackageMap) -> None:
             package_path=package_path,
         )
 
-        for package_name in package_map.GetPackageNames():
-            print(package_name, package_map.GetPath(package_name))
-            print("*" * 30)
-
 
 def get_drake_lite6_urdf_path(lite6_urdf_filename: FileName) -> FilePath:
 
@@ -69,6 +65,7 @@ def get_drake_lite6_urdf_path(lite6_urdf_filename: FileName) -> FilePath:
 
     return os.path.join(
         get_robot_models_directory_path(),
+        LITE6_DESCRIPTION_DIRNAME,
         ROBOT_MODELS_DRAKE_URDF_DIRNAME,
         subdir,
         lite6_urdf_filename,

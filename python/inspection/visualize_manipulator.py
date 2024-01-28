@@ -13,10 +13,15 @@ from pydrake.all import (
 )
 from pydrake.visualization import AddDefaultVisualization
 
-from python.common.robot_model_utils import add_robot_models_to_package_map, get_drake_lite6_urdf_path
+from python.common.robot_model_utils import (
+    add_robot_models_to_package_map,
+    get_drake_lite6_urdf_path,
+)
 
 LITE6_URDF_FILENAME = "lite6_robot_with_reverse_parallel_gripper.urdf"
-MANIPULATOR_DESCRIPTION_FILE_PATH = get_drake_lite6_urdf_path(lite6_urdf_filename=LITE6_URDF_FILENAME)
+MANIPULATOR_DESCRIPTION_FILE_PATH = get_drake_lite6_urdf_path(
+    lite6_urdf_filename=LITE6_URDF_FILENAME
+)
 
 
 def visualize_manipulator():
@@ -25,20 +30,15 @@ def visualize_manipulator():
     plant, _ = AddMultibodyPlantSceneGraph(builder, time_step=0)
     parser = Parser(plant)
     package_map = parser.package_map()
-    package_map.Add(
-        package_name="lite6_description",
-        #package_path="/home/shrenikm/Projects/manipulation_research/robot_models/lite6_description",
-        package_path="/home/shrenikm/Projects/drake_exp/experiment/lite6_description",
-    )
-
     add_robot_models_to_package_map(package_map=package_map)
- 
-    parser.AddModels(MANIPULATOR_DESCRIPTION_FILE_PATH)
-    
-    # print(plant.GetFrameIndices())
-    # input()
 
-    # plant.WeldFrames(plant.world_frame(), plant.GetFrameByName("link_base"))
+    # Making the assumption that the first frame in the model is the base frame.
+    # This is so that we can weld the base frame to the world frame.
+    model_instance_index = parser.AddModels(MANIPULATOR_DESCRIPTION_FILE_PATH)[0]
+    frame_indices = plant.GetFrameIndices(model_instance=model_instance_index)
+    base_frame = plant.get_frame(frame_indices[0])
+
+    plant.WeldFrames(plant.world_frame(), base_frame)
     plant.Finalize()
 
     meshcat.DeleteAddedControls()

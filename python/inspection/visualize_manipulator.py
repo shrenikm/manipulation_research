@@ -24,7 +24,9 @@ MANIPULATOR_DESCRIPTION_FILE_PATH = get_drake_lite6_urdf_path(
 )
 
 
-def visualize_manipulator():
+def visualize_manipulator(
+    show_frames: bool = False,
+) -> None:
     builder = DiagramBuilder()
 
     plant, _ = AddMultibodyPlantSceneGraph(builder, time_step=0)
@@ -52,4 +54,6 @@ def visualize_manipulator():
 
 if __name__ == "__main__":
     meshcat = StartMeshcat()
-    visualize_manipulator()
+
+    show_frames = True
+    visualize_manipulator(show_frames=show_frames)

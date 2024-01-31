@@ -11,7 +11,7 @@ LITE6_DESCRIPTION_DIRNAME = "lite6_description"
 LITE6_GRIPPER_URDF_FILENAME_PREFIXES = (
     "lite6_normal_",
     "lite6_reverse",
-    "lite6_vaccum",
+    "lite6_vacuum",
 )
 LITE6_ROBOT_WITH_GRIPPER_URDF_FILENAME_PREFIX = "lite6_robot_with_"
 LITE6_ROBOT_WITHOUT_GRIPPER_URDF_FILENAME_PREFIX = "lite6_robot_without_"

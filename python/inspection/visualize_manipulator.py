@@ -13,18 +13,14 @@ from pydrake.all import (
 )
 from pydrake.visualization import AddDefaultVisualization
 
-from python.common.robot_model_utils import (
-    add_robot_models_to_package_map,
-    get_drake_lite6_urdf_path,
-)
+from python.common.custom_types import FilePath
+from python.common.robot_model_utils import add_robot_models_to_package_map
 
 LITE6_URDF_FILENAME = "lite6_robot_with_reverse_parallel_gripper.urdf"
-MANIPULATOR_DESCRIPTION_FILE_PATH = get_drake_lite6_urdf_path(
-    lite6_urdf_filename=LITE6_URDF_FILENAME
-)
 
 
 def visualize_manipulator(
+    manipulator_description_file_path=FilePath,
     show_frames: bool = False,
 ) -> None:
     builder = DiagramBuilder()
@@ -36,7 +32,7 @@ def visualize_manipulator(
 
     # Making the assumption that the first frame in the model is the base frame.
     # This is so that we can weld the base frame to the world frame.
-    model_instance_index = parser.AddModels(MANIPULATOR_DESCRIPTION_FILE_PATH)[0]
+    model_instance_index = parser.AddModels(manipulator_description_file_path)[0]
     frame_indices = plant.GetFrameIndices(model_instance=model_instance_index)
     base_frame = plant.get_frame(frame_indices[0])
 
@@ -53,7 +49,19 @@ def visualize_manipulator(
 
 
 if __name__ == "__main__":
+    from python.lite6.utils.lite6_model_utils import (
+        Lite6ModelType,
+        get_drake_lite6_urdf_path,
+    )
+
     meshcat = StartMeshcat()
 
+    lite6_model_type = Lite6ModelType.ROBOT_WITH_RP_GRIPPER
+    manipulator_description_file_path = get_drake_lite6_urdf_path(
+        lite6_model_type=lite6_model_type,
+    )
     show_frames = True
-    visualize_manipulator(show_frames=show_frames)
+    visualize_manipulator(
+        manipulator_description_file_path=manipulator_description_file_path,
+        show_frames=show_frames,
+    )

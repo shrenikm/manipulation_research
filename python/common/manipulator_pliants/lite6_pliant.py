@@ -51,6 +51,9 @@ def create_lite6_pliant(config: Lite6PliantConfig) -> Diagram:
         get_drake_lite6_urdf_path(lite6_model_type=config.lite6_model_type),
     )
 
+    physics_plant = MultibodyPlant(time_step=config.time_step_s)
+    parser = Parser(physics_plant)
+
     plant.Finalize()
     diagram = builder.Build()
 

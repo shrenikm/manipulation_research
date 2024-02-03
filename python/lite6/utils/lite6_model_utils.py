@@ -53,3 +53,15 @@ def get_drake_lite6_urdf_path(lite6_model_type: Lite6ModelType) -> FilePath:
         subdir,
         lite6_urdf_filename,
     )
+
+
+def get_lite6_urdf_base_frame_name(lite6_model_type: Lite6ModelType) -> str:
+    return {
+        Lite6ModelType.NP_GRIPPER: "lite6_normal_parallel_gripper_link",
+        Lite6ModelType.RP_GRIPPER: "lite6_reverse_parallel_gripper_link",
+        Lite6ModelType.V_GRIPPER: "lite6_vacuum_gripper_link",
+        Lite6ModelType.ROBOT_WITHOUT_GRIPPER: "link_base",
+        Lite6ModelType.ROBOT_WITH_NP_GRIPPER: "link_base",
+        Lite6ModelType.ROBOT_WITH_RP_GRIPPER: "link_base",
+        Lite6ModelType.ROBOT_WITH_V_GRIPPER: "link_base",
+    }[lite6_model_type]

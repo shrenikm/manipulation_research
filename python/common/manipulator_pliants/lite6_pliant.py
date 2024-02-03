@@ -51,8 +51,16 @@ def create_lite6_pliant(config: Lite6PliantConfig) -> Diagram:
         get_drake_lite6_urdf_path(lite6_model_type=config.lite6_model_type),
     )
 
-    physics_plant = MultibodyPlant(time_step=config.time_step_s)
+    lite6_physics_plant = MultibodyPlant(time_step=config.time_step_s)
     parser = Parser(physics_plant)
+    package_map = parser.package_map()
+    add_robot_models_to_package_map(package_map=package_map)
+    lite6_physics_model = parser.AddModels(
+        get_drake_lite6_urdf_path(lite6_model_type=config.lite6_model_type),
+    )
+    lite6_physics_plant.WeldFrames(
+        lite6_physics_plant.world_frame(),
+    )
 
     plant.Finalize()
     diagram = builder.Build()

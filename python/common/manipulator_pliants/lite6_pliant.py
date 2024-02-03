@@ -15,6 +15,7 @@ from python.common.robot_model_utils import add_robot_models_to_package_map
 from python.lite6.utils.lite6_model_utils import (
     Lite6ModelType,
     get_drake_lite6_urdf_path,
+    get_lite6_urdf_base_frame_name,
 )
 
 
@@ -60,7 +61,11 @@ def create_lite6_pliant(config: Lite6PliantConfig) -> Diagram:
     )
     lite6_physics_plant.WeldFrames(
         lite6_physics_plant.world_frame(),
+        lite6_physics_plant.GetFrameByName(
+            get_lite6_urdf_base_frame_name(lite6_model_type=config.lite6_model_type)
+        ),
     )
+    lite6_physics_plant.Finalize()
 
     plant.Finalize()
     diagram = builder.Build()

@@ -1,6 +1,7 @@
 from typing import Optional
 
 import attr
+import numpy as np
 from pydrake.geometry import SceneGraph
 from pydrake.multibody.parsing import Parser
 from pydrake.multibody.plant import (
@@ -9,6 +10,7 @@ from pydrake.multibody.plant import (
     MultibodyPlant,
     MultibodyPlantConfig,
 )
+from pydrake.systems.controllers import InverseDynamicsController
 from pydrake.systems.framework import Diagram, DiagramBuilder
 
 from python.common.robot_model_utils import add_robot_models_to_package_map
@@ -51,6 +53,7 @@ def create_lite6_pliant(config: Lite6PliantConfig) -> Diagram:
     lite6_model = parser.AddModels(
         get_drake_lite6_urdf_path(lite6_model_type=config.lite6_model_type),
     )
+    n = plant.num_positions(model_instance=lite6_model)
 
     lite6_physics_plant = MultibodyPlant(time_step=config.time_step_s)
     parser = Parser(physics_plant)
@@ -66,6 +69,13 @@ def create_lite6_pliant(config: Lite6PliantConfig) -> Diagram:
         ),
     )
     lite6_physics_plant.Finalize()
+    controller = InverseDynamicsController(
+        lite6_physics_plant,
+        kp=np.ones(n, dtype=np.float64),
+        ki=np.ones(n, dtype=np.float64),
+        kd=np.ones(n, dtype=np.float64),
+        has_reference_acceleration=False,
+    )
 
     plant.Finalize()
     diagram = builder.Build()

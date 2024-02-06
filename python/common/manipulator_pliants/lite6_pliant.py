@@ -12,6 +12,7 @@ from pydrake.multibody.plant import (
 )
 from pydrake.systems.controllers import InverseDynamicsController
 from pydrake.systems.framework import Diagram, DiagramBuilder
+from python.common.control.constructs import PIDGains
 
 from python.common.robot_model_utils import add_robot_models_to_package_map
 from python.lite6.utils.lite6_model_utils import (
@@ -26,6 +27,7 @@ class Lite6PliantConfig:
     lite6_model_type: Lite6ModelType
     run_on_hardware: bool
     time_step_s: float
+    inverse_dynamics_pid_gains: PIDGains
     plant_config: Optional[MultibodyPlantConfig] = None
 
 
@@ -71,9 +73,9 @@ def create_lite6_pliant(config: Lite6PliantConfig) -> Diagram:
     lite6_physics_plant.Finalize()
     controller = InverseDynamicsController(
         lite6_physics_plant,
-        kp=np.ones(n, dtype=np.float64),
-        ki=np.ones(n, dtype=np.float64),
-        kd=np.ones(n, dtype=np.float64),
+        kp=config.inverse_dynamics_pid_gains.kp * np.ones(n, dtype=np.float64),
+        ki=config.inverse_dynamics_pid_gains.ki * np.ones(n, dtype=np.float64),
+        kd=config.inverse_dynamics_pid_gains.kd * np.ones(n, dtype=np.float64),
         has_reference_acceleration=False,
     )
 

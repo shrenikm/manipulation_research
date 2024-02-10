@@ -12,8 +12,8 @@ from pydrake.multibody.plant import (
 )
 from pydrake.systems.controllers import InverseDynamicsController
 from pydrake.systems.framework import Diagram, DiagramBuilder
-from python.common.control.constructs import PIDGains
 
+from python.common.control.constructs import PIDGains
 from python.common.robot_model_utils import add_robot_models_to_package_map
 from python.lite6.utils.lite6_model_utils import (
     Lite6ModelType,
@@ -57,22 +57,22 @@ def create_lite6_pliant(config: Lite6PliantConfig) -> Diagram:
     )
     n = plant.num_positions(model_instance=lite6_model)
 
-    lite6_physics_plant = MultibodyPlant(time_step=config.time_step_s)
-    parser = Parser(physics_plant)
+    lite6_controller_plant = MultibodyPlant(time_step=config.time_step_s)
+    parser = Parser(controller_plant)
     package_map = parser.package_map()
     add_robot_models_to_package_map(package_map=package_map)
-    lite6_physics_model = parser.AddModels(
+    lite6_controller_model = parser.AddModels(
         get_drake_lite6_urdf_path(lite6_model_type=config.lite6_model_type),
     )
-    lite6_physics_plant.WeldFrames(
-        lite6_physics_plant.world_frame(),
-        lite6_physics_plant.GetFrameByName(
+    lite6_controller_plant.WeldFrames(
+        lite6_controller_plant.world_frame(),
+        lite6_controller_plant.GetFrameByName(
             get_lite6_urdf_base_frame_name(lite6_model_type=config.lite6_model_type)
         ),
     )
-    lite6_physics_plant.Finalize()
-    controller = InverseDynamicsController(
-        lite6_physics_plant,
+    lite6_controller_plant.Finalize()
+    id_controller = InverseDynamicsController(
+        lite6_controller_plant,
         kp=config.inverse_dynamics_pid_gains.kp * np.ones(n, dtype=np.float64),
         ki=config.inverse_dynamics_pid_gains.ki * np.ones(n, dtype=np.float64),
         kd=config.inverse_dynamics_pid_gains.kd * np.ones(n, dtype=np.float64),

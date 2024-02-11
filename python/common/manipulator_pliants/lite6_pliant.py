@@ -58,7 +58,7 @@ def create_lite6_pliant(config: Lite6PliantConfig) -> Diagram:
     n = plant.num_positions(model_instance=lite6_model)
 
     lite6_controller_plant = MultibodyPlant(time_step=config.time_step_s)
-    parser = Parser(controller_plant)
+    parser = Parser(lite6_controller_plant)
     package_map = parser.package_map()
     add_robot_models_to_package_map(package_map=package_map)
     lite6_controller_model = parser.AddModels(

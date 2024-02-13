@@ -21,6 +21,11 @@ from python.lite6.utils.lite6_model_utils import (
     get_lite6_urdf_base_frame_name,
 )
 
+LITE6_PLIANT_SUPPORTED_MODEL_TYPES = (
+    Lite6ModelType.ROBOT_WITH_NP_GRIPPER,
+    Lite6ModelType.ROBOT_WITH_RP_GRIPPER,
+)
+
 
 @attr.frozen
 class Lite6PliantConfig:
@@ -32,6 +37,10 @@ class Lite6PliantConfig:
 
 
 def create_lite6_pliant(config: Lite6PliantConfig) -> Diagram:
+
+    assert (
+        config.lite6_model_type in LITE6_PLIANT_SUPPORTED_MODEL_TYPES
+    ), f"Unsupported model type. Must be one of {LITE6_PLIANT_SUPPORTED_MODEL_TYPES}"
 
     builder: DiagramBuilder = DiagramBuilder()
     plant: MultibodyPlant

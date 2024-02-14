@@ -92,3 +92,4 @@ def create_lite6_pliant(config: Lite6PliantConfig) -> Diagram:
     diagram = builder.Build()
 
     return diagram
+

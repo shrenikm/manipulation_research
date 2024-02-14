@@ -1,13 +1,11 @@
 import pytest
 
-from python.common.testing_utils import execute_pytest
+from python.common.testing_utils import execute_pytest_file
+
 
 def test_create_lite6_pliant() -> None:
-    print("hi")
     ...
 
 
-
 if __name__ == "__main__":
-    #execute_pytest(__file__)
-    execute_pytest("test_create_lite6_pliant")
+    execute_pytest_file(__file__, "test_create_lite6_pliant")

@@ -7,5 +7,9 @@ def test_create_lite6_pliant() -> None:
     ...
 
 
+def test_a() -> None:
+    ...
+
+
 if __name__ == "__main__":
-    execute_pytest_file(__file__, "test_create_lite6_pliant")
+    execute_pytest_file("test_create_lite6_pliant")

@@ -58,12 +58,12 @@ def create_lite6_pliant(config: Lite6PliantConfig) -> Diagram:
     package_map = parser.package_map()
     add_robot_models_to_package_map(package_map=package_map)
 
-    manipulator_description_file_path = get_drake_lite6_urdf_path(
-        lite6_model_type=lite6_model_type,
-    )
     lite6_model = parser.AddModels(
         get_drake_lite6_urdf_path(lite6_model_type=config.lite6_model_type),
-    )
+    )[0]
+
+    plant.Finalize()
+
     n = plant.num_positions(model_instance=lite6_model)
 
     lite6_controller_plant = MultibodyPlant(time_step=config.time_step_s)
@@ -92,4 +92,3 @@ def create_lite6_pliant(config: Lite6PliantConfig) -> Diagram:
     diagram = builder.Build()
 
     return diagram
-

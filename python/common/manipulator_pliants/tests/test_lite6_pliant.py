@@ -2,6 +2,7 @@ import pytest
 
 from python.common.control.constructs import PIDGains
 from python.common.manipulator_pliants.lite6_pliant import (
+    LITE6_PLIANT_SUPPORTED_MODEL_TYPES,
     Lite6PliantConfig,
     create_lite6_pliant,
 )
@@ -30,5 +31,24 @@ def test_create_lite6_pliant_with_unsupported_model_type(
         create_lite6_pliant(config=config)
 
 
+@pytest.mark.parametrize(
+    "supported_model_type",
+    LITE6_PLIANT_SUPPORTED_MODEL_TYPES,
+)
+def test_create_lite6_pliant_with_supported_type(
+    supported_model_type: Lite6ModelType,
+) -> None:
+    id_pid_gains = PIDGains(kp=1.0, ki=1.0, kd=1.0)
+
+    config = Lite6PliantConfig(
+        lite6_model_type=supported_model_type,
+        run_on_hardware=False,
+        time_step_s=1e-3,
+        inverse_dynamics_pid_gains=id_pid_gains,
+    )
+
+    create_lite6_pliant(config=config)
+
+
 if __name__ == "__main__":
-    execute_pytest_file("test_create_lite6_pliant")
+    execute_pytest_file("test_create_lite6_pliant_with_supported_type")

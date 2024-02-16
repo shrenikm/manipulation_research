@@ -62,9 +62,17 @@ def create_lite6_pliant(config: Lite6PliantConfig) -> Diagram:
         get_drake_lite6_urdf_path(lite6_model_type=config.lite6_model_type),
     )[0]
 
+    base_frame_name = get_lite6_urdf_base_frame_name(
+        lite6_model_type=config.lite6_model_type,
+    )
+    plant.WeldFrames(plant.world_frame(), plant.GetFrameByName(base_frame_name))
+
     plant.Finalize()
 
     n = plant.num_positions(model_instance=lite6_model)
+    print("=" * 100)
+    print(n, plant.num_joints(), plant.num_velocities(), plant.num_actuators())
+    print("=" * 100)
 
     lite6_controller_plant = MultibodyPlant(time_step=config.time_step_s)
     parser = Parser(lite6_controller_plant)
@@ -88,7 +96,6 @@ def create_lite6_pliant(config: Lite6PliantConfig) -> Diagram:
         has_reference_acceleration=False,
     )
 
-    plant.Finalize()
     diagram = builder.Build()
 
     return diagram

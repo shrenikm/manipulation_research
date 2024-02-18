@@ -70,9 +70,6 @@ def create_lite6_pliant(config: Lite6PliantConfig) -> Diagram:
     plant.Finalize()
 
     n = plant.num_positions(model_instance=lite6_model)
-    print("=" * 100)
-    print(n, plant.num_joints(), plant.num_velocities(), plant.num_actuators())
-    print("=" * 100)
 
     lite6_controller_plant = MultibodyPlant(time_step=config.time_step_s)
     parser = Parser(lite6_controller_plant)

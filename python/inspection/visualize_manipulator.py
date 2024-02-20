@@ -15,12 +15,14 @@ from pydrake.visualization import AddDefaultVisualization
 
 from python.common.custom_types import FilePath
 from python.common.robot_model_utils import add_robot_models_to_package_map
-
-LITE6_URDF_FILENAME = "lite6_robot_with_reverse_parallel_gripper.urdf"
+from python.lite6.utils.lite6_model_utils import (
+    Lite6ModelType,
+    get_drake_lite6_urdf_path,
+)
 
 
 def visualize_manipulator(
-    manipulator_description_file_path=FilePath,
+    manipulator_description_file_path: FilePath,
     show_frames: bool = False,
 ) -> None:
     builder = DiagramBuilder()
@@ -49,10 +51,6 @@ def visualize_manipulator(
 
 
 if __name__ == "__main__":
-    from python.lite6.utils.lite6_model_utils import (
-        Lite6ModelType,
-        get_drake_lite6_urdf_path,
-    )
 
     meshcat = StartMeshcat()
 

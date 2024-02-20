@@ -17,6 +17,7 @@ from python.common.control.constructs import PIDGains
 from python.common.robot_model_utils import add_robot_models_to_package_map
 from python.lite6.utils.lite6_model_utils import (
     Lite6ModelType,
+    add_lite6_model_to_plant,
     get_drake_lite6_urdf_path,
     get_lite6_urdf_base_frame_name,
 )
@@ -54,18 +55,10 @@ def create_lite6_pliant(config: Lite6PliantConfig) -> Diagram:
         ApplyMultibodyPlantConfig(config.plant_config, plant)
 
     # Load the model
-    parser = Parser(plant)
-    package_map = parser.package_map()
-    add_robot_models_to_package_map(package_map=package_map)
-
-    lite6_model = parser.AddModels(
-        get_drake_lite6_urdf_path(lite6_model_type=config.lite6_model_type),
-    )[0]
-
-    base_frame_name = get_lite6_urdf_base_frame_name(
+    lite6_model = add_lite6_model_to_plant(
+        plant=plant,
         lite6_model_type=config.lite6_model_type,
     )
-    plant.WeldFrames(plant.world_frame(), plant.GetFrameByName(base_frame_name))
 
     plant.Finalize()
 

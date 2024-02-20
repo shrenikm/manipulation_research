@@ -1,7 +1,7 @@
 import pytest
 
 from python.common.control.constructs import PIDGains
-from python.common.manipulator_pliants.lite6_pliant import (
+from python.lite6.pliant.lite6_pliant import (
     LITE6_PLIANT_SUPPORTED_MODEL_TYPES,
     Lite6PliantConfig,
     create_lite6_pliant,

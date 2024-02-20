@@ -1,9 +1,15 @@
 import os
 from enum import Enum
+from typing import Optional
+
+from pydrake.multibody.parsing import Parser
+from pydrake.multibody.plant import MultibodyPlant
+from pydrake.multibody.tree import ModelInstanceIndex
 
 from python.common.custom_types import FileName, FilePath
 from python.common.robot_model_utils import (
     ROBOT_MODELS_DRAKE_URDF_DIRNAME,
+    add_robot_models_to_package_map,
     get_robot_models_directory_path,
 )
 
@@ -65,3 +71,40 @@ def get_lite6_urdf_base_frame_name(lite6_model_type: Lite6ModelType) -> str:
         Lite6ModelType.ROBOT_WITH_RP_GRIPPER: "link_base",
         Lite6ModelType.ROBOT_WITH_V_GRIPPER: "link_base",
     }[lite6_model_type]
+
+
+def add_lite6_model_to_plant(
+    plant: MultibodyPlant,
+    lite6_model_type: Lite6ModelType,
+    parser: Optional[Parser] = None,
+    place_on_table: bool = False,
+) -> ModelInstanceIndex:
+    """
+    Loads and adds the required lite6 model (given by the model type) to the
+    plant.
+    If the parser is not given, it is created from the plant. If it is given,
+    it is required that its package map be updated to include the model paths.
+    If place_on_table is True, the table URDF is also loaded and the robot's
+    frame is welded to the taable. If False, the robot is welded to the world
+    frame.
+    """
+    if parser is None:
+        parser = Parser(plant)
+        package_map = parser.package_map()
+        add_robot_models_to_package_map(package_map=package_map)
+        print(package_map)
+    else:
+        print(parser.package_map())
+
+    if place_on_table:
+        raise NotImplementedError
+    else:
+        lite6_model = parser.AddModels(
+            get_drake_lite6_urdf_path(lite6_model_type=lite6_model_type),
+        )[0]
+
+        base_frame_name = get_lite6_urdf_base_frame_name(
+            lite6_model_type=lite6_model_type,
+        )
+        plant.WeldFrames(plant.world_frame(), plant.GetFrameByName(base_frame_name))
+        return lite6_model

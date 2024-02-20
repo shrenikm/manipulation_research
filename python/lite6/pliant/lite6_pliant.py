@@ -65,19 +65,12 @@ def create_lite6_pliant(config: Lite6PliantConfig) -> Diagram:
     n = plant.num_positions(model_instance=lite6_model)
 
     lite6_controller_plant = MultibodyPlant(time_step=config.time_step_s)
-    parser = Parser(lite6_controller_plant)
-    package_map = parser.package_map()
-    add_robot_models_to_package_map(package_map=package_map)
-    lite6_controller_model = parser.AddModels(
-        get_drake_lite6_urdf_path(lite6_model_type=config.lite6_model_type),
-    )
-    lite6_controller_plant.WeldFrames(
-        lite6_controller_plant.world_frame(),
-        lite6_controller_plant.GetFrameByName(
-            get_lite6_urdf_base_frame_name(lite6_model_type=config.lite6_model_type)
-        ),
+    lite6_controller_model = add_lite6_model_to_plant(
+        plant=lite6_controller_plant,
+        lite6_model_type=config.lite6_model_type,
     )
     lite6_controller_plant.Finalize()
+
     id_controller = InverseDynamicsController(
         lite6_controller_plant,
         kp=config.inverse_dynamics_pid_gains.kp * np.ones(n, dtype=np.float64),

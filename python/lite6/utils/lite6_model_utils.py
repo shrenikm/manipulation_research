@@ -92,9 +92,8 @@ def add_lite6_model_to_plant(
         parser = Parser(plant)
         package_map = parser.package_map()
         add_robot_models_to_package_map(package_map=package_map)
-        print(package_map)
     else:
-        print(parser.package_map())
+        assert parser.package_map().Contains(LITE6_DESCRIPTION_DIRNAME)
 
     if place_on_table:
         raise NotImplementedError

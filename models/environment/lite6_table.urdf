@@ -1,0 +1,48 @@
+<?xml version="1.0" ?>
+
+<robot name="lite6_table">
+
+  <material name="brown">
+    <!--
+    <color rgba="0.6 0.4 0.0 1.0"/>
+    -->
+    <color rgba="0.3 0.1 0.0 1.0"/>
+  </material>
+
+  <link name="world"/>
+
+  <!-- Table represented as a box of size 24" x 40" x 29" -->
+  <link name="link_lite6_table">
+    <visual>
+      <geometry>
+        <box size="0.6096 1.1016 0.7366"/>
+      </geometry>
+      <material name="brown"/>
+    </visual>
+    <collision>
+      <geometry>
+        <box size="0.6096 1.1016 0.7366"/>
+      </geometry>
+    </collision>
+  </link>
+
+  <link name="link_lite6_position"/>
+
+  <joint name="joint_world_to_lite6_table" type="fixed">
+    <parent link="world"/>
+    <child link="link_lite6_table"/>
+    <origin xyz="0 0 0.3683" rpy="0 0 0"/>
+  </joint>
+
+  <!--
+  Robot is placed centered in y, but on top of the table (so z=height/2) and
+  pushed back such that the mid point of the robot's link_base is 5" from the
+  back of the table (x=-7" as the half x width is 12").
+  -->
+  <joint name="joint_lite6_table_to_lite6_position" type="fixed">
+    <parent link="link_lite6_table"/>
+    <child link="link_lite6_position"/>
+    <origin xyz="-0.1778 0 0.3683" rpy="0 0 0"/>
+  </joint>
+
+</robot>

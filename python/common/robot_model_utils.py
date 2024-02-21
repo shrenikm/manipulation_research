@@ -4,6 +4,7 @@ from pydrake.multibody.parsing import PackageMap
 
 from python.common.custom_types import DirPath, FileName, FilePath
 
+MODELS_DIRNAME = "models"
 ROBOT_MODELS_DIRNAME = "robot_models"
 ROBOT_MODELS_DRAKE_URDF_DIRNAME = "drake_urdf"
 

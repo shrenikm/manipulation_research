@@ -5,8 +5,22 @@ from pydrake.multibody.parsing import PackageMap
 from python.common.custom_types import DirPath, FileName, FilePath
 
 MODELS_DIRNAME = "models"
+MODELS_ENVIRONMENT_DIRNAME = "environment"
 ROBOT_MODELS_DIRNAME = "robot_models"
 ROBOT_MODELS_DRAKE_URDF_DIRNAME = "drake_urdf"
+
+
+def get_models_directory_path() -> DirPath:
+    current_directory_path = os.path.dirname(
+        os.path.expanduser(os.path.realpath(__file__))
+    )
+    models_directory_path = os.path.join(
+        current_directory_path,
+        "..",
+        "..",
+        MODELS_DIRNAME,
+    )
+    return os.path.realpath(models_directory_path)
 
 
 def get_robot_models_directory_path() -> DirPath:

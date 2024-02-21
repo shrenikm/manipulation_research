@@ -8,11 +8,14 @@ from pydrake.multibody.tree import ModelInstanceIndex
 
 from python.common.custom_types import FileName, FilePath
 from python.common.robot_model_utils import (
+    MODELS_ENVIRONMENT_DIRNAME,
     ROBOT_MODELS_DRAKE_URDF_DIRNAME,
     add_robot_models_to_package_map,
+    get_models_directory_path,
     get_robot_models_directory_path,
 )
 
+LITE6_TABLE_FILENAME = "lite6_table.urdf"
 LITE6_DESCRIPTION_DIRNAME = "lite6_description"
 LITE6_GRIPPER_URDF_FILENAME_PREFIXES = (
     "lite6_normal_",
@@ -61,6 +64,14 @@ def get_drake_lite6_urdf_path(lite6_model_type: Lite6ModelType) -> FilePath:
     )
 
 
+def get_lite6_table_urdf_path() -> FilePath:
+    return os.path.join(
+        get_models_directory_path(),
+        MODELS_ENVIRONMENT_DIRNAME,
+        LITE6_TABLE_FILENAME,
+    )
+
+
 def get_lite6_urdf_base_frame_name(lite6_model_type: Lite6ModelType) -> str:
     return {
         Lite6ModelType.NP_GRIPPER: "lite6_normal_parallel_gripper_link",
@@ -71,6 +82,10 @@ def get_lite6_urdf_base_frame_name(lite6_model_type: Lite6ModelType) -> str:
         Lite6ModelType.ROBOT_WITH_RP_GRIPPER: "link_base",
         Lite6ModelType.ROBOT_WITH_V_GRIPPER: "link_base",
     }[lite6_model_type]
+
+
+def get_lite6_table_urdf_lite6_position_frame_name() -> str:
+    return "link_lite6_position"
 
 
 def add_lite6_model_to_plant(
@@ -96,8 +111,24 @@ def add_lite6_model_to_plant(
         assert parser.package_map().Contains(LITE6_DESCRIPTION_DIRNAME)
 
     if place_on_table:
-        raise NotImplementedError
+        # Add the table and the robot model.
+        lite6_model = parser.AddModels(
+            get_drake_lite6_urdf_path(lite6_model_type=lite6_model_type),
+        )[0]
+        parser.AddModels(get_lite6_table_urdf_path())
+
+        # Weld the robot to the table.
+        lite6_position_frame_name = get_lite6_table_urdf_lite6_position_frame_name()
+        base_frame_name = get_lite6_urdf_base_frame_name(
+            lite6_model_type=lite6_model_type,
+        )
+        plant.WeldFrames(
+            plant.GetFrameByName(lite6_position_frame_name),
+            plant.GetFrameByName(base_frame_name),
+        )
+        return lite6_model
     else:
+        # Add only the robot model.
         lite6_model = parser.AddModels(
             get_drake_lite6_urdf_path(lite6_model_type=lite6_model_type),
         )[0]

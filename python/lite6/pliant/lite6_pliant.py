@@ -13,8 +13,8 @@ from pydrake.multibody.plant import (
 )
 from pydrake.systems.controllers import InverseDynamicsController
 from pydrake.systems.framework import Diagram, DiagramBuilder
-from python.common.class_utils import StrEnum
 
+from python.common.class_utils import StrEnum
 from python.common.control.constructs import PIDGains
 from python.common.robot_model_utils import add_robot_models_to_package_map
 from python.lite6.utils.lite6_model_utils import (
@@ -45,12 +45,11 @@ class Lite6PliantConfig:
     plant_config: Optional[MultibodyPlantConfig] = None
 
 
-def create_lite6_pliant(config: Lite6PliantConfig) -> Diagram:
+def create_lite6_pliant_for_hardware(config: Lite6PliantConfig) -> Diagram:
+    raise NotImplementedError()
 
-    assert (
-        config.lite6_model_type in LITE6_PLIANT_SUPPORTED_MODEL_TYPES
-    ), f"Unsupported model type. Must be one of {LITE6_PLIANT_SUPPORTED_MODEL_TYPES}"
 
+def create_lite6_pliant_for_simulation(config: Lite6PliantConfig) -> Diagram:
     builder: DiagramBuilder = DiagramBuilder()
     plant: MultibodyPlant
     scene_graph: SceneGraph
@@ -90,3 +89,14 @@ def create_lite6_pliant(config: Lite6PliantConfig) -> Diagram:
     diagram = builder.Build()
 
     return diagram
+
+
+def create_lite6_pliant(config: Lite6PliantConfig) -> Diagram:
+    assert (
+        config.lite6_model_type in LITE6_PLIANT_SUPPORTED_MODEL_TYPES
+    ), f"Unsupported model type. Must be one of {LITE6_PLIANT_SUPPORTED_MODEL_TYPES}"
+
+    if config.run_on_hardware:
+        return create_lite6_pliant_for_hardware(config=config)
+    else:
+        return create_lite6_pliant_for_simulation(config=config)

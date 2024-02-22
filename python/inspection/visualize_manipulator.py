@@ -24,6 +24,7 @@ from python.lite6.utils.lite6_model_utils import (
 
 def visualize_manipulator(
     lite6_model_type: Lite6ModelType,
+    place_on_table: bool = True,
     show_frames: bool = False,
 ) -> None:
     builder = DiagramBuilder()
@@ -32,7 +33,7 @@ def visualize_manipulator(
     add_lite6_model_to_plant(
         plant=plant,
         lite6_model_type=lite6_model_type,
-        place_on_table=True,
+        place_on_table=place_on_table,
     )
     plant.Finalize()
 
@@ -49,12 +50,11 @@ if __name__ == "__main__":
 
     meshcat = StartMeshcat()
 
-    lite6_model_type = Lite6ModelType.ROBOT_WITH_RP_GRIPPER
-    manipulator_description_file_path = get_drake_lite6_urdf_path(
-        lite6_model_type=lite6_model_type,
-    )
+    lite6_model_type = Lite6ModelType.ROBOT_WITH_NP_GRIPPER
+    place_on_table = True
     show_frames = True
     visualize_manipulator(
         lite6_model_type=lite6_model_type,
+        place_on_table=place_on_table,
         show_frames=show_frames,
     )

@@ -6,6 +6,7 @@ from pydrake.multibody.parsing import Parser
 from pydrake.multibody.plant import MultibodyPlant
 from pydrake.multibody.tree import ModelInstanceIndex
 
+from python.common.class_utils import StrEnum
 from python.common.custom_types import FileName, FilePath
 from python.common.robot_model_utils import (
     MODELS_ENVIRONMENT_DIRNAME,
@@ -29,7 +30,7 @@ LITE6_ROBOT_WITH_GRIPPER_SUBDIR = "robot_with_gripper"
 LITE6_ROBOT_WITHOUT_GRIPPER_SUBDIR = "robot_without_gripper"
 
 
-class Lite6ModelType(str, Enum):
+class Lite6ModelType(StrEnum):
     NP_GRIPPER = "lite6_normal_parallel_gripper.urdf"
     RP_GRIPPER = "lite6_reverse_parallel_gripper.urdf"
     V_GRIPPER = "lite6_vacuum_gripper.urdf"

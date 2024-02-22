@@ -1,7 +1,3 @@
-from enum import Enum
-from typing import Optional
-
-import attr
 import numpy as np
 from pydrake.geometry import SceneGraph
 from pydrake.multibody.parsing import Parser
@@ -9,40 +5,16 @@ from pydrake.multibody.plant import (
     AddMultibodyPlantSceneGraph,
     ApplyMultibodyPlantConfig,
     MultibodyPlant,
-    MultibodyPlantConfig,
 )
 from pydrake.systems.controllers import InverseDynamicsController
 from pydrake.systems.framework import Diagram, DiagramBuilder
 
 from python.common.class_utils import StrEnum
-from python.common.control.constructs import PIDGains
-from python.common.robot_model_utils import add_robot_models_to_package_map
-from python.lite6.utils.lite6_model_utils import (
-    Lite6ModelType,
-    add_lite6_model_to_plant,
-    get_drake_lite6_urdf_path,
-    get_lite6_urdf_base_frame_name,
+from python.lite6.pliant.lite6_pliant_utils import (
+    LITE6_PLIANT_SUPPORTED_MODEL_TYPES,
+    Lite6PliantConfig,
 )
-
-LITE6_PLIANT_SUPPORTED_MODEL_TYPES = (
-    Lite6ModelType.ROBOT_WITH_NP_GRIPPER,
-    Lite6ModelType.ROBOT_WITH_RP_GRIPPER,
-)
-
-
-class Lite6ControlType(StrEnum):
-    POSTITION_AND_VELOCITY = "position_and_velocity"
-    VELOCITY_ONLY = "velocity_only"
-
-
-@attr.frozen
-class Lite6PliantConfig:
-    lite6_model_type: Lite6ModelType
-    lite6_control_type: Lite6ControlType
-    run_on_hardware: bool
-    time_step_s: float
-    inverse_dynamics_pid_gains: PIDGains
-    plant_config: Optional[MultibodyPlantConfig] = None
+from python.lite6.utils.lite6_model_utils import add_lite6_model_to_plant
 
 
 def create_lite6_pliant_for_hardware(config: Lite6PliantConfig) -> Diagram:

@@ -2,11 +2,11 @@ import pytest
 
 from python.common.control.constructs import PIDGains
 from python.common.testing_utils import execute_pytest_file
-from python.lite6.pliant.lite6_pliant import (
+from python.lite6.pliant.lite6_pliant import create_lite6_pliant
+from python.lite6.pliant.lite6_pliant_utils import (
     LITE6_PLIANT_SUPPORTED_MODEL_TYPES,
     Lite6ControlType,
     Lite6PliantConfig,
-    create_lite6_pliant,
 )
 from python.lite6.utils.lite6_model_utils import Lite6ModelType
 

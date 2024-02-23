@@ -103,6 +103,18 @@ def get_lite6_num_actuators(lite6_model_type: Lite6ModelType) -> int:
     }[lite6_model_type]
 
 
+def get_lite6_num_states(lite6_model_type: Lite6ModelType) -> int:
+    return {
+        Lite6ModelType.NP_GRIPPER: 2,
+        Lite6ModelType.RP_GRIPPER: 2,
+        Lite6ModelType.V_GRIPPER: 0,
+        Lite6ModelType.ROBOT_WITHOUT_GRIPPER: LITE6_DOF,
+        Lite6ModelType.ROBOT_WITH_NP_GRIPPER: LITE6_DOF + 2,
+        Lite6ModelType.ROBOT_WITH_RP_GRIPPER: LITE6_DOF + 2,
+        Lite6ModelType.ROBOT_WITH_V_GRIPPER: LITE6_DOF,
+    }[lite6_model_type]
+
+
 def add_lite6_model_to_plant(
     plant: MultibodyPlant,
     lite6_model_type: Lite6ModelType,

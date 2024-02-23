@@ -11,18 +11,17 @@ from pydrake.multibody.plant import (
 )
 from pydrake.systems.controllers import InverseDynamicsController
 from pydrake.systems.framework import Diagram, DiagramBuilder, System
-from pydrake.systems.primitives import PassThrough, PassThrough_
+from pydrake.systems.primitives import PassThrough
 
 from python.common.class_utils import StrEnum
 from python.lite6.pliant.lite6_pliant_utils import (
+    LITE6_PLIANT_GRIPPER_CLOSED_STATUS_IP_NAME,
+    LITE6_PLIANT_POSITIONS_DESIRED_IP_NAME,
     LITE6_PLIANT_SUPPORTED_MODEL_TYPES,
+    LITE6_PLIANT_VELOCITIES_DESIRED_IP_NAME,
     Lite6PliantConfig,
 )
 from python.lite6.utils.lite6_model_utils import LITE6_DOF, add_lite6_model_to_plant
-
-LITE6_PLIANT_POSITIONS_DESIRED_IP_NAME = "positions_desired_input"
-LITE6_PLIANT_VELOCITIES_DESIRED_IP_NAME = "velocities_desired_input"
-LITE6_PLIANT_GRIPPER_CLOSED_STATUS_IP_NAME = "gripper_closed_status_input"
 
 
 def add_and_export_pliant_input_ports(

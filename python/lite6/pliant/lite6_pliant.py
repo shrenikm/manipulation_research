@@ -1,3 +1,5 @@
+from typing import Tuple
+
 import numpy as np
 from pydrake.common.value import Value
 from pydrake.geometry import SceneGraph
@@ -8,7 +10,7 @@ from pydrake.multibody.plant import (
     MultibodyPlant,
 )
 from pydrake.systems.controllers import InverseDynamicsController
-from pydrake.systems.framework import Diagram, DiagramBuilder
+from pydrake.systems.framework import Diagram, DiagramBuilder, System
 from pydrake.systems.primitives import PassThrough, PassThrough_
 
 from python.common.class_utils import StrEnum
@@ -21,6 +23,40 @@ from python.lite6.utils.lite6_model_utils import LITE6_DOF, add_lite6_model_to_p
 LITE6_PLIANT_POSITIONS_DESIRED_IP_NAME = "positions_desired_input"
 LITE6_PLIANT_VELOCITIES_DESIRED_IP_NAME = "velocities_desired_input"
 LITE6_PLIANT_GRIPPER_CLOSED_STATUS_IP_NAME = "gripper_closed_status_input"
+
+
+def add_and_export_pliant_input_ports(
+    builder: DiagramBuilder,
+) -> Tuple[System, System, System]:
+    # Create the input systems to return.
+    positions_desired = builder.AddNamedSystem(
+        name="positions_desired",
+        system=PassThrough(vector_size=LITE6_DOF),
+    )
+    velocities_desired = builder.AddNamedSystem(
+        name="velocities_desired",
+        system=PassThrough(vector_size=LITE6_DOF),
+    )
+    gripper_closed_status = builder.AddNamedSystem(
+        name="gripper_closed_status",
+        system=PassThrough(abstract_model_value=Value(False)),
+    )
+
+    # Export the ports.
+    builder.ExportInput(
+        input=positions_desired.get_input_port(),
+        name=LITE6_PLIANT_POSITIONS_DESIRED_IP_NAME,
+    )
+    builder.ExportInput(
+        input=velocities_desired.get_input_port(),
+        name=LITE6_PLIANT_VELOCITIES_DESIRED_IP_NAME,
+    )
+    builder.ExportInput(
+        input=gripper_closed_status.get_input_port(),
+        name=LITE6_PLIANT_GRIPPER_CLOSED_STATUS_IP_NAME,
+    )
+
+    return positions_desired, velocities_desired, gripper_closed_status
 
 
 def create_lite6_pliant_for_hardware(config: Lite6PliantConfig) -> Diagram:
@@ -51,17 +87,12 @@ def create_lite6_pliant_for_simulation(config: Lite6PliantConfig) -> Diagram:
     nv = main_plant.num_velocities(model_instance=lite6_model)
     assert nq == nv
 
-    positions_desired = builder.AddNamedSystem(
-        name="positions_desired",
-        system=PassThrough(vector_size=LITE6_DOF),
-    )
-    velocities_desired = builder.AddNamedSystem(
-        name="velocities_desired",
-        system=PassThrough(vector_size=LITE6_DOF),
-    )
-    gripper_closed_status = builder.AddNamedSystem(
-        name="gripper_closed_status",
-        system=PassThrough(abstract_model_value=Value(False)),
+    (
+        positions_desired,
+        velocities_desired,
+        gripper_closed_status,
+    ) = add_and_export_pliant_input_ports(
+        builder=builder,
     )
 
     lite6_controller_plant = MultibodyPlant(time_step=config.time_step_s)
@@ -77,20 +108,6 @@ def create_lite6_pliant_for_simulation(config: Lite6PliantConfig) -> Diagram:
         ki=config.inverse_dynamics_pid_gains.ki * np.ones(nq, dtype=np.float64),
         kd=config.inverse_dynamics_pid_gains.kd * np.ones(nq, dtype=np.float64),
         has_reference_acceleration=False,
-    )
-
-    # Exporting ports.
-    builder.ExportInput(
-        input=positions_desired.get_input_port(),
-        name=LITE6_PLIANT_POSITIONS_DESIRED_IP_NAME,
-    )
-    builder.ExportInput(
-        input=velocities_desired.get_input_port(),
-        name=LITE6_PLIANT_VELOCITIES_DESIRED_IP_NAME,
-    )
-    builder.ExportInput(
-        input=gripper_closed_status.get_input_port(),
-        name=LITE6_PLIANT_GRIPPER_CLOSED_STATUS_IP_NAME,
     )
 
     diagram = builder.Build()

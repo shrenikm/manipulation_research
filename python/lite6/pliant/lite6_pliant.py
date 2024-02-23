@@ -8,13 +8,17 @@ from pydrake.multibody.plant import (
 )
 from pydrake.systems.controllers import InverseDynamicsController
 from pydrake.systems.framework import Diagram, DiagramBuilder
+from pydrake.systems.primitives import PassThrough, PassThrough_
 
 from python.common.class_utils import StrEnum
 from python.lite6.pliant.lite6_pliant_utils import (
     LITE6_PLIANT_SUPPORTED_MODEL_TYPES,
     Lite6PliantConfig,
 )
-from python.lite6.utils.lite6_model_utils import add_lite6_model_to_plant
+from python.lite6.utils.lite6_model_utils import LITE6_DOF, add_lite6_model_to_plant
+
+LITE6_PLIANT_POSITIONS_DESIRED_IP_NAME = "positions_desired"
+LITE6_PLIANT_VELOCITIES_DESIRED_IP_NAME = "velocities_desired"
 
 
 def create_lite6_pliant_for_hardware(config: Lite6PliantConfig) -> Diagram:
@@ -23,25 +27,36 @@ def create_lite6_pliant_for_hardware(config: Lite6PliantConfig) -> Diagram:
 
 def create_lite6_pliant_for_simulation(config: Lite6PliantConfig) -> Diagram:
     builder: DiagramBuilder = DiagramBuilder()
-    plant: MultibodyPlant
+    main_plant: MultibodyPlant
     scene_graph: SceneGraph
-    plant, scene_graph = AddMultibodyPlantSceneGraph(
+    main_plant, scene_graph = AddMultibodyPlantSceneGraph(
         builder,
         time_step=config.time_step_s,
     )
 
     if config.plant_config is not None:
-        ApplyMultibodyPlantConfig(config.plant_config, plant)
+        ApplyMultibodyPlantConfig(config.plant_config, main_plant)
 
     # Load the model
     lite6_model = add_lite6_model_to_plant(
-        plant=plant,
+        plant=main_plant,
         lite6_model_type=config.lite6_model_type,
     )
 
-    plant.Finalize()
+    main_plant.Finalize()
 
-    n = plant.num_positions(model_instance=lite6_model)
+    nq = main_plant.num_positions(model_instance=lite6_model)
+    nv = main_plant.num_velocities(model_instance=lite6_model)
+    assert nq == nv
+
+    positions_input = builder.AddNamedSystem(
+        "positions_input",
+        PassThrough(LITE6_DOF),
+    )
+    velocities_input = builder.AddNamedSystem(
+        "velocities_input",
+        PassThrough(LITE6_DOF),
+    )
 
     lite6_controller_plant = MultibodyPlant(time_step=config.time_step_s)
     lite6_controller_model = add_lite6_model_to_plant(
@@ -52,10 +67,20 @@ def create_lite6_pliant_for_simulation(config: Lite6PliantConfig) -> Diagram:
 
     id_controller = InverseDynamicsController(
         lite6_controller_plant,
-        kp=config.inverse_dynamics_pid_gains.kp * np.ones(n, dtype=np.float64),
-        ki=config.inverse_dynamics_pid_gains.ki * np.ones(n, dtype=np.float64),
-        kd=config.inverse_dynamics_pid_gains.kd * np.ones(n, dtype=np.float64),
+        kp=config.inverse_dynamics_pid_gains.kp * np.ones(nq, dtype=np.float64),
+        ki=config.inverse_dynamics_pid_gains.ki * np.ones(nq, dtype=np.float64),
+        kd=config.inverse_dynamics_pid_gains.kd * np.ones(nq, dtype=np.float64),
         has_reference_acceleration=False,
+    )
+
+    # Exporting ports.
+    builder.ExportInput(
+        input=positions_input.get_input_port(),
+        name=LITE6_PLIANT_POSITIONS_DESIRED_IP_NAME,
+    )
+    builder.ExportInput(
+        input=velocities_input.get_input_porst(),
+        name=LITE6_PLIANT_VELOCITIES_DESIRED_IP_NAME,
     )
 
     diagram = builder.Build()

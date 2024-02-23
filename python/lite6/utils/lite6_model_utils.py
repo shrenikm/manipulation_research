@@ -29,6 +29,8 @@ LITE6_GRIPPER_SUBDIR = "gripper"
 LITE6_ROBOT_WITH_GRIPPER_SUBDIR = "robot_with_gripper"
 LITE6_ROBOT_WITHOUT_GRIPPER_SUBDIR = "robot_without_gripper"
 
+LITE6_DOF = 6
+
 
 class Lite6ModelType(StrEnum):
     NP_GRIPPER = "lite6_normal_parallel_gripper.urdf"
@@ -87,6 +89,18 @@ def get_lite6_urdf_base_frame_name(lite6_model_type: Lite6ModelType) -> str:
 
 def get_lite6_table_urdf_lite6_position_frame_name() -> str:
     return "link_lite6_position"
+
+
+def get_lite6_num_actuators(lite6_model_type: Lite6ModelType) -> int:
+    return {
+        Lite6ModelType.NP_GRIPPER: 2,
+        Lite6ModelType.RP_GRIPPER: 2,
+        Lite6ModelType.V_GRIPPER: 0,
+        Lite6ModelType.ROBOT_WITHOUT_GRIPPER: LITE6_DOF,
+        Lite6ModelType.ROBOT_WITH_NP_GRIPPER: LITE6_DOF + 2,
+        Lite6ModelType.ROBOT_WITH_RP_GRIPPER: LITE6_DOF + 2,
+        Lite6ModelType.ROBOT_WITH_V_GRIPPER: LITE6_DOF,
+    }[lite6_model_type]
 
 
 def add_lite6_model_to_plant(

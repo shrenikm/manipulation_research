@@ -1,4 +1,5 @@
 import numpy as np
+from pydrake.common.value import Value
 from pydrake.geometry import SceneGraph
 from pydrake.multibody.parsing import Parser
 from pydrake.multibody.plant import (
@@ -17,8 +18,9 @@ from python.lite6.pliant.lite6_pliant_utils import (
 )
 from python.lite6.utils.lite6_model_utils import LITE6_DOF, add_lite6_model_to_plant
 
-LITE6_PLIANT_POSITIONS_DESIRED_IP_NAME = "positions_desired"
-LITE6_PLIANT_VELOCITIES_DESIRED_IP_NAME = "velocities_desired"
+LITE6_PLIANT_POSITIONS_DESIRED_IP_NAME = "positions_desired_input"
+LITE6_PLIANT_VELOCITIES_DESIRED_IP_NAME = "velocities_desired_input"
+LITE6_PLIANT_GRIPPER_CLOSED_STATUS_IP_NAME = "gripper_closed_status_input"
 
 
 def create_lite6_pliant_for_hardware(config: Lite6PliantConfig) -> Diagram:
@@ -49,13 +51,17 @@ def create_lite6_pliant_for_simulation(config: Lite6PliantConfig) -> Diagram:
     nv = main_plant.num_velocities(model_instance=lite6_model)
     assert nq == nv
 
-    positions_input = builder.AddNamedSystem(
-        "positions_input",
-        PassThrough(LITE6_DOF),
+    positions_desired = builder.AddNamedSystem(
+        name="positions_desired",
+        system=PassThrough(vector_size=LITE6_DOF),
     )
-    velocities_input = builder.AddNamedSystem(
-        "velocities_input",
-        PassThrough(LITE6_DOF),
+    velocities_desired = builder.AddNamedSystem(
+        name="velocities_desired",
+        system=PassThrough(vector_size=LITE6_DOF),
+    )
+    gripper_closed_status = builder.AddNamedSystem(
+        name="gripper_closed_status",
+        system=PassThrough(abstract_model_value=Value(False)),
     )
 
     lite6_controller_plant = MultibodyPlant(time_step=config.time_step_s)
@@ -75,12 +81,16 @@ def create_lite6_pliant_for_simulation(config: Lite6PliantConfig) -> Diagram:
 
     # Exporting ports.
     builder.ExportInput(
-        input=positions_input.get_input_port(),
+        input=positions_desired.get_input_port(),
         name=LITE6_PLIANT_POSITIONS_DESIRED_IP_NAME,
     )
     builder.ExportInput(
-        input=velocities_input.get_input_porst(),
+        input=velocities_desired.get_input_port(),
         name=LITE6_PLIANT_VELOCITIES_DESIRED_IP_NAME,
+    )
+    builder.ExportInput(
+        input=gripper_closed_status.get_input_port(),
+        name=LITE6_PLIANT_GRIPPER_CLOSED_STATUS_IP_NAME,
     )
 
     diagram = builder.Build()

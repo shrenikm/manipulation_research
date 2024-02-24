@@ -1,13 +1,19 @@
 import os
 from enum import Enum
-from typing import Optional
+from typing import Optional, Tuple
 
 from pydrake.multibody.parsing import Parser
 from pydrake.multibody.plant import MultibodyPlant
 from pydrake.multibody.tree import ModelInstanceIndex
 
 from python.common.class_utils import StrEnum
-from python.common.custom_types import FileName, FilePath
+from python.common.custom_types import (
+    FileName,
+    FilePath,
+    PositionsVector,
+    StateVector,
+    VelocitiesVector,
+)
 from python.common.robot_model_utils import (
     MODELS_ENVIRONMENT_DIRNAME,
     ROBOT_MODELS_DRAKE_URDF_DIRNAME,
@@ -30,6 +36,14 @@ LITE6_ROBOT_WITH_GRIPPER_SUBDIR = "robot_with_gripper"
 LITE6_ROBOT_WITHOUT_GRIPPER_SUBDIR = "robot_without_gripper"
 
 LITE6_DOF = 6
+LITE6_GRIPPER_DOF = 2
+
+# Gripper open and closed positions from the URDF
+LITE6_NP_GRIPPER_OPEN_POSITIONS = (0.008, -0.008)
+LITE6_NP_GRIPPER_CLOSED_POSITIONS = (0.0, 0.0)
+
+LITE6_RP_GRIPPER_OPEN_POSITIONS = (0.008, -0.008)
+LITE6_RP_GRIPPER_CLOSED_POSITIONS = (0.0, 0.0)
 
 
 class Lite6ModelType(StrEnum):
@@ -40,6 +54,34 @@ class Lite6ModelType(StrEnum):
     ROBOT_WITH_NP_GRIPPER = "lite6_robot_with_normal_parallel_gripper.urdf"
     ROBOT_WITH_RP_GRIPPER = "lite6_robot_with_reverse_parallel_gripper.urdf"
     ROBOT_WITH_V_GRIPPER = "lite6_robot_with_vacuum_gripper.urdf"
+
+
+class Lite6ModelGroups:
+    LITE6_GRIPPER_MODELS = (
+        Lite6ModelType.NP_GRIPPER,
+        Lite6ModelType.RP_GRIPPER,
+        Lite6ModelType.V_GRIPPER,
+    )
+
+    LITE6_ROBOT_MODELS = (
+        Lite6ModelType.ROBOT_WITH_NP_GRIPPER,
+        Lite6ModelType.ROBOT_WITH_RP_GRIPPER,
+        Lite6ModelType.ROBOT_WITH_V_GRIPPER,
+        Lite6ModelType.ROBOT_WITHOUT_GRIPPER,
+    )
+
+    LITE6_ROBOT_WITH_GRIPPER_MODELS = (
+        Lite6ModelType.ROBOT_WITH_NP_GRIPPER,
+        Lite6ModelType.ROBOT_WITH_RP_GRIPPER,
+        Lite6ModelType.ROBOT_WITH_V_GRIPPER,
+    )
+
+    LITE6_ROBOT_WITH_PARALLEL_GRIPPER_MODELS = (
+        Lite6ModelType.ROBOT_WITH_NP_GRIPPER,
+        Lite6ModelType.ROBOT_WITH_RP_GRIPPER,
+    )
+
+    LITE6_ROBOT_WITH_VACUUM_GRIPPER_MODELS = (Lite6ModelType.ROBOT_WITH_V_GRIPPER,)
 
 
 def get_drake_lite6_urdf_path(lite6_model_type: Lite6ModelType) -> FilePath:
@@ -133,6 +175,90 @@ def get_lite6_num_states(lite6_model_type: Lite6ModelType) -> int:
     ) + get_lite6_num_velocities(
         lite6_model_type=lite6_model_type,
     )
+
+
+def add_joint_positions_to_lite6_state(
+    lite6_model_type: Lite6ModelType,
+    state_vector: StateVector,
+    positions_vector: PositionsVector,
+) -> None:
+    """
+    Mutates the state vector to add the positions at the correct indices.
+    """
+    assert lite6_model_type in Lite6ModelGroups.LITE6_ROBOT_MODELS
+    assert positions_vector.size == LITE6_DOF
+    state_vector[:LITE6_DOF] = positions_vector
+
+
+def add_joint_velocities_to_lite6_state(
+    lite6_model_type: Lite6ModelType,
+    state_vector: StateVector,
+    velocities_vector: VelocitiesVector,
+) -> None:
+    """
+    Mutates the state vector to add the velocities at the correct indices.
+    """
+    assert lite6_model_type in Lite6ModelGroups.LITE6_ROBOT_MODELS
+    assert velocities_vector.size == LITE6_DOF
+
+    if lite6_model_type in Lite6ModelGroups.LITE6_ROBOT_WITH_PARALLEL_GRIPPER_MODELS:
+        state_vector[
+            LITE6_DOF + LITE6_GRIPPER_DOF : 2 * LITE6_DOF + LITE6_GRIPPER_DOF
+        ] = velocities_vector
+    else:
+        state_vector[LITE6_DOF:] = velocities_vector
+
+
+def get_parallel_gripper_positions(
+    lite6_model_type: Lite6ModelType,
+    gripper_closed_desired: bool,
+) -> Tuple[float, float]:
+    assert lite6_model_type in Lite6ModelGroups.LITE6_ROBOT_WITH_PARALLEL_GRIPPER_MODELS
+    if (
+        lite6_model_type == Lite6ModelType.ROBOT_WITH_NP_GRIPPER
+        and not gripper_closed_desired
+    ):
+        return LITE6_NP_GRIPPER_OPEN_POSITIONS
+    elif (
+        lite6_model_type == Lite6ModelType.ROBOT_WITH_NP_GRIPPER
+        and gripper_closed_desired
+    ):
+        return LITE6_NP_GRIPPER_CLOSED_POSITIONS
+    elif (
+        lite6_model_type == Lite6ModelType.ROBOT_WITH_RP_GRIPPER
+        and not gripper_closed_desired
+    ):
+        return LITE6_RP_GRIPPER_OPEN_POSITIONS
+    elif (
+        lite6_model_type == Lite6ModelType.ROBOT_WITH_RP_GRIPPER
+        and gripper_closed_desired
+    ):
+        return LITE6_RP_GRIPPER_CLOSED_POSITIONS
+    else:
+        raise NotImplementedError
+
+
+def add_parallel_gripper_state_to_lite6_state(
+    lite6_model_type: Lite6ModelType,
+    state_vector: StateVector,
+    gripper_closed_desired: bool,
+) -> None:
+    """
+    Mutates the state vector to add the gripper positions and velocities using
+    the desired gripper closed status. (Note that this is only the lite6 robot
+    models with parallel grippers).
+    If the gripper needs to be closed, we set the positions of the grippers as
+    such and the velocities to zero. Similary for the open position with the
+    velocities still being set to zero.
+    """
+    parallel_gripper_positions = get_parallel_gripper_positions(
+        lite6_model_type=lite6_model_type,
+        gripper_closed_desired=gripper_closed_desired,
+    )
+    state_vector[LITE6_DOF : LITE6_DOF + LITE6_GRIPPER_DOF] = parallel_gripper_positions
+    state_vector[
+        2 * LITE6_DOF + LITE6_GRIPPER_DOF : 2 * LITE6_DOF + 2 * LITE6_GRIPPER_DOF
+    ] = 0.0
 
 
 def add_lite6_model_to_plant(

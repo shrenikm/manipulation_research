@@ -4,6 +4,7 @@ import pytest
 
 from python.common.testing_utils import execute_pytest_file
 from python.lite6.utils.lite6_model_utils import (
+    Lite6ModelGroups,
     Lite6ModelType,
     get_drake_lite6_urdf_path,
     get_lite6_num_actuators,
@@ -14,6 +15,44 @@ from python.lite6.utils.lite6_model_utils import (
     get_lite6_table_urdf_path,
     get_lite6_urdf_base_frame_name,
 )
+
+
+def test_lite6_model_groups() -> None:
+    assert Lite6ModelType.NP_GRIPPER in Lite6ModelGroups.LITE6_GRIPPER_MODELS
+    assert Lite6ModelType.RP_GRIPPER in Lite6ModelGroups.LITE6_GRIPPER_MODELS
+    assert Lite6ModelType.V_GRIPPER in Lite6ModelGroups.LITE6_GRIPPER_MODELS
+
+    assert Lite6ModelType.ROBOT_WITH_NP_GRIPPER in Lite6ModelGroups.LITE6_ROBOT_MODELS
+    assert Lite6ModelType.ROBOT_WITH_RP_GRIPPER in Lite6ModelGroups.LITE6_ROBOT_MODELS
+    assert Lite6ModelType.ROBOT_WITH_V_GRIPPER in Lite6ModelGroups.LITE6_ROBOT_MODELS
+    assert Lite6ModelType.ROBOT_WITHOUT_GRIPPER in Lite6ModelGroups.LITE6_ROBOT_MODELS
+
+    assert (
+        Lite6ModelType.ROBOT_WITH_NP_GRIPPER
+        in Lite6ModelGroups.LITE6_ROBOT_WITH_GRIPPER_MODELS
+    )
+    assert (
+        Lite6ModelType.ROBOT_WITH_RP_GRIPPER
+        in Lite6ModelGroups.LITE6_ROBOT_WITH_GRIPPER_MODELS
+    )
+    assert (
+        Lite6ModelType.ROBOT_WITH_V_GRIPPER
+        in Lite6ModelGroups.LITE6_ROBOT_WITH_GRIPPER_MODELS
+    )
+
+    assert (
+        Lite6ModelType.ROBOT_WITH_NP_GRIPPER
+        in Lite6ModelGroups.LITE6_ROBOT_WITH_PARALLEL_GRIPPER_MODELS
+    )
+    assert (
+        Lite6ModelType.ROBOT_WITH_RP_GRIPPER
+        in Lite6ModelGroups.LITE6_ROBOT_WITH_PARALLEL_GRIPPER_MODELS
+    )
+
+    assert (
+        Lite6ModelType.ROBOT_WITH_V_GRIPPER
+        in Lite6ModelGroups.LITE6_ROBOT_WITH_VACUUM_GRIPPER_MODELS
+    )
 
 
 def test_get_drake_lite6_urdf_path() -> None:

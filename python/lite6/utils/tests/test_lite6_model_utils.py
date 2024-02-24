@@ -56,13 +56,13 @@ def test_get_lite6_num_actuators() -> None:
 
 
 def test_get_lite6_num_states() -> None:
-    assert get_lite6_num_states(Lite6ModelType.NP_GRIPPER) == 2
-    assert get_lite6_num_states(Lite6ModelType.RP_GRIPPER) == 2
+    assert get_lite6_num_states(Lite6ModelType.NP_GRIPPER) == 4
+    assert get_lite6_num_states(Lite6ModelType.RP_GRIPPER) == 4
     assert get_lite6_num_states(Lite6ModelType.V_GRIPPER) == 0
-    assert get_lite6_num_states(Lite6ModelType.ROBOT_WITHOUT_GRIPPER) == 6
-    assert get_lite6_num_states(Lite6ModelType.ROBOT_WITH_NP_GRIPPER) == 8
-    assert get_lite6_num_states(Lite6ModelType.ROBOT_WITH_RP_GRIPPER) == 8
-    assert get_lite6_num_states(Lite6ModelType.ROBOT_WITH_V_GRIPPER) == 6
+    assert get_lite6_num_states(Lite6ModelType.ROBOT_WITHOUT_GRIPPER) == 12
+    assert get_lite6_num_states(Lite6ModelType.ROBOT_WITH_NP_GRIPPER) == 16
+    assert get_lite6_num_states(Lite6ModelType.ROBOT_WITH_RP_GRIPPER) == 16
+    assert get_lite6_num_states(Lite6ModelType.ROBOT_WITH_V_GRIPPER) == 12
 
 
 if __name__ == "__main__":

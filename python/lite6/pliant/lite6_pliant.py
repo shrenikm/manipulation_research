@@ -36,8 +36,8 @@ def add_and_export_pliant_input_ports(
         name="velocities_desired",
         system=PassThrough(vector_size=LITE6_DOF),
     )
-    gripper_closed_status = builder.AddNamedSystem(
-        name="gripper_closed_status",
+    gripper_closed_desired = builder.AddNamedSystem(
+        name="gripper_closed_desired",
         system=PassThrough(abstract_model_value=Value(False)),
     )
 
@@ -51,11 +51,11 @@ def add_and_export_pliant_input_ports(
         name=LITE6_PLIANT_VELOCITIES_DESIRED_IP_NAME,
     )
     builder.ExportInput(
-        input=gripper_closed_status.get_input_port(),
+        input=gripper_closed_desired.get_input_port(),
         name=LITE6_PLIANT_GRIPPER_CLOSED_STATUS_IP_NAME,
     )
 
-    return positions_desired, velocities_desired, gripper_closed_status
+    return positions_desired, velocities_desired, gripper_closed_desired
 
 
 def create_lite6_pliant_for_hardware(config: Lite6PliantConfig) -> Diagram:
@@ -89,7 +89,7 @@ def create_lite6_pliant_for_simulation(config: Lite6PliantConfig) -> Diagram:
     (
         positions_desired,
         velocities_desired,
-        gripper_closed_status,
+        gripper_closed_desired,
     ) = add_and_export_pliant_input_ports(
         builder=builder,
     )

@@ -1,7 +1,7 @@
 import os
-from enum import Enum
 from typing import Optional, Tuple
 
+import numpy as np
 from pydrake.multibody.parsing import Parser
 from pydrake.multibody.plant import MultibodyPlant
 from pydrake.multibody.tree import ModelInstanceIndex
@@ -259,6 +259,34 @@ def add_parallel_gripper_state_to_lite6_state(
     state_vector[
         2 * LITE6_DOF + LITE6_GRIPPER_DOF : 2 * LITE6_DOF + 2 * LITE6_GRIPPER_DOF
     ] = 0.0
+
+
+def create_lite6_state(
+    lite6_model_type: Lite6ModelType,
+    positions_vector: PositionsVector,
+    velocities_vector: VelocitiesVector,
+    gripper_closed_desired: bool,
+) -> StateVector:
+    """
+    Creates the lite6 state from the given positions, velocities and gripper closed status.
+    """
+    state_vector = np.zeros(get_lite6_num_states(lite6_model_type), dtype=np.float64)
+    add_joint_positions_to_lite6_state(
+        lite6_model_type=lite6_model_type,
+        state_vector=state_vector,
+        positions_vector=positions_vector,
+    )
+    add_joint_velocities_to_lite6_state(
+        lite6_model_type=lite6_model_type,
+        state_vector=state_vector,
+        velocities_vector=velocities_vector,
+    )
+    add_parallel_gripper_state_to_lite6_state(
+        lite6_model_type=lite6_model_type,
+        state_vector=state_vector,
+        gripper_closed_desired=gripper_closed_desired,
+    )
+    return state_vector
 
 
 def add_lite6_model_to_plant(

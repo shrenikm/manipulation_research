@@ -6,6 +6,7 @@ import pytest
 from python.common.testing_utils import execute_pytest_file
 from python.lite6.utils.lite6_model_utils import (
     LITE6_DOF,
+    Lite6GripperStatus,
     Lite6ModelGroups,
     Lite6ModelType,
     add_joint_positions_to_lite6_state,
@@ -273,7 +274,7 @@ def test_add_parallel_gripper_state_to_lite6_state() -> None:
             add_parallel_gripper_state_to_lite6_state(
                 lite6_model_type=lite6_model_type,
                 state_vector=np.zeros(12),
-                gripper_closed_desired=True,
+                lite6_gripper_status=Lite6GripperStatus.CLOSED,
             )
 
     for lite6_model_type in (
@@ -286,11 +287,11 @@ def test_add_parallel_gripper_state_to_lite6_state() -> None:
         )
         state_vector = np.copy(state_vector_initial)
 
-        gripper_closed_desired = True
+        lite6_gripper_status = Lite6GripperStatus.CLOSED
         new_state_vector = add_parallel_gripper_state_to_lite6_state(
             lite6_model_type=lite6_model_type,
             state_vector=state_vector,
-            gripper_closed_desired=gripper_closed_desired,
+            lite6_gripper_status=lite6_gripper_status,
         )
         # No mutation test.
         np.testing.assert_array_equal(state_vector_initial, state_vector)
@@ -317,11 +318,11 @@ def test_add_parallel_gripper_state_to_lite6_state() -> None:
             ],
         )
 
-        gripper_closed_desired = False
+        lite6_gripper_status = Lite6GripperStatus.OPEN
         new_state_vector = add_parallel_gripper_state_to_lite6_state(
             lite6_model_type=lite6_model_type,
             state_vector=state_vector,
-            gripper_closed_desired=gripper_closed_desired,
+            lite6_gripper_status=lite6_gripper_status,
         )
         # No mutation test.
         np.testing.assert_array_equal(state_vector_initial, state_vector)
@@ -363,7 +364,7 @@ def test_create_lite6_state() -> None:
                 lite6_model_type=lite6_model_type,
                 positions_vector=np.zeros(6),
                 velocities_vector=np.zeros(6),
-                gripper_closed_desired=True,
+                lite6_gripper_status=Lite6GripperStatus.CLOSED,
             )
 
     for lite6_model_type in (
@@ -373,12 +374,12 @@ def test_create_lite6_state() -> None:
         positions_vector = 2 * np.ones(6, dtype=np.float64)
         velocities_vector = 3 * np.ones(6, dtype=np.float64)
 
-        gripper_closed_desired = True
+        lite6_gripper_status = Lite6GripperStatus.CLOSED
         state_vector = create_lite6_state(
             lite6_model_type=lite6_model_type,
             positions_vector=positions_vector,
             velocities_vector=velocities_vector,
-            gripper_closed_desired=gripper_closed_desired,
+            lite6_gripper_status=lite6_gripper_status,
         )
         np.testing.assert_array_equal(
             state_vector,
@@ -402,12 +403,12 @@ def test_create_lite6_state() -> None:
             ],
         )
 
-        gripper_closed_desired = False
+        lite6_gripper_status = Lite6GripperStatus.OPEN
         state_vector = create_lite6_state(
             lite6_model_type=lite6_model_type,
             positions_vector=positions_vector,
             velocities_vector=velocities_vector,
-            gripper_closed_desired=gripper_closed_desired,
+            lite6_gripper_status=lite6_gripper_status,
         )
         np.testing.assert_array_equal(
             state_vector,

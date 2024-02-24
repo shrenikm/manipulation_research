@@ -11,6 +11,7 @@ from python.common.class_utils import StrEnum
 from python.common.control.constructs import PIDGains
 from python.lite6.utils.lite6_model_utils import (
     LITE6_DOF,
+    Lite6ControlType,
     Lite6ModelType,
     create_lite6_state,
     get_lite6_num_states,
@@ -46,14 +47,6 @@ LITE6_PLIANT_MULTIPLEXER_SE_IP_NAME = (
 LITE6_PLIANT_MULTIPLEXER_SD_OP_NAME = (
     LITE6_PLIANT_MULTIPLEXER_PREFIX + LITE6_PLIANT_GRIPPER_CLOSED_STATUS_IP_NAME
 )
-
-
-class Lite6ControlType(StrEnum):
-    # Control both q and qdot -- Specify what joint angles to reach and how fast
-    # Each joint should move.
-    STATE = "state"
-    # Control only qdot -- Only specify the instantaneous joint velocities.
-    VELOCITY = "velocity"
 
 
 @attr.frozen

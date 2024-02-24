@@ -1,4 +1,5 @@
 import os
+from enum import IntEnum, auto
 from typing import Optional, Tuple
 
 import numpy as np
@@ -44,6 +45,23 @@ LITE6_NP_GRIPPER_CLOSED_POSITIONS = (0.0, 0.0)
 
 LITE6_RP_GRIPPER_OPEN_POSITIONS = (0.008, -0.008)
 LITE6_RP_GRIPPER_CLOSED_POSITIONS = (0.0, 0.0)
+
+
+class Lite6ControlType(IntEnum):
+    # Control both q and qdot -- Specify what joint angles to reach and how fast
+    # Each joint should move.
+    STATE = auto()
+    # Control only qdot -- Only specify the instantaneous joint velocities.
+    VELOCITY = auto()
+
+
+class Lite6GripperStatus(IntEnum):
+    """
+    Parallel gripper status. Either open or closed.
+    """
+
+    OPEN = auto()
+    CLOSED = auto()
 
 
 class Lite6ModelType(StrEnum):
@@ -218,27 +236,27 @@ def add_joint_velocities_to_lite6_state(
 
 def get_parallel_gripper_positions(
     lite6_model_type: Lite6ModelType,
-    gripper_closed_desired: bool,
+    lite6_gripper_status: Lite6GripperStatus,
 ) -> Tuple[float, float]:
     assert lite6_model_type in Lite6ModelGroups.LITE6_ROBOT_WITH_PARALLEL_GRIPPER_MODELS
     if (
         lite6_model_type == Lite6ModelType.ROBOT_WITH_NP_GRIPPER
-        and not gripper_closed_desired
+        and lite6_gripper_status == Lite6GripperStatus.OPEN
     ):
         return LITE6_NP_GRIPPER_OPEN_POSITIONS
     elif (
         lite6_model_type == Lite6ModelType.ROBOT_WITH_NP_GRIPPER
-        and gripper_closed_desired
+        and lite6_gripper_status == Lite6GripperStatus.CLOSED
     ):
         return LITE6_NP_GRIPPER_CLOSED_POSITIONS
     elif (
         lite6_model_type == Lite6ModelType.ROBOT_WITH_RP_GRIPPER
-        and not gripper_closed_desired
+        and lite6_gripper_status == Lite6GripperStatus.OPEN
     ):
         return LITE6_RP_GRIPPER_OPEN_POSITIONS
     elif (
         lite6_model_type == Lite6ModelType.ROBOT_WITH_RP_GRIPPER
-        and gripper_closed_desired
+        and lite6_gripper_status == Lite6GripperStatus.CLOSED
     ):
         return LITE6_RP_GRIPPER_CLOSED_POSITIONS
     else:
@@ -248,7 +266,7 @@ def get_parallel_gripper_positions(
 def add_parallel_gripper_state_to_lite6_state(
     lite6_model_type: Lite6ModelType,
     state_vector: StateVector,
-    gripper_closed_desired: bool,
+    lite6_gripper_status: Lite6GripperStatus,
 ) -> StateVector:
     """
     Returns a new state vector with the gripper positions and velocities using
@@ -260,7 +278,7 @@ def add_parallel_gripper_state_to_lite6_state(
     """
     parallel_gripper_positions = get_parallel_gripper_positions(
         lite6_model_type=lite6_model_type,
-        gripper_closed_desired=gripper_closed_desired,
+        lite6_gripper_status=lite6_gripper_status,
     )
     state_vector_with_added_gripper_state = np.copy(state_vector)
     state_vector_with_added_gripper_state[
@@ -276,7 +294,7 @@ def create_lite6_state(
     lite6_model_type: Lite6ModelType,
     positions_vector: PositionsVector,
     velocities_vector: VelocitiesVector,
-    gripper_closed_desired: bool,
+    lite6_gripper_status: Lite6GripperStatus,
 ) -> StateVector:
     """
     Creates the lite6 state from the given positions, velocities and gripper closed status.
@@ -295,7 +313,7 @@ def create_lite6_state(
     state_vector = add_parallel_gripper_state_to_lite6_state(
         lite6_model_type=lite6_model_type,
         state_vector=state_vector,
-        gripper_closed_desired=gripper_closed_desired,
+        lite6_gripper_status=lite6_gripper_status,
     )
     return state_vector
 
@@ -306,6 +324,20 @@ def get_joint_positions_from_lite6_state(
 ) -> PositionsVector:
     assert lite6_model_type in Lite6ModelGroups.LITE6_ROBOT_MODELS
     return state_vector[:LITE6_DOF]
+
+
+def get_joint_velocities_from_lite6_state(
+    lite6_model_type: Lite6ModelType,
+    state_vector: StateVector,
+) -> VelocitiesVector:
+    assert lite6_model_type in Lite6ModelGroups.LITE6_ROBOT_MODELS
+
+    if lite6_model_type in Lite6ModelGroups.LITE6_ROBOT_WITH_PARALLEL_GRIPPER_MODELS:
+        return state_vector[
+            LITE6_DOF + LITE6_GRIPPER_DOF : 2 * LITE6_DOF + LITE6_GRIPPER_DOF
+        ]
+    else:
+        return state_vector[LITE6_DOF:]
 
 
 def add_lite6_model_to_plant(

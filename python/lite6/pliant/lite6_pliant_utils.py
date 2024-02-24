@@ -12,6 +12,7 @@ from python.common.control.constructs import PIDGains
 from python.lite6.utils.lite6_model_utils import (
     LITE6_DOF,
     Lite6ModelType,
+    create_lite6_state,
     get_lite6_num_states,
 )
 
@@ -113,6 +114,7 @@ class Lite6PliantMultiplexer(LeafSystem):
         gripper_closed_desired_bool = self._gcs_input_port.Eval(context)
 
         # TODO: Remove
+        assert isinstance(positions_desired_vector, np.ndarray)
         assert isinstance(gripper_closed_desired_bool, bool)
 
         if self.config.lite6_control_type == Lite6ControlType.STATE:
@@ -121,13 +123,23 @@ class Lite6PliantMultiplexer(LeafSystem):
             # The gripper values are set according to the desired flag. Desired gripper
             # velocity will be 0 with the positions being open/closed according to the
             # GCD port input.
-            ...
+            state_multiplexed_vector = create_lite6_state(
+                lite6_model_type=self.config.lite6_model_type,
+                positions_vector=positions_desired_vector,
+                velocities_vector=velocities_desired_vector,
+                gripper_closed_desired=gripper_closed_desired_bool,
+            )
         elif self.config.lite6_control_type == Lite6ControlType.VELOCITY:
             # For velocity control, we route the desired velocities into the output
             # state's velocities. The output's positions are obtained from the input
             # estimated positions state. This is the only case where we use the SE input
             # port value.
-            ...
+            state_multiplexed_vector = create_lite6_state(
+                lite6_model_type=self.config.lite6_model_type,
+                positions_vector=positions_estimated_vector,
+                velocities_vector=velocities_desired_vector,
+                gripper_closed_desired=gripper_closed_desired_bool,
+            )
         else:
             raise NotImplementedError
 

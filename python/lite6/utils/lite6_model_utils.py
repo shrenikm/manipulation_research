@@ -103,16 +103,36 @@ def get_lite6_num_actuators(lite6_model_type: Lite6ModelType) -> int:
     }[lite6_model_type]
 
 
-def get_lite6_num_states(lite6_model_type: Lite6ModelType) -> int:
+def get_lite6_num_positions(lite6_model_type: Lite6ModelType) -> int:
     return {
-        Lite6ModelType.NP_GRIPPER: 4,
-        Lite6ModelType.RP_GRIPPER: 4,
+        Lite6ModelType.NP_GRIPPER: 2,
+        Lite6ModelType.RP_GRIPPER: 2,
         Lite6ModelType.V_GRIPPER: 0,
-        Lite6ModelType.ROBOT_WITHOUT_GRIPPER: 2 * LITE6_DOF,
-        Lite6ModelType.ROBOT_WITH_NP_GRIPPER: 2 * (LITE6_DOF + 2),
-        Lite6ModelType.ROBOT_WITH_RP_GRIPPER: 2 * (LITE6_DOF + 2),
-        Lite6ModelType.ROBOT_WITH_V_GRIPPER: 2 * LITE6_DOF,
+        Lite6ModelType.ROBOT_WITHOUT_GRIPPER: LITE6_DOF,
+        Lite6ModelType.ROBOT_WITH_NP_GRIPPER: LITE6_DOF + 2,
+        Lite6ModelType.ROBOT_WITH_RP_GRIPPER: LITE6_DOF + 2,
+        Lite6ModelType.ROBOT_WITH_V_GRIPPER: LITE6_DOF,
     }[lite6_model_type]
+
+
+def get_lite6_num_velocities(lite6_model_type: Lite6ModelType) -> int:
+    return {
+        Lite6ModelType.NP_GRIPPER: 2,
+        Lite6ModelType.RP_GRIPPER: 2,
+        Lite6ModelType.V_GRIPPER: 0,
+        Lite6ModelType.ROBOT_WITHOUT_GRIPPER: LITE6_DOF,
+        Lite6ModelType.ROBOT_WITH_NP_GRIPPER: LITE6_DOF + 2,
+        Lite6ModelType.ROBOT_WITH_RP_GRIPPER: LITE6_DOF + 2,
+        Lite6ModelType.ROBOT_WITH_V_GRIPPER: LITE6_DOF,
+    }[lite6_model_type]
+
+
+def get_lite6_num_states(lite6_model_type: Lite6ModelType) -> int:
+    return get_lite6_num_positions(
+        lite6_model_type=lite6_model_type,
+    ) + get_lite6_num_velocities(
+        lite6_model_type=lite6_model_type,
+    )
 
 
 def add_lite6_model_to_plant(

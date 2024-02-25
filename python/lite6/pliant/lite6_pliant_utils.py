@@ -25,7 +25,7 @@ LITE6_PLIANT_SUPPORTED_MODEL_TYPES = (
 
 LITE6_PLIANT_POSITIONS_DESIRED_IP_NAME = "positions_desired_input"
 LITE6_PLIANT_VELOCITIES_DESIRED_IP_NAME = "velocities_desired_input"
-LITE6_PLIANT_GRIPPER_CLOSED_STATUS_IP_NAME = "gripper_closed_desired_input"
+LITE6_PLIANT_GRIPPER_STATUS_DESIRED_IP_NAME = "gripper_status_desired_input"
 
 LITE6_PLIANT_STATE_ESTIMATED_IP_NAME = "state_estimated_input"
 LITE6_PLIANT_STATE_DESIRED_OP_NAME = "state_desired_output"
@@ -37,15 +37,15 @@ LITE6_PLIANT_MULTIPLEXER_PD_IP_NAME = (
 LITE6_PLIANT_MULTIPLEXER_VD_IP_NAME = (
     LITE6_PLIANT_MULTIPLEXER_PREFIX + LITE6_PLIANT_VELOCITIES_DESIRED_IP_NAME
 )
-LITE6_PLIANT_MULTIPLEXER_GCD_IP_NAME = (
-    LITE6_PLIANT_MULTIPLEXER_PREFIX + LITE6_PLIANT_GRIPPER_CLOSED_STATUS_IP_NAME
+LITE6_PLIANT_MULTIPLEXER_GSD_IP_NAME = (
+    LITE6_PLIANT_MULTIPLEXER_PREFIX + LITE6_PLIANT_GRIPPER_STATUS_DESIRED_IP_NAME
 )
 
 LITE6_PLIANT_MULTIPLEXER_SE_IP_NAME = (
     LITE6_PLIANT_MULTIPLEXER_PREFIX + LITE6_PLIANT_STATE_ESTIMATED_IP_NAME
 )
 LITE6_PLIANT_MULTIPLEXER_SD_OP_NAME = (
-    LITE6_PLIANT_MULTIPLEXER_PREFIX + LITE6_PLIANT_GRIPPER_CLOSED_STATUS_IP_NAME
+    LITE6_PLIANT_MULTIPLEXER_PREFIX + LITE6_PLIANT_GRIPPER_STATUS_DESIRED_IP_NAME
 )
 
 
@@ -83,8 +83,8 @@ class Lite6PliantMultiplexer(LeafSystem):
             name=LITE6_PLIANT_MULTIPLEXER_VD_IP_NAME,
             size=LITE6_DOF,
         )
-        self._gcs_input_port = self.DeclareAbstractInputPort(
-            name=LITE6_PLIANT_MULTIPLEXER_GCD_IP_NAME,
+        self._gsd_input_port = self.DeclareAbstractInputPort(
+            name=LITE6_PLIANT_MULTIPLEXER_GSD_IP_NAME,
             model_value=Value(False),
         )
 
@@ -104,23 +104,23 @@ class Lite6PliantMultiplexer(LeafSystem):
         state_estimated_vector = self._se_input_port.Eval(context)
         positions_desired_vector = self._pd_input_port.Eval(context)
         velocities_desired_vector = self._vd_input_port.Eval(context)
-        gripper_closed_desired_bool = self._gcs_input_port.Eval(context)
+        gripper_status_desired = self._gsd_input_port.Eval(context)
 
         # TODO: Remove
         assert isinstance(positions_desired_vector, np.ndarray)
-        assert isinstance(gripper_closed_desired_bool, bool)
+        assert isinstance(gripper_status_desired_bool, bool)
 
         if self.config.lite6_control_type == Lite6ControlType.STATE:
             # For full state control, we need to route the desired positions and
             # velocities into the non gripper state values of the output.
             # The gripper values are set according to the desired flag. Desired gripper
             # velocity will be 0 with the positions being open/closed according to the
-            # GCD port input.
+            # GSD port input.
             state_multiplexed_vector = create_lite6_state(
                 lite6_model_type=self.config.lite6_model_type,
                 positions_vector=positions_desired_vector,
                 velocities_vector=velocities_desired_vector,
-                gripper_closed_desired=gripper_closed_desired_bool,
+                lite6_gripper_status=gripper_status_desired,
             )
         elif self.config.lite6_control_type == Lite6ControlType.VELOCITY:
             # For velocity control, we route the desired velocities into the output
@@ -131,7 +131,7 @@ class Lite6PliantMultiplexer(LeafSystem):
                 lite6_model_type=self.config.lite6_model_type,
                 positions_vector=positions_estimated_vector,
                 velocities_vector=velocities_desired_vector,
-                gripper_closed_desired=gripper_closed_desired_bool,
+                lite6_gripper_status=gripper_status_desired,
             )
         else:
             raise NotImplementedError

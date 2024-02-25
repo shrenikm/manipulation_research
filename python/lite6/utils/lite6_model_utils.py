@@ -62,6 +62,7 @@ class Lite6GripperStatus(IntEnum):
 
     OPEN = auto()
     CLOSED = auto()
+    UNDEFINED = auto()
 
 
 class Lite6ModelType(StrEnum):
@@ -239,6 +240,7 @@ def get_parallel_gripper_positions(
     lite6_gripper_status: Lite6GripperStatus,
 ) -> Tuple[float, float]:
     assert lite6_model_type in Lite6ModelGroups.LITE6_ROBOT_WITH_PARALLEL_GRIPPER_MODELS
+    assert lite6_gripper_status != Lite6GripperStatus.UNDEFINED
     if (
         lite6_model_type == Lite6ModelType.ROBOT_WITH_NP_GRIPPER
         and lite6_gripper_status == Lite6GripperStatus.OPEN
@@ -263,7 +265,7 @@ def get_parallel_gripper_positions(
         raise NotImplementedError
 
 
-def add_parallel_gripper_state_to_lite6_state(
+def add_gripper_status_to_lite6_state(
     lite6_model_type: Lite6ModelType,
     state_vector: StateVector,
     lite6_gripper_status: Lite6GripperStatus,
@@ -310,7 +312,7 @@ def create_lite6_state(
         state_vector=state_vector,
         velocities_vector=velocities_vector,
     )
-    state_vector = add_parallel_gripper_state_to_lite6_state(
+    state_vector = add_gripper_status_to_lite6_state(
         lite6_model_type=lite6_model_type,
         state_vector=state_vector,
         lite6_gripper_status=lite6_gripper_status,
@@ -338,6 +340,46 @@ def get_joint_velocities_from_lite6_state(
         ]
     else:
         return state_vector[LITE6_DOF:]
+
+
+def get_gripper_status_from_lite6_state(
+    lite6_model_type: Lite6ModelType,
+    state_vector: StateVector,
+    tolerance: float = 1e-4,
+) -> Lite6GripperStatus:
+
+    assert lite6_model_type in Lite6ModelGroups.LITE6_ROBOT_WITH_PARALLEL_GRIPPER_MODELS
+
+    parallel_gripper_positions = state_vector[LITE6_DOF : LITE6_DOF + LITE6_GRIPPER_DOF]
+    if lite6_model_type == Lite6ModelType.ROBOT_WITH_NP_GRIPPER:
+        if np.allclose(
+            parallel_gripper_positions,
+            LITE6_NP_GRIPPER_OPEN_POSITIONS,
+            atol=tolerance,
+        ):
+            return Lite6GripperStatus.OPEN
+        if np.allclose(
+            parallel_gripper_positions,
+            LITE6_NP_GRIPPER_CLOSED_POSITIONS,
+            atol=tolerance,
+        ):
+            return Lite6GripperStatus.CLOSED
+
+    elif lite6_model_type == Lite6ModelType.ROBOT_WITH_RP_GRIPPER:
+        if np.allclose(
+            parallel_gripper_positions,
+            LITE6_RP_GRIPPER_OPEN_POSITIONS,
+            atol=tolerance,
+        ):
+            return Lite6GripperStatus.OPEN
+        if np.allclose(
+            parallel_gripper_positions,
+            LITE6_RP_GRIPPER_CLOSED_POSITIONS,
+            atol=tolerance,
+        ):
+            return Lite6GripperStatus.CLOSED
+
+    return Lite6GripperStatus.UNDEFINED
 
 
 def add_lite6_model_to_plant(

@@ -14,6 +14,7 @@ from python.lite6.utils.lite6_model_utils import (
     Lite6ControlType,
     Lite6ModelType,
     create_lite6_state,
+    get_joint_positions_from_lite6_state,
     get_lite6_num_states,
 )
 
@@ -127,6 +128,10 @@ class Lite6PliantMultiplexer(LeafSystem):
             # state's velocities. The output's positions are obtained from the input
             # estimated positions state. This is the only case where we use the SE input
             # port value.
+            positions_estimated_vector = get_joint_positions_from_lite6_state(
+                lite6_model_type=self.config.lite6_model_type,
+                state_vector=state_estimated_vector,
+            )
             state_multiplexed_vector = create_lite6_state(
                 lite6_model_type=self.config.lite6_model_type,
                 positions_vector=positions_estimated_vector,

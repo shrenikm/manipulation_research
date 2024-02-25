@@ -2,7 +2,7 @@
 
 <!-- Cube of size 1 inch that can be manipulated -->
 
-<robot name="cube1">
+<robot name="cube_1_inch">
 
   <material name="blue">
     <color rgba="0.06 0.2 0.85 1.0"/>
@@ -11,7 +11,7 @@
   <link name="world"/>
 
   <!-- Table represented as a box of size 24" x 40" x 29" -->
-  <link name="link_cube1">
+  <link name="link_cube_1_inch">
     <visual>
       <geometry>
         <box size="0.0254 0.0254 0.0254"/>

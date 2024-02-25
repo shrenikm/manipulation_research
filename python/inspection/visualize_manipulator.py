@@ -14,7 +14,7 @@ from pydrake.all import (
 from pydrake.visualization import AddDefaultVisualization
 
 from python.common.custom_types import FilePath
-from python.common.robot_model_utils import add_robot_models_to_package_map
+from python.common.model_utils import add_robot_models_to_package_map
 from python.lite6.utils.lite6_model_utils import (
     Lite6ModelType,
     add_lite6_model_to_plant,

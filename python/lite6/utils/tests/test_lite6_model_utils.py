@@ -5,7 +5,6 @@ import pytest
 
 from python.common.testing_utils import execute_pytest_file
 from python.lite6.utils.lite6_model_utils import (
-    LITE6_DOF,
     Lite6GripperStatus,
     Lite6ModelGroups,
     Lite6ModelType,

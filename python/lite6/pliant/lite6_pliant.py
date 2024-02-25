@@ -14,6 +14,7 @@ from pydrake.systems.framework import Diagram, DiagramBuilder, System
 from pydrake.systems.primitives import PassThrough
 
 from python.common.class_utils import StrEnum
+from python.common.model_utils import add_object_models_to_plant
 from python.lite6.pliant.lite6_pliant_utils import (
     LITE6_PLIANT_GSD_IP_NAME,
     LITE6_PLIANT_GSD_OP_NAME,
@@ -92,6 +93,10 @@ def create_lite6_pliant_for_simulation(config: Lite6PliantConfig) -> Diagram:
     lite6_model = add_lite6_model_to_plant(
         plant=main_plant,
         lite6_model_type=config.lite6_model_type,
+    )
+    add_object_models_to_plant(
+        plant=main_plant,
+        object_model_configs=config.object_model_configs,
     )
 
     main_plant.Finalize()

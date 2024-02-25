@@ -1,5 +1,5 @@
 from enum import Enum
-from typing import Optional
+from typing import Optional, Sequence
 
 import attr
 import numpy as np
@@ -9,6 +9,7 @@ from pydrake.systems.framework import BasicVector, Context, LeafSystem
 
 from python.common.class_utils import StrEnum
 from python.common.control.constructs import PIDGains
+from python.common.model_utils import ObjectModelConfig
 from python.lite6.utils.lite6_model_utils import (
     LITE6_DOF,
     Lite6ControlType,
@@ -80,6 +81,7 @@ class Lite6PliantConfig:
     time_step_s: float
     inverse_dynamics_pid_gains: PIDGains
     plant_config: Optional[MultibodyPlantConfig] = None
+    object_model_configs: Optional[Sequence[ObjectModelConfig]] = None
 
 
 class Lite6PliantMultiplexer(LeafSystem):

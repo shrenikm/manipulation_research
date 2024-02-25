@@ -15,11 +15,10 @@ from python.common.custom_types import (
     StateVector,
     VelocitiesVector,
 )
-from python.common.robot_model_utils import (
-    MODELS_ENVIRONMENT_DIRNAME,
+from python.common.model_utils import (
     ROBOT_MODELS_DRAKE_URDF_DIRNAME,
     add_robot_models_to_package_map,
-    get_models_directory_path,
+    get_environment_models_directory_path,
     get_robot_models_directory_path,
 )
 
@@ -130,8 +129,7 @@ def get_drake_lite6_urdf_path(lite6_model_type: Lite6ModelType) -> FilePath:
 
 def get_lite6_table_urdf_path() -> FilePath:
     return os.path.join(
-        get_models_directory_path(),
-        MODELS_ENVIRONMENT_DIRNAME,
+        get_environment_models_directory_path(),
         LITE6_TABLE_FILENAME,
     )
 

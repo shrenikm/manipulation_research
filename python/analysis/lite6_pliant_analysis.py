@@ -54,11 +54,11 @@ def analyze_lite6_pliant(
 
     lite6_pliant.GetInputPort(
         port_name="velocities_desired_input",
-    ).FixValue(lite6_pliant_context, np.array([0.1, 0.0, 0.0, 0.0, 0.0, 0.0]))
+    ).FixValue(lite6_pliant_context, np.array([0.0, 0.0, 0.0, 0.0, 0.0, 0.0]))
 
     lite6_pliant.GetInputPort(
         port_name="gripper_status_desired_input",
-    ).FixValue(lite6_pliant_context, Value(Lite6GripperStatus.CLOSED))
+    ).FixValue(lite6_pliant_context, Value(Lite6GripperStatus.OPEN))
 
     diagram.ForcedPublish(simulator_context)
 

@@ -21,7 +21,7 @@ from python.lite6.utils.lite6_model_utils import (
 )
 
 
-def visualize_manipulator(
+def analyze_lite6_pliant(
     lite6_model_type: Lite6ModelType,
     object_model_configs: Optional[Sequence[ObjectModelConfig]] = None,
     place_on_table: bool = True,

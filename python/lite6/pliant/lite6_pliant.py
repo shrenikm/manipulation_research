@@ -33,6 +33,7 @@ from python.lite6.pliant.lite6_pliant_utils import (
 from python.lite6.utils.lite6_model_utils import (
     LITE6_DOF,
     Lite6GripperStatus,
+    Lite6PliantType,
     add_lite6_model_to_plant,
 )
 
@@ -222,7 +223,9 @@ def create_lite6_pliant(config: Lite6PliantConfig) -> Diagram:
         config.lite6_model_type in LITE6_PLIANT_SUPPORTED_MODEL_TYPES
     ), f"Unsupported model type. Must be one of {LITE6_PLIANT_SUPPORTED_MODEL_TYPES}"
 
-    if config.run_on_hardware:
+    if config.lite6_pliant_type == Lite6PliantType.HARDWARE:
         return create_lite6_pliant_for_hardware(config=config)
-    else:
+    elif config.lite6_pliant_type == Lite6PliantType.SIMULATION:
         return create_lite6_pliant_for_simulation(config=config)
+    else:
+        raise NotImplementedError

@@ -15,6 +15,7 @@ from python.lite6.utils.lite6_model_utils import (
     Lite6ControlType,
     Lite6GripperStatus,
     Lite6ModelType,
+    Lite6PliantType,
     create_lite6_state,
     get_gripper_status_from_lite6_state,
     get_joint_positions_from_lite6_state,
@@ -77,7 +78,7 @@ LITE6_PLIANT_MULTIPLEXER_GSE_OP_NAME = (
 class Lite6PliantConfig:
     lite6_model_type: Lite6ModelType
     lite6_control_type: Lite6ControlType
-    run_on_hardware: bool
+    lite6_pliant_type: Lite6PliantType
     time_step_s: float
     inverse_dynamics_pid_gains: PIDGains
     plant_config: Optional[MultibodyPlantConfig] = None

@@ -8,7 +8,7 @@ from python.lite6.pliant.lite6_pliant_utils import (
     Lite6ControlType,
     Lite6PliantConfig,
 )
-from python.lite6.utils.lite6_model_utils import Lite6ModelType
+from python.lite6.utils.lite6_model_utils import Lite6ModelType, get_lite6_num_positions
 
 
 @pytest.mark.parametrize(
@@ -24,7 +24,13 @@ def test_create_lite6_pliant_with_unsupported_model_type(
     lite6_control_type: Lite6ControlType,
 ) -> None:
 
-    id_pid_gains = PIDGains(kp=1.0, ki=1.0, kd=1.0)
+    nq = get_lite6_num_positions(lite6_model_type=unsupported_model_type)
+    id_pid_gains = PIDGains.from_scalar_gains(
+        size=nq,
+        kp_scalar=1.0,
+        ki_scalar=1.0,
+        kd_scalar=1.0,
+    )
 
     config = Lite6PliantConfig(
         lite6_model_type=unsupported_model_type,
@@ -50,7 +56,14 @@ def test_create_lite6_pliant_with_supported_type(
     lite6_model_type: Lite6ModelType,
     lite6_control_type: Lite6ControlType,
 ) -> None:
-    id_pid_gains = PIDGains(kp=1.0, ki=1.0, kd=1.0)
+
+    nq = get_lite6_num_positions(lite6_model_type=lite6_model_type)
+    id_pid_gains = PIDGains.from_scalar_gains(
+        size=nq,
+        kp_scalar=1.0,
+        ki_scalar=1.0,
+        kd_scalar=1.0,
+    )
 
     config = Lite6PliantConfig(
         lite6_model_type=lite6_model_type,

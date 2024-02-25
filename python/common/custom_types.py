@@ -26,3 +26,4 @@ NpVector3f64 = Annotated[npt.NDArray[f64], Literal["3"]]
 PositionsVector = NpVectorNf64
 VelocitiesVector = NpVectorNf64
 StateVector = NpVectorNf64
+GainsVector = NpVectorNf64

@@ -29,32 +29,46 @@ LITE6_PLIANT_SUPPORTED_MODEL_TYPES = (
 )
 
 
-LITE6_PLIANT_POSITIONS_DESIRED_IP_NAME = "positions_desired_input"
-LITE6_PLIANT_VELOCITIES_DESIRED_IP_NAME = "velocities_desired_input"
-LITE6_PLIANT_GRIPPER_STATUS_DESIRED_IP_NAME = "gripper_status_desired_input"
+LITE6_PLIANT_PD_IP_NAME = "positions_desired_input"
+LITE6_PLIANT_VD_IP_NAME = "velocities_desired_input"
+LITE6_PLIANT_GSD_IP_NAME = "gripper_status_desired_input"
+LITE6_PLIANT_SE_IP_NAME = "state_estimated_input"
 
-LITE6_PLIANT_STATE_ESTIMATED_IP_NAME = "state_estimated_input"
-LITE6_PLIANT_STATE_DESIRED_OP_NAME = "state_desired_output"
-LITE6_PLIANT_POSITIONS_ESTIMATED_OP_NAME = "positions_estimated_output"
-LITE6_PLIANT_VELOCITIES_ESTIMATED_OP_NAME = "velocities_estimated_output"
-LITE6_PLIANT_GRIPPER_STATUS_ESTIMATED_OP_NAME = "gripper_status_estimated_output"
+LITE6_PLIANT_PD_OP_NAME = "positions_desired_output"
+LITE6_PLIANT_VD_OP_NAME = "velocities_desired_output"
+LITE6_PLIANT_GSD_OP_NAME = "gripper_status_desired_output"
+
+LITE6_PLIANT_SD_OP_NAME = "state_desired_output"
+LITE6_PLIANT_PE_OP_NAME = "positions_estimated_output"
+LITE6_PLIANT_VE_OP_NAME = "velocities_estimated_output"
+LITE6_PLIANT_GSE_OP_NAME = "gripper_status_estimated_output"
 
 LITE6_PLIANT_MULTIPLEXER_PREFIX = "mult_"
 LITE6_PLIANT_MULTIPLEXER_PD_IP_NAME = (
-    LITE6_PLIANT_MULTIPLEXER_PREFIX + LITE6_PLIANT_POSITIONS_DESIRED_IP_NAME
+    LITE6_PLIANT_MULTIPLEXER_PREFIX + LITE6_PLIANT_PD_IP_NAME
 )
 LITE6_PLIANT_MULTIPLEXER_VD_IP_NAME = (
-    LITE6_PLIANT_MULTIPLEXER_PREFIX + LITE6_PLIANT_VELOCITIES_DESIRED_IP_NAME
+    LITE6_PLIANT_MULTIPLEXER_PREFIX + LITE6_PLIANT_VD_IP_NAME
 )
 LITE6_PLIANT_MULTIPLEXER_GSD_IP_NAME = (
-    LITE6_PLIANT_MULTIPLEXER_PREFIX + LITE6_PLIANT_GRIPPER_STATUS_DESIRED_IP_NAME
+    LITE6_PLIANT_MULTIPLEXER_PREFIX + LITE6_PLIANT_GSD_IP_NAME
 )
 
 LITE6_PLIANT_MULTIPLEXER_SE_IP_NAME = (
-    LITE6_PLIANT_MULTIPLEXER_PREFIX + LITE6_PLIANT_STATE_ESTIMATED_IP_NAME
+    LITE6_PLIANT_MULTIPLEXER_PREFIX + LITE6_PLIANT_SE_IP_NAME
 )
+
 LITE6_PLIANT_MULTIPLEXER_SD_OP_NAME = (
-    LITE6_PLIANT_MULTIPLEXER_PREFIX + LITE6_PLIANT_GRIPPER_STATUS_DESIRED_IP_NAME
+    LITE6_PLIANT_MULTIPLEXER_PREFIX + LITE6_PLIANT_SD_OP_NAME
+)
+LITE6_PLIANT_MULTIPLEXER_PE_OP_NAME = (
+    LITE6_PLIANT_MULTIPLEXER_PREFIX + LITE6_PLIANT_PE_OP_NAME
+)
+LITE6_PLIANT_MULTIPLEXER_VE_OP_NAME = (
+    LITE6_PLIANT_MULTIPLEXER_PREFIX + LITE6_PLIANT_VE_OP_NAME
+)
+LITE6_PLIANT_MULTIPLEXER_GSE_OP_NAME = (
+    LITE6_PLIANT_MULTIPLEXER_PREFIX + LITE6_PLIANT_GSE_OP_NAME
 )
 
 
@@ -80,25 +94,25 @@ class Lite6PliantMultiplexer(LeafSystem):
             lite6_model_type=config.lite6_model_type,
         )
 
-        self._se_input_port = self.DeclareVectorInputPort(
+        self.se_input_port = self.DeclareVectorInputPort(
             name=LITE6_PLIANT_MULTIPLEXER_SE_IP_NAME,
             size=self.num_total_states,
         )
-        self._pd_input_port = self.DeclareVectorInputPort(
+        self.pd_input_port = self.DeclareVectorInputPort(
             name=LITE6_PLIANT_MULTIPLEXER_PD_IP_NAME,
             size=LITE6_DOF,
         )
-        self._vd_input_port = self.DeclareVectorInputPort(
+        self.vd_input_port = self.DeclareVectorInputPort(
             name=LITE6_PLIANT_MULTIPLEXER_VD_IP_NAME,
             size=LITE6_DOF,
         )
-        self._gsd_input_port = self.DeclareAbstractInputPort(
+        self.gsd_input_port = self.DeclareAbstractInputPort(
             name=LITE6_PLIANT_MULTIPLEXER_GSD_IP_NAME,
-            model_value=Value(False),
+            model_value=Value(Lite6GripperStatus.CLOSED),
         )
 
-        self.DeclareVectorOutputPort(
-            name=LITE6_PLIANT_STATE_DESIRED_OP_NAME,
+        self.sd_output_port = self.DeclareVectorOutputPort(
+            name=LITE6_PLIANT_MULTIPLEXER_SD_OP_NAME,
             size=self.num_total_states,
             calc=self.compute_state_desired_output,
         )
@@ -110,10 +124,10 @@ class Lite6PliantMultiplexer(LeafSystem):
     ) -> None:
         state_output_vector = np.zeros(self.num_total_states, dtype=np.float64)
 
-        state_estimated_vector = self._se_input_port.Eval(context)
-        positions_desired_vector = self._pd_input_port.Eval(context)
-        velocities_desired_vector = self._vd_input_port.Eval(context)
-        gripper_status_desired = self._gsd_input_port.Eval(context)
+        state_estimated_vector = self.se_input_port.Eval(context)
+        positions_desired_vector = self.pd_input_port.Eval(context)
+        velocities_desired_vector = self.vd_input_port.Eval(context)
+        gripper_status_desired = self.gsd_input_port.Eval(context)
 
         # TODO: Remove
         assert isinstance(positions_desired_vector, np.ndarray)
@@ -166,23 +180,23 @@ class Lite6PliantDeMultiplexer(LeafSystem):
             lite6_model_type=config.lite6_model_type,
         )
 
-        self._se_input_port = self.DeclareVectorInputPort(
+        self.se_input_port = self.DeclareVectorInputPort(
             name=LITE6_PLIANT_MULTIPLEXER_SE_IP_NAME,
             size=self.num_total_states,
         )
 
-        self.DeclareVectorOutputPort(
-            name=LITE6_PLIANT_POSITIONS_ESTIMATED_OP_NAME,
+        self.pe_output_port = self.DeclareVectorOutputPort(
+            name=LITE6_PLIANT_MULTIPLEXER_PE_OP_NAME,
             size=LITE6_DOF,
             calc=self.compute_positions_estimated_output,
         )
-        self.DeclareVectorOutputPort(
-            name=LITE6_PLIANT_VELOCITIES_ESTIMATED_OP_NAME,
+        self.ve_output_port = self.DeclareVectorOutputPort(
+            name=LITE6_PLIANT_MULTIPLEXER_VE_OP_NAME,
             size=LITE6_DOF,
             calc=self.compute_velocities_estimated_output,
         )
-        self.DeclareAbstractOutputPort(
-            name=LITE6_PLIANT_GRIPPER_STATUS_ESTIMATED_OP_NAME,
+        self.gse_output_port = self.DeclareAbstractOutputPort(
+            name=LITE6_PLIANT_MULTIPLEXER_GSE_OP_NAME,
             alloc=lambda: Value(Lite6GripperStatus.CLOSED),
             calc=self.compute_gripper_status_estimated_output,
         )
@@ -192,7 +206,7 @@ class Lite6PliantDeMultiplexer(LeafSystem):
         context: Context,
         output_vector: BasicVector,
     ) -> None:
-        state_estimated_vector = self._se_input_port.Eval(context)
+        state_estimated_vector = self.se_input_port.Eval(context)
 
         # TODO: Remove
         assert isinstance(state_estimated_vector, np.ndarray)
@@ -210,7 +224,7 @@ class Lite6PliantDeMultiplexer(LeafSystem):
         context: Context,
         output_vector: BasicVector,
     ) -> None:
-        state_estimated_vector = self._se_input_port.Eval(context)
+        state_estimated_vector = self.se_input_port.Eval(context)
 
         # TODO: Remove
         assert isinstance(state_estimated_vector, np.ndarray)
@@ -228,7 +242,7 @@ class Lite6PliantDeMultiplexer(LeafSystem):
         context: Context,
         output_value: AbstractValue,
     ) -> None:
-        state_estimated_vector = self._se_input_port.Eval(context)
+        state_estimated_vector = self.se_input_port.Eval(context)
 
         # TODO: Remove
         assert isinstance(state_estimated_vector, np.ndarray)

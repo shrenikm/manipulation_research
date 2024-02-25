@@ -1,0 +1,32 @@
+<?xml version="1.0" ?>
+
+<!-- Cube of size 1 inch that can be manipulated -->
+
+<robot name="cube1">
+
+  <material name="blue">
+    <color rgba="0.06 0.2 0.85 1.0"/>
+  </material>
+
+  <link name="world"/>
+
+  <!-- Table represented as a box of size 24" x 40" x 29" -->
+  <link name="link_cube1">
+    <visual>
+      <geometry>
+        <box size="0.0254 0.0254 0.0254"/>
+      </geometry>
+      <material name="blue"/>
+    </visual>
+    <collision>
+      <geometry>
+        <box size="0.0254 0.0254 0.0254"/>
+      </geometry>
+    </collision>
+    <inertial>
+      <mass value="0.006"/>
+      <inertia ixx="0.000000645" ixy="0.0" ixz="0.0" iyy="0.000000645" iyz="0.0" izz="0.000000645"/>
+    </inertial>
+  </link>
+
+</robot>

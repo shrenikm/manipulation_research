@@ -1,8 +1,8 @@
-from typing import Tuple
+from typing import Optional, Tuple
 
 import numpy as np
 from pydrake.common.value import Value
-from pydrake.geometry import SceneGraph
+from pydrake.geometry import MeshcatVisualizer, SceneGraph
 from pydrake.multibody.parsing import Parser
 from pydrake.multibody.plant import (
     AddMultibodyPlant,
@@ -13,6 +13,7 @@ from pydrake.multibody.plant import (
 from pydrake.systems.controllers import InverseDynamicsController
 from pydrake.systems.framework import Diagram, DiagramBuilder, System
 from pydrake.systems.primitives import PassThrough
+from pydrake.visualization import AddDefaultVisualization
 
 from python.common.class_utils import StrEnum
 from python.common.model_utils import add_object_models_to_plant
@@ -79,7 +80,10 @@ def create_lite6_pliant_for_hardware(config: Lite6PliantConfig) -> Diagram:
     raise NotImplementedError()
 
 
-def create_lite6_pliant_for_simulation(config: Lite6PliantConfig) -> Diagram:
+def create_lite6_pliant_for_simulation(
+    config: Lite6PliantConfig,
+    meshcat: Optional[MeshcatVisualizer] = None,
+) -> Diagram:
     builder: DiagramBuilder = DiagramBuilder()
     main_plant: MultibodyPlant
     scene_graph: SceneGraph
@@ -103,6 +107,11 @@ def create_lite6_pliant_for_simulation(config: Lite6PliantConfig) -> Diagram:
     )
 
     main_plant.Finalize()
+
+    AddDefaultVisualization(
+        builder=builder,
+        meshcat=meshcat,
+    )
 
     nq = main_plant.num_positions(model_instance=lite6_model)
     nv = main_plant.num_velocities(model_instance=lite6_model)
@@ -220,7 +229,10 @@ def create_lite6_pliant_for_simulation(config: Lite6PliantConfig) -> Diagram:
     return diagram
 
 
-def create_lite6_pliant(config: Lite6PliantConfig) -> Diagram:
+def create_lite6_pliant(
+    config: Lite6PliantConfig,
+    meshcat: Optional[MeshcatVisualizer] = None,
+) -> Diagram:
     assert (
         config.lite6_model_type in LITE6_PLIANT_SUPPORTED_MODEL_TYPES
     ), f"Unsupported model type. Must be one of {LITE6_PLIANT_SUPPORTED_MODEL_TYPES}"
@@ -228,6 +240,9 @@ def create_lite6_pliant(config: Lite6PliantConfig) -> Diagram:
     if config.lite6_pliant_type == Lite6PliantType.HARDWARE:
         return create_lite6_pliant_for_hardware(config=config)
     elif config.lite6_pliant_type == Lite6PliantType.SIMULATION:
-        return create_lite6_pliant_for_simulation(config=config)
+        return create_lite6_pliant_for_simulation(
+            config=config,
+            meshcat=meshcat,
+        )
     else:
         raise NotImplementedError

@@ -133,7 +133,7 @@ class Lite6PliantMultiplexer(LeafSystem):
 
         # TODO: Remove
         assert isinstance(positions_desired_vector, np.ndarray)
-        assert isinstance(gripper_status_desired_bool, bool)
+        assert isinstance(gripper_status_desired, Lite6GripperStatus)
 
         if self.config.lite6_control_type == Lite6ControlType.STATE:
             # For full state control, we need to route the desired positions and

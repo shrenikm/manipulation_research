@@ -183,7 +183,7 @@ class Lite6PliantDeMultiplexer(LeafSystem):
         )
         self.DeclareAbstractOutputPort(
             name=LITE6_PLIANT_GRIPPER_STATUS_ESTIMATED_OP_NAME,
-            alloc=lambda: Lite6GripperStatus.CLOSED,
+            alloc=lambda: Value(Lite6GripperStatus.CLOSED),
             calc=self.compute_gripper_status_estimated_output,
         )
 

@@ -17,7 +17,7 @@ from python.lite6.utils.lite6_model_utils import Lite6ModelType
 )
 @pytest.mark.parametrize(
     "lite6_control_type",
-    Lite6ControlType.get_all_fields(),
+    [control_type for control_type in Lite6ControlType],
 )
 def test_create_lite6_pliant_with_unsupported_model_type(
     unsupported_model_type: Lite6ModelType,
@@ -44,7 +44,7 @@ def test_create_lite6_pliant_with_unsupported_model_type(
 )
 @pytest.mark.parametrize(
     "lite6_control_type",
-    Lite6ControlType.get_all_fields(),
+    [control_type for control_type in Lite6ControlType],
 )
 def test_create_lite6_pliant_with_supported_type(
     lite6_model_type: Lite6ModelType,

@@ -15,11 +15,13 @@ from pydrake.systems.primitives import PassThrough
 
 from python.common.class_utils import StrEnum
 from python.lite6.pliant.lite6_pliant_utils import (
-    LITE6_PLIANT_GRIPPER_CLOSED_STATUS_IP_NAME,
+    LITE6_PLIANT_GRIPPER_STATUS_DESIRED_IP_NAME,
     LITE6_PLIANT_POSITIONS_DESIRED_IP_NAME,
     LITE6_PLIANT_SUPPORTED_MODEL_TYPES,
     LITE6_PLIANT_VELOCITIES_DESIRED_IP_NAME,
     Lite6PliantConfig,
+    Lite6PliantDeMultiplexer,
+    Lite6PliantMultiplexer,
 )
 from python.lite6.utils.lite6_model_utils import (
     LITE6_DOF,
@@ -58,7 +60,7 @@ def add_and_export_pliant_input_ports(
     )
     builder.ExportInput(
         input=gripper_status_desired.get_input_port(),
-        name=LITE6_PLIANT_GRIPPER_CLOSED_STATUS_IP_NAME,
+        name=LITE6_PLIANT_GRIPPER_STATUS_DESIRED_IP_NAME,
     )
 
     return positions_desired, velocities_desired, gripper_status_desired
@@ -113,6 +115,15 @@ def create_lite6_pliant_for_simulation(config: Lite6PliantConfig) -> Diagram:
         ki=config.inverse_dynamics_pid_gains.ki * np.ones(nq, dtype=np.float64),
         kd=config.inverse_dynamics_pid_gains.kd * np.ones(nq, dtype=np.float64),
         has_reference_acceleration=False,
+    )
+
+    lite6_multiplexer = builder.AddNamedSystem(
+        name="lite6_multiplexer",
+        system=Lite6PliantMultiplexer(config=config),
+    )
+    lite6_demultiplexer = builder.AddNamedSystem(
+        name="lite6_demultiplexer",
+        system=Lite6PliantDeMultiplexer(config=config),
     )
 
     diagram = builder.Build()

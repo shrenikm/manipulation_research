@@ -26,6 +26,7 @@ from python.lite6.utils.lite6_model_utils import (
     LITE6_TABLE_HEIGHT,
     Lite6ModelType,
     add_lite6_model_to_plant,
+    get_default_height_for_object_model_type,
     get_drake_lite6_urdf_path,
 )
 
@@ -67,7 +68,15 @@ if __name__ == "__main__":
     object_model_configs = [
         ObjectModelConfig(
             object_model_type=ObjectModelType.CUBE_1_INCH,
-            position=np.array([0.0, 0.0, LITE6_TABLE_HEIGHT + 0.0127]),
+            position=np.array(
+                [
+                    0.0,
+                    0.0,
+                    get_default_height_for_object_model_type(
+                        ObjectModelType.CUBE_1_INCH
+                    ),
+                ]
+            ),
         ),
     ]
     place_on_table = True

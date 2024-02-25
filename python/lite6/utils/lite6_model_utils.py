@@ -17,6 +17,7 @@ from python.common.custom_types import (
 )
 from python.common.model_utils import (
     ROBOT_MODELS_DRAKE_URDF_DIRNAME,
+    ObjectModelType,
     add_robot_models_to_package_map,
     get_environment_models_directory_path,
     get_robot_models_directory_path,
@@ -134,6 +135,17 @@ def get_lite6_table_urdf_path() -> FilePath:
         get_environment_models_directory_path(),
         LITE6_TABLE_FILENAME,
     )
+
+
+def get_default_height_for_object_model_type(
+    object_model_type: ObjectModelType,
+) -> float:
+    """
+    Default height of object models where they lie on the lite6 table.
+    """
+    return {ObjectModelType.CUBE_1_INCH: LITE6_TABLE_HEIGHT + 0.5 * 0.0254}[
+        object_model_type
+    ]
 
 
 def get_lite6_urdf_base_frame_name(lite6_model_type: Lite6ModelType) -> str:

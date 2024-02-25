@@ -5,7 +5,7 @@ from pydrake.all import DiagramBuilder, StartMeshcat
 from pydrake.common.value import Value
 from pydrake.multibody.plant import MultibodyPlantConfig
 from pydrake.systems.analysis import Simulator
-from pydrake.systems.framework import System
+from pydrake.systems.framework import Diagram, System
 from pydrake.visualization import (
     AddDefaultVisualization,
     ApplyVisualizationConfig,
@@ -32,17 +32,17 @@ def analyze_lite6_pliant(
     config: Lite6PliantConfig,
 ) -> None:
 
-    meshcat = StartMeshcat()
-
     builder = DiagramBuilder()
 
-    lite6_pliant: System = builder.AddNamedSystem(
-        name="lite6_pliant",
-        system=create_lite6_pliant(
-            config=config,
-            meshcat=meshcat,
-        ),
+    lite6_pliant_container = create_lite6_pliant(
+        config=config,
     )
+
+    lite6_pliant: Diagram = builder.AddNamedSystem(
+        name="lite6_pliant",
+        system=lite6_pliant_container.diagram,
+    )
+    meshcat = lite6_pliant_container.meshcat
 
     diagram = builder.Build()
     simulator = Simulator(diagram)
@@ -50,11 +50,11 @@ def analyze_lite6_pliant(
     lite6_pliant_context = lite6_pliant.GetMyContextFromRoot(simulator_context)
     lite6_pliant.GetInputPort(
         port_name="positions_desired_input",
-    ).FixValue(lite6_pliant_context, np.array([1., 0., 0., 0., 0., 0.]))
+    ).FixValue(lite6_pliant_context, np.array([0.0, 0.0, 0.0, 0.0, 0.0, 0.0]))
 
     lite6_pliant.GetInputPort(
         port_name="velocities_desired_input",
-    ).FixValue(lite6_pliant_context, np.zeros(6))
+    ).FixValue(lite6_pliant_context, np.array([0.1, 0.0, 0.0, 0.0, 0.0, 0.0]))
 
     lite6_pliant.GetInputPort(
         port_name="gripper_status_desired_input",
@@ -69,8 +69,8 @@ def analyze_lite6_pliant(
 
 if __name__ == "__main__":
 
-    lite6_model_type = Lite6ModelType.ROBOT_WITH_NP_GRIPPER
-    lite6_control_type = Lite6ControlType.STATE
+    lite6_model_type = Lite6ModelType.ROBOT_WITH_RP_GRIPPER
+    lite6_control_type = Lite6ControlType.VELOCITY
     lite6_pliant_type = Lite6PliantType.SIMULATION
     inverse_dynamics_pid_gains = PIDGains.from_scalar_gains(
         size=8,

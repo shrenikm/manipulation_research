@@ -25,6 +25,8 @@ from python.lite6.utils.lite6_model_utils import (
     get_lite6_num_velocities,
 )
 
+LITE6_PLIANT_DEFAULT_MESHCAT_PORT = 7000
+
 LITE6_PLIANT_SUPPORTED_MODEL_TYPES = (
     Lite6ModelType.ROBOT_WITH_NP_GRIPPER,
     Lite6ModelType.ROBOT_WITH_RP_GRIPPER,

@@ -2,7 +2,13 @@ from typing import Optional, Tuple
 
 import numpy as np
 from pydrake.common.value import Value
-from pydrake.geometry import MeshcatVisualizer, SceneGraph
+from pydrake.geometry import (
+    Meshcat,
+    MeshcatParams,
+    MeshcatVisualizer,
+    SceneGraph,
+    StartMeshcat,
+)
 from pydrake.multibody.parsing import Parser
 from pydrake.multibody.plant import (
     AddMultibodyPlant,
@@ -17,7 +23,9 @@ from pydrake.visualization import AddDefaultVisualization
 
 from python.common.class_utils import StrEnum
 from python.common.model_utils import add_object_models_to_plant
+from python.common.pliant.multibody_pliant import MultibodyPliantContainer
 from python.lite6.pliant.lite6_pliant_utils import (
+    LITE6_PLIANT_DEFAULT_MESHCAT_PORT,
     LITE6_PLIANT_GSD_IP_NAME,
     LITE6_PLIANT_GSD_OP_NAME,
     LITE6_PLIANT_GSE_OP_NAME,
@@ -82,8 +90,10 @@ def create_lite6_pliant_for_hardware(config: Lite6PliantConfig) -> Diagram:
 
 def create_lite6_pliant_for_simulation(
     config: Lite6PliantConfig,
-    meshcat: Optional[MeshcatVisualizer] = None,
-) -> Diagram:
+) -> MultibodyPliantContainer:
+    meshcat = Meshcat(
+        params=MeshcatParams(),
+    )
     builder: DiagramBuilder = DiagramBuilder()
     main_plant: MultibodyPlant
     scene_graph: SceneGraph
@@ -226,23 +236,28 @@ def create_lite6_pliant_for_simulation(
 
     diagram = builder.Build()
 
-    return diagram
+    return MultibodyPliantContainer(
+        diagram=diagram,
+        plant=main_plant,
+        scene_graph=scene_graph,
+        meshcat=meshcat,
+    )
 
 
 def create_lite6_pliant(
     config: Lite6PliantConfig,
-    meshcat: Optional[MeshcatVisualizer] = None,
-) -> Diagram:
+) -> MultibodyPliantContainer:
     assert (
         config.lite6_model_type in LITE6_PLIANT_SUPPORTED_MODEL_TYPES
     ), f"Unsupported model type. Must be one of {LITE6_PLIANT_SUPPORTED_MODEL_TYPES}"
 
     if config.lite6_pliant_type == Lite6PliantType.HARDWARE:
-        return create_lite6_pliant_for_hardware(config=config)
+        return create_lite6_pliant_for_hardware(
+            config=config,
+        )
     elif config.lite6_pliant_type == Lite6PliantType.SIMULATION:
         return create_lite6_pliant_for_simulation(
             config=config,
-            meshcat=meshcat,
         )
     else:
         raise NotImplementedError

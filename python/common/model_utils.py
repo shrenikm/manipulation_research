@@ -5,15 +5,10 @@ import attr
 from pydrake.multibody.parsing import PackageMap, Parser
 from pydrake.multibody.plant import MultibodyPlant
 from pydrake.multibody.tree import ModelInstanceIndex
+from pydrake.systems.all import RigidTransform
 
 from python.common.class_utils import StrEnum
-from python.common.custom_types import (
-    DirPath,
-    FileName,
-    FilePath,
-    PositionsVector,
-    VelocitiesVector,
-)
+from python.common.custom_types import DirPath, FilePath, PositionsVector
 
 MODELS_DIRNAME = "models"
 ENVIRONMENT_MODELS_DIRNAME = "environment"
@@ -30,8 +25,7 @@ class ObjectModelType(StrEnum):
 class ObjectModelConfig:
 
     object_model_type: ObjectModelType
-    positions: Optional[PositionsVector] = None
-    velocities: Optional[VelocitiesVector] = None
+    position: Optional[PositionsVector] = None
 
 
 def get_models_directory_path() -> DirPath:
@@ -111,14 +105,26 @@ def add_object_models_to_plant(
     if parser is None:
         parser = Parser(plant)
 
-    model_instance_indices = []
+    model_instances = []
 
     for object_model_config in object_model_configs:
-        model_indstance_index = parser.AddModels(
+        model_instance = parser.AddModels(
             get_object_model_urdf_path(
                 object_model_type=object_model_config.object_model_type,
             ),
-        )
-        model_instance_indices.append(model_indstance_index)
+        )[0]
+        model_instances.append(model_instance)
 
-    return model_instance_indices
+        body = plant.get_body(
+            body_index=plant.GetBodyIndices(model_instance=model_instance)[0]
+        )
+
+        if object_model_config.position is not None:
+            plant.SetDefaultFreeBodyPose(
+                body=body,
+                X_WB=RigidTransform(
+                    p=object_model_config.position,
+                ),
+            )
+
+    return model_instances

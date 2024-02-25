@@ -79,9 +79,8 @@ class Lite6PliantConfig:
     lite6_model_type: Lite6ModelType
     lite6_control_type: Lite6ControlType
     lite6_pliant_type: Lite6PliantType
-    time_step_s: float
     inverse_dynamics_pid_gains: PIDGains
-    plant_config: Optional[MultibodyPlantConfig] = None
+    plant_config: MultibodyPlantConfig
     object_model_configs: Optional[Sequence[ObjectModelConfig]] = None
 
 

@@ -5,6 +5,7 @@ from pydrake.common.value import Value
 from pydrake.geometry import SceneGraph
 from pydrake.multibody.parsing import Parser
 from pydrake.multibody.plant import (
+    AddMultibodyPlant,
     AddMultibodyPlantSceneGraph,
     ApplyMultibodyPlantConfig,
     MultibodyPlant,
@@ -82,9 +83,9 @@ def create_lite6_pliant_for_simulation(config: Lite6PliantConfig) -> Diagram:
     builder: DiagramBuilder = DiagramBuilder()
     main_plant: MultibodyPlant
     scene_graph: SceneGraph
-    main_plant, scene_graph = AddMultibodyPlantSceneGraph(
-        builder,
-        time_step=config.time_step_s,
+    main_plant, scene_graph = AddMultibodyPlant(
+        config=config.plant_config,
+        builder=builder,
     )
 
     if config.plant_config is not None:
@@ -94,6 +95,7 @@ def create_lite6_pliant_for_simulation(config: Lite6PliantConfig) -> Diagram:
     lite6_model = add_lite6_model_to_plant(
         plant=main_plant,
         lite6_model_type=config.lite6_model_type,
+        place_on_table=True,
     )
     add_object_models_to_plant(
         plant=main_plant,
@@ -114,7 +116,7 @@ def create_lite6_pliant_for_simulation(config: Lite6PliantConfig) -> Diagram:
         builder=builder,
     )
 
-    lite6_controller_plant = MultibodyPlant(time_step=config.time_step_s)
+    lite6_controller_plant = MultibodyPlant(time_step=config.plant_config.time_step)
     lite6_controller_model = add_lite6_model_to_plant(
         plant=lite6_controller_plant,
         lite6_model_type=config.lite6_model_type,

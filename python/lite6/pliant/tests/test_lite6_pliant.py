@@ -1,4 +1,5 @@
 import pytest
+from pydrake.multibody.plant import MultibodyPlantConfig
 
 from python.common.control.constructs import PIDGains
 from python.common.testing_utils import execute_pytest_file
@@ -40,8 +41,8 @@ def test_create_lite6_pliant_with_unsupported_model_type(
         lite6_model_type=unsupported_model_type,
         lite6_control_type=lite6_control_type,
         lite6_pliant_type=Lite6PliantType.SIMULATION,
-        time_step_s=1e-3,
         inverse_dynamics_pid_gains=id_pid_gains,
+        plant_config=MultibodyPlantConfig(time_step=0.001),
     )
 
     with pytest.raises(AssertionError):
@@ -73,8 +74,8 @@ def test_create_lite6_pliant_with_supported_type(
         lite6_model_type=lite6_model_type,
         lite6_control_type=lite6_control_type,
         lite6_pliant_type=Lite6PliantType.SIMULATION,
-        time_step_s=1e-3,
         inverse_dynamics_pid_gains=id_pid_gains,
+        plant_config=MultibodyPlantConfig(time_step=0.001),
     )
 
     create_lite6_pliant(config=config)

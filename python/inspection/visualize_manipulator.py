@@ -23,6 +23,7 @@ from python.common.model_utils import (
     add_robot_models_to_package_map,
 )
 from python.lite6.utils.lite6_model_utils import (
+    LITE6_TABLE_HEIGHT,
     Lite6ModelType,
     add_lite6_model_to_plant,
     get_drake_lite6_urdf_path,
@@ -43,14 +44,11 @@ def visualize_manipulator(
         lite6_model_type=lite6_model_type,
         place_on_table=place_on_table,
     )
-    a = add_object_models_to_plant(
+    add_object_models_to_plant(
         plant=plant,
         object_model_configs=object_model_configs,
     )
     plant.Finalize()
-
-    print(a)
-    print(plant.num_positions(a[0]))
 
     meshcat.DeleteAddedControls()
 
@@ -69,7 +67,7 @@ if __name__ == "__main__":
     object_model_configs = [
         ObjectModelConfig(
             object_model_type=ObjectModelType.CUBE_1_INCH,
-            position=[0.0, 0.0, 1.0],
+            position=np.array([0.0, 0.0, LITE6_TABLE_HEIGHT + 0.0127]),
         ),
     ]
     place_on_table = True

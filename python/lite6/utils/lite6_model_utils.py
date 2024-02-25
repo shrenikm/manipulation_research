@@ -45,6 +45,8 @@ LITE6_NP_GRIPPER_CLOSED_POSITIONS = (0.0, 0.0)
 LITE6_RP_GRIPPER_OPEN_POSITIONS = (0.008, -0.008)
 LITE6_RP_GRIPPER_CLOSED_POSITIONS = (0.0, 0.0)
 
+LITE6_TABLE_HEIGHT = 0.7366
+
 
 class Lite6ControlType(IntEnum):
     # Control both q and qdot -- Specify what joint angles to reach and how fast

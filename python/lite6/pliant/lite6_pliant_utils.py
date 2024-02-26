@@ -118,10 +118,10 @@ class Lite6PliantMultiplexer(LeafSystem):
         self.sd_output_port = self.DeclareVectorOutputPort(
             name=LITE6_PLIANT_MULTIPLEXER_SD_OP_NAME,
             size=self.num_total_states,
-            calc=self.compute_state_desired_output,
+            calc=self._compute_state_desired_output,
         )
 
-    def compute_state_desired_output(
+    def _compute_state_desired_output(
         self,
         context: Context,
         output_vector: BasicVector,
@@ -192,20 +192,20 @@ class Lite6PliantDeMultiplexer(LeafSystem):
         self.pe_output_port = self.DeclareVectorOutputPort(
             name=LITE6_PLIANT_MULTIPLEXER_PE_OP_NAME,
             size=LITE6_DOF,
-            calc=self.compute_positions_estimated_output,
+            calc=self._compute_positions_estimated_output,
         )
         self.ve_output_port = self.DeclareVectorOutputPort(
             name=LITE6_PLIANT_MULTIPLEXER_VE_OP_NAME,
             size=LITE6_DOF,
-            calc=self.compute_velocities_estimated_output,
+            calc=self._compute_velocities_estimated_output,
         )
         self.gse_output_port = self.DeclareAbstractOutputPort(
             name=LITE6_PLIANT_MULTIPLEXER_GSE_OP_NAME,
             alloc=lambda: Value(Lite6GripperStatus.CLOSED),
-            calc=self.compute_gripper_status_estimated_output,
+            calc=self._compute_gripper_status_estimated_output,
         )
 
-    def compute_positions_estimated_output(
+    def _compute_positions_estimated_output(
         self,
         context: Context,
         output_vector: BasicVector,
@@ -223,7 +223,7 @@ class Lite6PliantDeMultiplexer(LeafSystem):
             value=positions_output_vector,
         )
 
-    def compute_velocities_estimated_output(
+    def _compute_velocities_estimated_output(
         self,
         context: Context,
         output_vector: BasicVector,
@@ -241,7 +241,7 @@ class Lite6PliantDeMultiplexer(LeafSystem):
             value=velocities_output_vector,
         )
 
-    def compute_gripper_status_estimated_output(
+    def _compute_gripper_status_estimated_output(
         self,
         context: Context,
         output_value: AbstractValue,

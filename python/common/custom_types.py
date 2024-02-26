@@ -22,8 +22,12 @@ NpVector1f64 = Annotated[npt.NDArray[f64], Literal["1"]]
 NpVector2f64 = Annotated[npt.NDArray[f64], Literal["2"]]
 NpVector3f64 = Annotated[npt.NDArray[f64], Literal["3"]]
 
+# Time stuff.
+TimesVector = NpVectorNf64  # Time in seconds
+
 # Control.
 PositionsVector = NpVectorNf64
 VelocitiesVector = NpVectorNf64
 StateVector = NpVectorNf64
 GainsVector = NpVectorNf64
+ControlSignalVector = NpVectorNf64

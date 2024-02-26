@@ -1,5 +1,5 @@
 import os
-from enum import IntEnum, auto
+from enum import Enum, auto
 from typing import Optional, Tuple
 
 import numpy as np
@@ -49,7 +49,7 @@ LITE6_RP_GRIPPER_CLOSED_POSITIONS = (0.0, 0.0)
 LITE6_TABLE_HEIGHT = 0.7366
 
 
-class Lite6PliantType(IntEnum):
+class Lite6PliantType(Enum):
     """
     Simulation or Hardware pliant type.
     """
@@ -58,7 +58,7 @@ class Lite6PliantType(IntEnum):
     HARDWARE = auto()
 
 
-class Lite6ControlType(IntEnum):
+class Lite6ControlType(Enum):
     # Control both q and qdot -- Specify what joint angles to reach and how fast
     # Each joint should move.
     STATE = auto()
@@ -66,7 +66,7 @@ class Lite6ControlType(IntEnum):
     VELOCITY = auto()
 
 
-class Lite6GripperStatus(IntEnum):
+class Lite6GripperStatus(Enum):
     """
     Parallel gripper status. Either open or closed.
     """

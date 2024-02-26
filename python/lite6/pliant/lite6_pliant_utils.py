@@ -133,10 +133,6 @@ class Lite6PliantMultiplexer(LeafSystem):
         velocities_desired_vector = self.vd_input_port.Eval(context)
         gripper_status_desired = self.gsd_input_port.Eval(context)
 
-        # TODO: Remove
-        assert isinstance(positions_desired_vector, np.ndarray)
-        assert isinstance(gripper_status_desired, Lite6GripperStatus)
-
         if self.config.lite6_control_type == Lite6ControlType.STATE:
             # For full state control, we need to route the desired positions and
             # velocities into the non gripper state values of the output.
@@ -212,9 +208,6 @@ class Lite6PliantDeMultiplexer(LeafSystem):
     ) -> None:
         state_estimated_vector = self.se_input_port.Eval(context)
 
-        # TODO: Remove
-        assert isinstance(state_estimated_vector, np.ndarray)
-
         positions_output_vector = get_joint_positions_from_lite6_state(
             lite6_model_type=self.config.lite6_model_type,
             state_vector=state_estimated_vector,
@@ -230,9 +223,6 @@ class Lite6PliantDeMultiplexer(LeafSystem):
     ) -> None:
         state_estimated_vector = self.se_input_port.Eval(context)
 
-        # TODO: Remove
-        assert isinstance(state_estimated_vector, np.ndarray)
-
         velocities_output_vector = get_joint_velocities_from_lite6_state(
             lite6_model_type=self.config.lite6_model_type,
             state_vector=state_estimated_vector,
@@ -247,9 +237,6 @@ class Lite6PliantDeMultiplexer(LeafSystem):
         output_value: AbstractValue,
     ) -> None:
         state_estimated_vector = self.se_input_port.Eval(context)
-
-        # TODO: Remove
-        assert isinstance(state_estimated_vector, np.ndarray)
 
         lite6_gripper_status = get_gripper_status_from_lite6_state(
             lite6_model_type=self.config.lite6_model_type,

@@ -1,0 +1,22 @@
+joint1_choreograph:
+  joint_index: 0
+  section1:
+    start_time_delay: 2.
+    end_time_delay: 2.
+    active_time: 7.
+    start_joint_positions: [0., 0., 0., 0., 0., 0.]
+    control_signal:
+      type: "step"
+      value: 0.1
+      delay_time: 2.
+  section2:
+    start_time_delay: 2.
+    end_time_delay: 2.
+    active_time: 2.
+    start_joint_positions: [0., 0., 0., 0., 0., 0.]
+    control_signal:
+      type: "step"
+      value: -0.78
+      delay_time: 1.
+   
+      

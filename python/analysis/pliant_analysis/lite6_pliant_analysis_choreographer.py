@@ -1,13 +1,20 @@
+from __future__ import annotations
+
 from enum import Enum, auto
 from typing import Iterator, Sequence
 
 import attr
 import numpy as np
+import yaml
 from pydrake.systems.framework import BasicVector, Context, LeafSystem
 
-from python.common.control.signals import ControlSignal
-from python.common.custom_types import PositionsVector
-from python.common.exceptions import Lite6PliantError
+from python.common.control.signals import (
+    ControlSignal,
+    SineControlSignal,
+    StepControlSignal,
+)
+from python.common.custom_types import FilePath, PositionsVector
+from python.common.exceptions import Lite6PliantChoreographerError, Lite6PliantError
 from python.common.logging import MRLogger
 from python.lite6.pliant.lite6_pliant_utils import Lite6PliantConfig
 from python.lite6.utils.lite6_model_utils import LITE6_DOF, Lite6ControlType
@@ -22,15 +29,15 @@ CC_OUTPUT_PORT = "cc_output_port"
 class ChoreographedSection:
     start_time_delay: float
     end_time_delay: float
-    control_signal: ControlSignal
+    active_time: float
     start_joint_positions: PositionsVector
-    end_joint_positions: PositionsVector
+    control_signal: ControlSignal
 
 
 @attr.frozen
 class JointChoreographedSections:
     joint_index: int
-    choreographed_sections = Sequence[ChoreographedSection]
+    choreographed_sections: Sequence[ChoreographedSection]
 
     def __len__(self) -> int:
         return len(self.choreographed_sections)
@@ -40,8 +47,8 @@ class JointChoreographedSections:
 
 
 @attr.frozen
-class Lite6PliantAnalysisChoreographer:
-    joint_choreographed_sections = Sequence[JointChoreographedSections]
+class Lite6PliantChoreographer:
+    joint_choreographed_sections: Sequence[JointChoreographedSections]
 
     def __len__(self) -> int:
         return len(self.joint_choreographed_sections)
@@ -49,18 +56,59 @@ class Lite6PliantAnalysisChoreographer:
     def __getitem__(self, index: int) -> JointChoreographedSections:
         return self.joint_choreographed_sections[index]
 
+    @classmethod
+    def from_yaml(
+        cls,
+        yaml_filepath: FilePath,
+    ) -> Lite6PliantChoreographer:
+        with open(file=yaml_filepath, mode="r") as stream:
+            parsed_yaml = yaml.safe_load(stream=stream)
+        jcs = []
+        for jcs_dict in parsed_yaml.values():
+            joint_index = jcs_dict.pop("joint_index")
+            sections = []
+            for sections_dict in jcs_dict.values():
+                control_signal_dict = sections_dict.pop("control_signal")
+                control_signal_type = control_signal_dict.pop("type")
+                if control_signal_type == "step":
+                    control_signal = StepControlSignal(**control_signal_dict)
+                elif control_signal_type == "sine":
+                    control_signal = SineControlSignal(**control_signal_dict)
+                else:
+                    raise Lite6PliantChoreographerError("Invalid control signal type")
+                cs = ChoreographedSection(
+                    start_time_delay=sections_dict.pop("start_time_delay"),
+                    end_time_delay=sections_dict.pop("end_time_delay"),
+                    active_time=sections_dict.pop("active_time"),
+                    start_joint_positions=np.array(
+                        sections_dict.pop("start_joint_positions")
+                    ),
+                    control_signal=control_signal,
+                )
+                sections.append(cs)
+            jcs.append(
+                JointChoreographedSections(
+                    joint_index=joint_index,
+                    choreographed_sections=sections,
+                )
+            )
+        return cls(
+            joint_choreographed_sections=jcs,
+        )
+
 
 class ChoreographedSectionStatus(Enum):
     START_DELAY = auto()
+    PRE_ACTIVE = auto()
     ACTIVE = auto()
     END_DELAY = auto()
 
 
-class Lite6PliantAnalysisChoreographerController(LeafSystem):
+class Lite6PliantChoreographerController(LeafSystem):
     def __init__(
         self,
         config: Lite6PliantConfig,
-        choreographer: Lite6PliantAnalysisChoreographer,
+        choreographer: Lite6PliantChoreographer,
     ):
         # Currently only designed for velocity control
         if config.lite6_control_type != Lite6ControlType.VELOCITY:
@@ -77,6 +125,7 @@ class Lite6PliantAnalysisChoreographerController(LeafSystem):
         self._current_section_index = 0
         self._status = ChoreographedSectionStatus.START_DELAY
         self._section_start_wait_time = None
+        self._section_active_time = None
         self._section_end_wait_time = None
         self._done = False
 
@@ -112,7 +161,7 @@ class Lite6PliantAnalysisChoreographerController(LeafSystem):
             output_vector.SetFromVector(value=np.zeros(LITE6_DOF, dtype=np.float64))
             return
 
-        time_sec = context.get_time()
+        current_time = context.get_time()
         pe_vector = self.cc_pe_input_port.Eval(context)
         ve_vector = self.cc_ve_input_port.Eval(context)
 
@@ -123,25 +172,53 @@ class Lite6PliantAnalysisChoreographerController(LeafSystem):
             # We wait by sending zero velocities.
             velocities_output_vector = np.zeros(LITE6_DOF, dtype=np.float64)
             if self._section_start_wait_time is None:
-                self._section_start_wait_time = time_sec
-            elif time_sec - self._section_start_wait_time > cs.start_time_delay:
+                self._section_start_wait_time = current_time
+            elif current_time - self._section_start_wait_time > cs.start_time_delay:
                 # Move to active.
                 self._section_start_wait_time = None
-                self._status = ChoreographedSectionStatus.ACTIVE
+                self._status = ChoreographedSectionStatus.PRE_ACTIVE
                 self._logger.info(
                     f"[Joint {self._current_joint_index}][Section {self._current_section_index}] Start delay done."
                 )
+        elif self._status == ChoreographedSectionStatus.PRE_ACTIVE:
+            if np.allclose(pe_vector, cs.start_joint_positions, atol=0.002):
+                velocities_output_vector = np.zeros(LITE6_DOF, dtype=np.float64)
+                self._status = ChoreographedSectionStatus.ACTIVE
+                self._section_active_time = current_time
+                self._logger.info(
+                    f"[Joint {self._current_joint_index}][Section {self._current_section_index}] Pre active done."
+                )
+            else:
+                # P controller to get the joints to the start positions.
+                velocities_output_vector = self.kp * (
+                    cs.start_joint_positions - pe_vector
+                )
         elif self._status == ChoreographedSectionStatus.ACTIVE:
-            ...
+            velocities_output_vector = np.zeros(LITE6_DOF, dtype=np.float64)
+            if self._section_active_time is None:
+                self._section_active_time = current_time
+            elif current_time - self._section_active_time > cs.active_time:
+                self._section_active_time = None
+                self._status = ChoreographedSectionStatus.END_DELAY
+                self._logger.info(
+                    f"[Joint {self._current_joint_index}][Section {self._current_section_index}] Active done."
+                )
+            else:
+                velocities_output_vector = np.zeros(LITE6_DOF, dtype=np.float64)
+                signal = cs.control_signal.compute_signal(
+                    time_step=current_time - self._section_active_time
+                )
+                velocities_output_vector[self._current_joint_index] = signal
+
         elif self._status == ChoreographedSectionStatus.END_DELAY:
             # We wait by sending zero velocities.
             velocities_output_vector = np.zeros(LITE6_DOF, dtype=np.float64)
             if self._section_end_wait_time is None:
-                self._section_end_wait_time = time_sec
-            elif time_sec - self._section_end_wait_time > cs.end_time_delay:
+                self._section_end_wait_time = current_time
+            elif current_time - self._section_end_wait_time > cs.end_time_delay:
                 # Move to active.
                 self._section_end_wait_time = None
-                self._status = ChoreographedSectionStatus.START_DELAY
+                self._status = ChoreographedSectionStatus.END_DELAY
                 self._logger.info(
                     f"[Joint {self._current_joint_index}][Section {self._current_section_index}] End delay done."
                 )

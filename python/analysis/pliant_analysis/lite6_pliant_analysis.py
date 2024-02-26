@@ -63,7 +63,10 @@ def analyze_lite6_pliant(
     diagram.ForcedPublish(simulator_context)
 
     meshcat.StartRecording(set_visualizations_while_recording=False)
-    simulator.AdvanceTo(10.0)
+    simulator.AdvanceTo(
+        boundary_time=10.0,
+        interruptible=True,
+    )
     meshcat.PublishRecording()
 
 

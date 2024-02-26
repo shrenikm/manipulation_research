@@ -78,6 +78,7 @@ class Lite6PliantAnalysisChoreographerController(LeafSystem):
         self._status = ChoreographedSectionStatus.START_DELAY
         self._section_start_wait_time = None
         self._section_end_wait_time = None
+        self._done = False
 
         self.cc_pe_input_port = self.DeclareVectorInputPort(
             name=CC_PE_INPUT_PORT,
@@ -106,6 +107,10 @@ class Lite6PliantAnalysisChoreographerController(LeafSystem):
         context: Context,
         output_vector: BasicVector,
     ) -> None:
+
+        if self._done:
+            output_vector.SetFromVector(value=np.zeros(LITE6_DOF, dtype=np.float64))
+            return
 
         time_sec = context.get_time()
         pe_vector = self.cc_pe_input_port.Eval(context)
@@ -140,6 +145,25 @@ class Lite6PliantAnalysisChoreographerController(LeafSystem):
                 self._logger.info(
                     f"[Joint {self._current_joint_index}][Section {self._current_section_index}] End delay done."
                 )
+
+                # If the entire thing is over.
+                if self._current_joint_index == len(self.choreographer) - 1:
+                    self._done = True
+                    self._logger.info("Choreography done!")
+                else:
+                    # Update the section and optionally joint.
+                    if self._current_section_index == len(jcs) - 1:
+                        # Last section for this joint. Moving to the next one.
+                        self._current_joint_index += 1
+                        self._current_section_index = 0
+                        self._logger.info(
+                            f"[Joint {self._current_joint_index}][Section {self._current_section_index}] Current joint completed. Moving to the next one."
+                        )
+                    else:
+                        self._current_section_index += 1
+                        self._logger.info(
+                            f"[Joint {self._current_joint_index}][Section {self._current_section_index}] Current section completed. Moving to the next one."
+                        )
 
         output_vector.SetFromVector(
             value=velocities_output_vector,

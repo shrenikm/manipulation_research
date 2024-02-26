@@ -127,7 +127,7 @@ class Lite6PliantChoreographerController(LeafSystem):
 
         self.config = config
         self.choreographer = choreographer
-        self.kp = 0.1
+        self.kp = 0.2
         self._logger = MRLogger(self.__class__.__name__)
 
         # States.
@@ -225,7 +225,7 @@ class Lite6PliantChoreographerController(LeafSystem):
             elif current_time - self._section_end_wait_time > cs.end_time_delay:
                 # Move to active.
                 self._section_end_wait_time = None
-                self._status = ChoreographedSectionStatus.END_DELAY
+                self._status = ChoreographedSectionStatus.START_DELAY
                 self._logger.info(
                     f"[Joint {self._current_joint_index}][Section {self._current_section_index}] End delay done."
                 )
@@ -237,17 +237,17 @@ class Lite6PliantChoreographerController(LeafSystem):
                         self._done = True
                         self._logger.info("Choreography done!")
                     else:
-                        self._current_joint_index += 1
-                        self._current_section_index = 0
                         self._logger.info(
                             f"[Joint {self._current_joint_index}][Section {self._current_section_index}] Current joint completed. Moving to the next one."
                         )
+                        self._current_joint_index += 1
+                        self._current_section_index = 0
                 else:
                     # Go to the next section.
-                    self._current_section_index += 1
                     self._logger.info(
                         f"[Joint {self._current_joint_index}][Section {self._current_section_index}] Current section completed. Moving to the next one."
                     )
+                    self._current_section_index += 1
 
         output_vector.SetFromVector(
             value=velocities_output_vector,

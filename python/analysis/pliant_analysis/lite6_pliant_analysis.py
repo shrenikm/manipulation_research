@@ -81,7 +81,7 @@ def analyze_lite6_pliant(
 
     lite6_pliant.GetInputPort(
         port_name="gripper_status_desired_input",
-    ).FixValue(lite6_pliant_context, Value(Lite6GripperStatus.OPEN))
+    ).FixValue(lite6_pliant_context, Value(Lite6GripperStatus.CLOSED))
 
     diagram.ForcedPublish(simulator_context)
 

@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import os
 from enum import Enum, auto
 from typing import Iterator, Sequence
 
@@ -22,6 +23,14 @@ from python.lite6.utils.lite6_model_utils import LITE6_DOF, Lite6ControlType
 CC_PE_INPUT_PORT = "cc_pe_input_port"
 CC_VE_INPUT_PORT = "cc_ve_input_port"
 CC_OUTPUT_PORT = "cc_output_port"
+CHOREOGRAPHER_CONFIG_YAML_FILENAME = "choreographer_config.yaml"
+
+
+def get_choreographer_config_yaml_filepath() -> FilePath:
+    return os.path.join(
+        os.path.dirname(__file__),
+        CHOREOGRAPHER_CONFIG_YAML_FILENAME,
+    )
 
 
 # TODO: Maybe move to common if generally useful
@@ -118,6 +127,7 @@ class Lite6PliantChoreographerController(LeafSystem):
 
         self.config = config
         self.choreographer = choreographer
+        self.kp = 0.1
         self._logger = MRLogger(self.__class__.__name__)
 
         # States.
@@ -163,14 +173,15 @@ class Lite6PliantChoreographerController(LeafSystem):
 
         current_time = context.get_time()
         pe_vector = self.cc_pe_input_port.Eval(context)
-        ve_vector = self.cc_ve_input_port.Eval(context)
+        # print("ccpe:", pe_vector.round(2))
 
         jcs = self.choreographer[self._current_joint_index]
         cs = jcs[self._current_section_index]
 
+        velocities_output_vector = np.zeros(LITE6_DOF, dtype=np.float64)
+
         if self._status == ChoreographedSectionStatus.START_DELAY:
             # We wait by sending zero velocities.
-            velocities_output_vector = np.zeros(LITE6_DOF, dtype=np.float64)
             if self._section_start_wait_time is None:
                 self._section_start_wait_time = current_time
             elif current_time - self._section_start_wait_time > cs.start_time_delay:
@@ -182,7 +193,6 @@ class Lite6PliantChoreographerController(LeafSystem):
                 )
         elif self._status == ChoreographedSectionStatus.PRE_ACTIVE:
             if np.allclose(pe_vector, cs.start_joint_positions, atol=0.002):
-                velocities_output_vector = np.zeros(LITE6_DOF, dtype=np.float64)
                 self._status = ChoreographedSectionStatus.ACTIVE
                 self._section_active_time = current_time
                 self._logger.info(
@@ -194,7 +204,6 @@ class Lite6PliantChoreographerController(LeafSystem):
                     cs.start_joint_positions - pe_vector
                 )
         elif self._status == ChoreographedSectionStatus.ACTIVE:
-            velocities_output_vector = np.zeros(LITE6_DOF, dtype=np.float64)
             if self._section_active_time is None:
                 self._section_active_time = current_time
             elif current_time - self._section_active_time > cs.active_time:
@@ -204,7 +213,6 @@ class Lite6PliantChoreographerController(LeafSystem):
                     f"[Joint {self._current_joint_index}][Section {self._current_section_index}] Active done."
                 )
             else:
-                velocities_output_vector = np.zeros(LITE6_DOF, dtype=np.float64)
                 signal = cs.control_signal.compute_signal(
                     time_step=current_time - self._section_active_time
                 )
@@ -212,7 +220,6 @@ class Lite6PliantChoreographerController(LeafSystem):
 
         elif self._status == ChoreographedSectionStatus.END_DELAY:
             # We wait by sending zero velocities.
-            velocities_output_vector = np.zeros(LITE6_DOF, dtype=np.float64)
             if self._section_end_wait_time is None:
                 self._section_end_wait_time = current_time
             elif current_time - self._section_end_wait_time > cs.end_time_delay:
@@ -223,24 +230,24 @@ class Lite6PliantChoreographerController(LeafSystem):
                     f"[Joint {self._current_joint_index}][Section {self._current_section_index}] End delay done."
                 )
 
-                # If the entire thing is over.
-                if self._current_joint_index == len(self.choreographer) - 1:
-                    self._done = True
-                    self._logger.info("Choreography done!")
-                else:
-                    # Update the section and optionally joint.
-                    if self._current_section_index == len(jcs) - 1:
-                        # Last section for this joint. Moving to the next one.
+                # If this is the last section, we go to the next joint and reset the section index to 0
+                if self._current_section_index == len(jcs) - 1:
+                    if self._current_joint_index == len(self.choreographer) - 1:
+                        # If this is also the last joint, we are done.
+                        self._done = True
+                        self._logger.info("Choreography done!")
+                    else:
                         self._current_joint_index += 1
                         self._current_section_index = 0
                         self._logger.info(
                             f"[Joint {self._current_joint_index}][Section {self._current_section_index}] Current joint completed. Moving to the next one."
                         )
-                    else:
-                        self._current_section_index += 1
-                        self._logger.info(
-                            f"[Joint {self._current_joint_index}][Section {self._current_section_index}] Current section completed. Moving to the next one."
-                        )
+                else:
+                    # Go to the next section.
+                    self._current_section_index += 1
+                    self._logger.info(
+                        f"[Joint {self._current_joint_index}][Section {self._current_section_index}] Current section completed. Moving to the next one."
+                    )
 
         output_vector.SetFromVector(
             value=velocities_output_vector,

@@ -40,6 +40,7 @@ from python.lite6.pliant.lite6_pliant_utils import (
     Lite6PliantDeMultiplexer,
     Lite6PliantMultiplexer,
 )
+from python.lite6.utils.lite6_hardware_utils import Lite6HardwareInterface
 from python.lite6.utils.lite6_model_utils import (
     LITE6_DOF,
     Lite6GripperStatus,
@@ -95,6 +96,56 @@ def create_lite6_pliant_for_hardware(
         gripper_status_desired,
     ) = add_and_export_pliant_input_ports(
         builder=builder,
+    )
+
+    lite6_hardware_interface = builder.AddSystem(
+        Lite6HardwareInterface(config=config),
+    )
+
+    # Connections.
+    builder.Connect(
+        positions_desired.get_output_port(),
+        lite6_hardware_interface.pd_input_port,
+    )
+    builder.Connect(
+        velocities_desired.get_output_port(),
+        lite6_hardware_interface.vd_input_port,
+    )
+    builder.Connect(
+        gripper_status_desired.get_output_port(),
+        lite6_hardware_interface.gsd_input_port,
+    )
+
+    # Export required output ports.
+    builder.ExportOutput(
+        output=positions_desired.get_output_port(),
+        name=LITE6_PLIANT_PD_OP_NAME,
+    )
+    builder.ExportOutput(
+        output=velocities_desired.get_output_port(),
+        name=LITE6_PLIANT_VD_OP_NAME,
+    )
+    builder.ExportOutput(
+        output=gripper_status_desired.get_output_port(),
+        name=LITE6_PLIANT_GSD_OP_NAME,
+    )
+    builder.ExportOutput(
+        output=lite6_hardware_interface.pe_output_port,
+        name=LITE6_PLIANT_PE_OP_NAME,
+    )
+    builder.ExportOutput(
+        output=lite6_hardware_interface.ve_output_port,
+        name=LITE6_PLIANT_VE_OP_NAME,
+    )
+    builder.ExportOutput(
+        output=lite6_hardware_interface.gse_output_port,
+        name=LITE6_PLIANT_GSE_OP_NAME,
+    )
+
+    diagram = builder.Build()
+
+    return MultibodyPliantContainer(
+        diagram=diagram,
     )
 
 

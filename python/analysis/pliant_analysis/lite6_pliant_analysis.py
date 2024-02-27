@@ -92,6 +92,8 @@ def analyze_lite6_pliant(
     )
     meshcat.PublishRecording()
 
+    choreographer_controller.plot_recordings()
+
 
 if __name__ == "__main__":
 

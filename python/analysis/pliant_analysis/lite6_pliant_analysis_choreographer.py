@@ -1,11 +1,11 @@
 from __future__ import annotations
-import matplotlib.pyplot as plt
 
 import os
 from enum import Enum, auto
-from typing import Iterator, Sequence
+from typing import Iterator, Sequence, Tuple
 
 import attr
+import matplotlib.pyplot as plt
 import numpy as np
 import yaml
 from pydrake.systems.framework import BasicVector, Context, LeafSystem
@@ -133,6 +133,9 @@ class Lite6PliantChoreographerController(LeafSystem):
         self.kp = 0.5
         self._logger = MRLogger(self.__class__.__name__)
 
+        # Variables
+        self.num_choreographed_joints = len(self.choreographer)
+
         # States.
         self._current_joint_index = 0
         self._current_section_index = 0
@@ -149,13 +152,13 @@ class Lite6PliantChoreographerController(LeafSystem):
         self._current_recorded_target_velocities = np.empty(0, dtype=np.float64)
         self._current_recorded_estimated_velocities = np.empty(0, dtype=np.float64)
         self._times_map = {
-            joint_index: {} for joint_index in range(len(self.choreographer))
+            joint_index: {} for joint_index in range(self.num_choreographed_joints)
         }
         self._target_velocities_map = {
-            joint_index: {} for joint_index in range(len(self.choreographer))
+            joint_index: {} for joint_index in range(self.num_choreographed_joints)
         }
         self._estimated_velocities_map = {
-            joint_index: {} for joint_index in range(len(self.choreographer))
+            joint_index: {} for joint_index in range(self.num_choreographed_joints)
         }
 
         self.cc_pe_input_port = self.DeclareVectorInputPort(
@@ -173,15 +176,56 @@ class Lite6PliantChoreographerController(LeafSystem):
             calc=self._compute_control_velocities_output,
         )
 
-    def plot_recordings(self) -> None:
-        ...
+    @staticmethod
+    def _get_subplots_size_for_num_sections(num_sections: int) -> Tuple[int, int]:
+        assert 1 <= num_sections <= 9
+        return {
+            1: (1, 1),
+            2: (1, 2),
+            3: (1, 3),
+            4: (2, 2),
+            5: (2, 3),
+            6: (2, 3),
+            7: (3, 3),
+            8: (3, 3),
+            9: (3, 3),
+        }[num_sections]
 
+    def plot_recordings(self) -> None:
+        self._logger.info("Generating plots!")
+        for joint_index in range(self.num_choreographed_joints):
+            assert (
+                len(self._times_map[joint_index])
+                == len(self._target_velocities_map[joint_index])
+                == len(self._estimated_velocities_map[joint_index])
+            )
+            num_sections = len(self._times_map[joint_index])
+            fig, axes = plt.subplots(
+                *self._get_subplots_size_for_num_sections(num_sections=num_sections)
+            )
+            fig.suptitle("Choreographer Analysis Plots")
+            for section_index in range(num_sections):
+                ax = axes[section_index]
+                t = self._times_map[joint_index][section_index]
+                tv = self._target_velocities_map[joint_index][section_index]
+                ev = self._estimated_velocities_map[joint_index][section_index]
+
+                ax.set_title(f"Joint {joint_index + 1}/{self.num_choreographed_joints}")
+                ax.plot(t, tv, color="blue", label="Target velocities")
+                ax.plot(t, ev, color="orange", label="Estimated velocities")
+                ax.set_xlabel("t (sec)")
+                ax.set_ylabel("qdot (rad/s)")
+                # Adding a legend makes it congested.
+                #ax.legend(loc="upper right")
+
+            plt.show()
 
     def _compute_control_velocities_output(
         self,
         context: Context,
         output_vector: BasicVector,
     ) -> None:
+        # TODO: Split into cleaner smaller functions.
 
         if self._done:
             output_vector.SetFromVector(value=np.zeros(LITE6_DOF, dtype=np.float64))
@@ -235,6 +279,13 @@ class Lite6PliantChoreographerController(LeafSystem):
                 self._estimated_velocities_map[self._current_joint_index][
                     self._current_section_index
                 ] = np.copy(self._current_recorded_estimated_velocities)
+
+                # Clear out the existing current data vectors.
+                self._current_recorded_times = np.empty(0, dtype=np.float64)
+                self._current_recorded_target_velocities = np.empty(0, dtype=np.float64)
+                self._current_recorded_estimated_velocities = np.empty(
+                    0, dtype=np.float64
+                )
 
                 self._logger.info(
                     f"[Joint {self._current_joint_index + 1}][Section {self._current_section_index + 1}] Active done."

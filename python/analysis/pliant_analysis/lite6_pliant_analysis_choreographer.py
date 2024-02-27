@@ -203,6 +203,8 @@ class Lite6PliantChoreographerController(LeafSystem):
             fig, axes = plt.subplots(
                 *self._get_subplots_size_for_num_sections(num_sections=num_sections)
             )
+            # Flattening axes as it returns a nested 2d list smh.
+            axes = [ax for axes_row in axes for ax in axes_row]
             fig.suptitle("Choreographer Analysis Plots")
             for section_index in range(num_sections):
                 ax = axes[section_index]
@@ -215,9 +217,8 @@ class Lite6PliantChoreographerController(LeafSystem):
                 ax.plot(t, ev, color="orange", label="Estimated velocities")
                 ax.set_xlabel("t (sec)")
                 ax.set_ylabel("qdot (rad/s)")
-                # Adding a legend makes it congested.
-                #ax.legend(loc="upper right")
 
+            plt.tight_layout()
             plt.show()
 
     def _compute_control_velocities_output(

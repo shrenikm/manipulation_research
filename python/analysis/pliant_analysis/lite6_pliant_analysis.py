@@ -87,7 +87,7 @@ def analyze_lite6_pliant(
 
     meshcat.StartRecording(set_visualizations_while_recording=False)
     simulator.AdvanceTo(
-        boundary_time=60.0,
+        boundary_time=120.0,
         interruptible=True,
     )
     meshcat.PublishRecording()

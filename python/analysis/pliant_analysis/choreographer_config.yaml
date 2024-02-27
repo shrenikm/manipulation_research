@@ -31,11 +31,38 @@ joint1_choreograph:
     start_time_delay: 1.
     end_time_delay: 1.
     active_time: 2.
-    start_joint_positions: [1.57, 1.57, 3.14, 0., 0., 0.]
+    start_joint_positions: [1.5, 1.57, 3.14, 0., 0., 0.]
     control_signal:
       type: "step"
       value: -3.
       delay_time: 1.
+  section5:
+    start_time_delay: 1.
+    end_time_delay: 1.
+    active_time: 1.
+    start_joint_positions: [-1.5, 1.57, 3.14, 0., 0., 0.]
+    control_signal:
+      type: "sine"
+      amplitude: 3.
+      frequency: 1.
+  section6:
+    start_time_delay: 1.
+    end_time_delay: 1.
+    active_time: 5.
+    start_joint_positions: [1.5, 1.57, 3.14, 0., 0., 0.]
+    control_signal:
+      type: "sine"
+      amplitude: -1.
+      frequency: 2.
+  section7:
+    start_time_delay: 1.
+    end_time_delay: 1.
+    active_time: 10.
+    start_joint_positions: [-1.5, 1.57, 3.14, 0., 0., 0.]
+    control_signal:
+      type: "sine"
+      amplitude: 0.2
+      frequency: 3.
 
    
       

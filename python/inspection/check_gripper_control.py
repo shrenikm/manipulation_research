@@ -1,37 +1,20 @@
-from typing import Optional, Sequence
-
 import numpy as np
-from pydrake.all import DiagramBuilder, StartMeshcat
+from pydrake.all import DiagramBuilder
 from pydrake.common.value import AbstractValue, Value
 from pydrake.multibody.plant import MultibodyPlantConfig
 from pydrake.systems.analysis import Simulator
-from pydrake.systems.framework import Diagram, LeafSystem, System
-from pydrake.visualization import (
-    AddDefaultVisualization,
-    ApplyVisualizationConfig,
-    VisualizationConfig,
-)
+from pydrake.systems.framework import Context, Diagram, LeafSystem, System
 
-from python.analysis.pliant_analysis.lite6_pliant_analysis_choreographer import (
-    Lite6PliantChoreographer,
-    Lite6PliantChoreographerController,
-    get_choreographer_config_yaml_filepath,
-)
 from python.common.control.constructs import PIDGains
-from python.common.model_utils import (
-    ObjectModelConfig,
-    ObjectModelType,
-    add_object_models_to_plant,
-)
 from python.lite6.pliant.lite6_pliant import create_lite6_pliant
 from python.lite6.pliant.lite6_pliant_utils import (
     LITE6_PLIANT_GSD_IP_NAME,
-    LITE6_PLIANT_PE_OP_NAME,
+    LITE6_PLIANT_PD_IP_NAME,
     LITE6_PLIANT_VD_IP_NAME,
-    LITE6_PLIANT_VE_OP_NAME,
     Lite6PliantConfig,
 )
 from python.lite6.utils.lite6_model_utils import (
+    LITE6_DOF,
     Lite6ControlType,
     Lite6GripperStatus,
     Lite6ModelType,
@@ -95,7 +78,15 @@ def check_gripper_control(
     diagram = builder.Build()
     simulator = Simulator(diagram)
     simulator_context = simulator.get_mutable_context()
-    diagram.ForcedPublish(simulator_context)
+    lite6_pliant_context = lite6_pliant.GetMyContextFromRoot(simulator_context)
+
+    lite6_pliant.GetInputPort(
+        port_name=LITE6_PLIANT_PD_IP_NAME,
+    ).FixValue(lite6_pliant_context, np.zeros(LITE6_DOF, dtype=np.float64))
+
+    lite6_pliant.GetInputPort(
+        port_name=LITE6_PLIANT_VD_IP_NAME,
+    ).FixValue(lite6_pliant_context, np.zeros(LITE6_DOF, dtype=np.float64))
 
     # TODO: Clean this up.
     if config.lite6_pliant_type == Lite6PliantType.SIMULATION:

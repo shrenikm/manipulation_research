@@ -106,9 +106,9 @@ class Lite6HardwareInterface(LeafSystem):
             )
         elif self.config.lite6_control_type == Lite6ControlType.VELOCITY:
             self.arm.vc_set_joint_velocity(
-                speeds=velocities_desired_vector
+                speeds=velocities_desired_vector,
                 is_radian=True,
-                duration=0.,
+                duration=0,
             )
         else:
             raise NotImplementedError("Invalid control type")
@@ -134,7 +134,9 @@ class Lite6HardwareInterface(LeafSystem):
         output_vector: BasicVector,
     ) -> None:
 
-        ret_code, (positions_estimated_list, _, _) = self.arm.get_joint_states(is_radian=True)
+        ret_code, (positions_estimated_list, _, _) = self.arm.get_joint_states(
+            is_radian=True
+        )
         assert ret_code == 0
 
         output_vector.SetFromVector(
@@ -150,8 +152,9 @@ class Lite6HardwareInterface(LeafSystem):
         ret_code, positions_estimated_list = self.arm.get_servo_angle(is_radian=True)
         assert ret_code == 0
 
-        ret_code, (_, velocities_estimated_list, _) = self.arm.get_joint_states(is_radian=True)
-
+        ret_code, (_, velocities_estimated_list, _) = self.arm.get_joint_states(
+            is_radian=True
+        )
 
         output_vector.SetFromVector(
             value=np.array(velocities_estimated_list, dtype=np.float64),
@@ -164,4 +167,3 @@ class Lite6HardwareInterface(LeafSystem):
     ) -> None:
 
         output_value.set_value(self._gripper_status)
-

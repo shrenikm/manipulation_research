@@ -33,19 +33,23 @@ LITE6_PLIANT_SUPPORTED_MODEL_TYPES = (
 )
 
 
-LITE6_PLIANT_PD_IP_NAME = "positions_desired_input"
-LITE6_PLIANT_VD_IP_NAME = "velocities_desired_input"
-LITE6_PLIANT_GSD_IP_NAME = "gripper_status_desired_input"
-LITE6_PLIANT_SE_IP_NAME = "state_estimated_input"
+# Positions desired
+LITE6_PLIANT_PD_IP_NAME = "pd_input"
+# Velocities desired
+LITE6_PLIANT_VD_IP_NAME = "vd_input"
+# Gripper status desired
+LITE6_PLIANT_GSD_IP_NAME = "gsd_input"
+# State estimated
+LITE6_PLIANT_SE_IP_NAME = "se_input"
 
-LITE6_PLIANT_PD_OP_NAME = "positions_desired_output"
-LITE6_PLIANT_VD_OP_NAME = "velocities_desired_output"
-LITE6_PLIANT_GSD_OP_NAME = "gripper_status_desired_output"
+LITE6_PLIANT_PD_OP_NAME = "pd_output"
+LITE6_PLIANT_VD_OP_NAME = "vd_output"
+LITE6_PLIANT_GSD_OP_NAME = "gsd_output"
 
-LITE6_PLIANT_SD_OP_NAME = "state_desired_output"
-LITE6_PLIANT_PE_OP_NAME = "positions_estimated_output"
-LITE6_PLIANT_VE_OP_NAME = "velocities_estimated_output"
-LITE6_PLIANT_GSE_OP_NAME = "gripper_status_estimated_output"
+LITE6_PLIANT_SD_OP_NAME = "sd_output"
+LITE6_PLIANT_PE_OP_NAME = "pe_output"
+LITE6_PLIANT_VE_OP_NAME = "ve_output"
+LITE6_PLIANT_GSE_OP_NAME = "gse_output"
 
 LITE6_PLIANT_MULTIPLEXER_PREFIX = "mult_"
 LITE6_PLIANT_MULTIPLEXER_PD_IP_NAME = (

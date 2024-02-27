@@ -73,7 +73,7 @@ class Lite6GripperStatus(Enum):
 
     OPEN = auto()
     CLOSED = auto()
-    UNDEFINED = auto()
+    NEUTRAL = auto()
 
 
 class Lite6ModelType(StrEnum):
@@ -261,7 +261,7 @@ def get_parallel_gripper_positions(
     lite6_gripper_status: Lite6GripperStatus,
 ) -> Tuple[float, float]:
     assert lite6_model_type in Lite6ModelGroups.LITE6_ROBOT_WITH_PARALLEL_GRIPPER_MODELS
-    assert lite6_gripper_status != Lite6GripperStatus.UNDEFINED
+    assert lite6_gripper_status != Lite6GripperStatus.NEUTRAL
     if (
         lite6_model_type == Lite6ModelType.ROBOT_WITH_NP_GRIPPER
         and lite6_gripper_status == Lite6GripperStatus.OPEN
@@ -400,7 +400,7 @@ def get_gripper_status_from_lite6_state(
         ):
             return Lite6GripperStatus.CLOSED
 
-    return Lite6GripperStatus.UNDEFINED
+    return Lite6GripperStatus.NEUTRAL
 
 
 def add_lite6_model_to_plant(

@@ -25,7 +25,9 @@ from python.common.model_utils import (
 )
 from python.lite6.pliant.lite6_pliant import create_lite6_pliant
 from python.lite6.pliant.lite6_pliant_utils import (
+    LITE6_PLIANT_GSD_IP_NAME,
     LITE6_PLIANT_PE_OP_NAME,
+    LITE6_PLIANT_VD_IP_NAME,
     LITE6_PLIANT_VE_OP_NAME,
     Lite6PliantConfig,
 )
@@ -71,7 +73,7 @@ def analyze_lite6_pliant(
     )
     builder.Connect(
         choreographer_controller.cc_output_port,
-        lite6_pliant.GetInputPort("velocities_desired_input"),
+        lite6_pliant.GetInputPort(LITE6_PLIANT_VD_IP_NAME),
     )
 
     diagram = builder.Build()
@@ -80,7 +82,7 @@ def analyze_lite6_pliant(
     lite6_pliant_context = lite6_pliant.GetMyContextFromRoot(simulator_context)
 
     lite6_pliant.GetInputPort(
-        port_name="gripper_status_desired_input",
+        port_name=LITE6_PLIANT_GSD_IP_NAME,
     ).FixValue(lite6_pliant_context, Value(Lite6GripperStatus.CLOSED))
 
     diagram.ForcedPublish(simulator_context)

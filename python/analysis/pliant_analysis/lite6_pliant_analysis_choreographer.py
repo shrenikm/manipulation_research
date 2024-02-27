@@ -227,7 +227,6 @@ class Lite6PliantChoreographerController(LeafSystem):
         output_vector: BasicVector,
     ) -> None:
         # TODO: Split into cleaner smaller functions.
-
         if self._done:
             output_vector.SetFromVector(value=np.zeros(LITE6_DOF, dtype=np.float64))
             return

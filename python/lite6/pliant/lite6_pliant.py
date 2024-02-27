@@ -84,8 +84,18 @@ def add_and_export_pliant_input_ports(
     return positions_desired, velocities_desired, gripper_status_desired
 
 
-def create_lite6_pliant_for_hardware(config: Lite6PliantConfig) -> Diagram:
-    raise NotImplementedError()
+def create_lite6_pliant_for_hardware(
+    config: Lite6PliantConfig,
+) -> MultibodyPliantContainer:
+    builder: DiagramBuilder = DiagramBuilder()
+
+    (
+        positions_desired,
+        velocities_desired,
+        gripper_status_desired,
+    ) = add_and_export_pliant_input_ports(
+        builder=builder,
+    )
 
 
 def create_lite6_pliant_for_simulation(

@@ -285,7 +285,7 @@ def test_add_gripper_status_to_lite6_state() -> None:
             add_gripper_status_to_lite6_state(
                 lite6_model_type=lite6_model_type,
                 state_vector=state_vector,
-                lite6_gripper_status=Lite6GripperStatus.UNDEFINED,
+                lite6_gripper_status=Lite6GripperStatus.NEUTRAL,
             )
 
         lite6_gripper_status = Lite6GripperStatus.CLOSED
@@ -518,7 +518,7 @@ def test_get_gripper_status_from_lite6_state() -> None:
             lite6_model_type=lite6_model_type,
             state_vector=state_vector,
         )
-        assert lite6_gripper_status == Lite6GripperStatus.UNDEFINED
+        assert lite6_gripper_status == Lite6GripperStatus.NEUTRAL
 
         estimated_lite6_gripper_status = Lite6GripperStatus.OPEN
         estimated_state_vector = add_gripper_status_to_lite6_state(

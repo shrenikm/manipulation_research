@@ -201,7 +201,7 @@ class Lite6PliantDeMultiplexer(LeafSystem):
         )
         self.gse_output_port = self.DeclareAbstractOutputPort(
             name=LITE6_PLIANT_MULTIPLEXER_GSE_OP_NAME,
-            alloc=lambda: Value(Lite6GripperStatus.CLOSED),
+            alloc=lambda: Value(Lite6GripperStatus.NEUTRAL),
             calc=self._compute_gripper_status_estimated_output,
         )
 

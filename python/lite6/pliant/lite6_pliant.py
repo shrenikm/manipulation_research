@@ -169,7 +169,7 @@ def create_lite6_pliant_for_hardware(
     diagram.set_name(config.get_name())
 
     return MultibodyPliantContainer(
-        diagram=diagram,
+        pliant_diagram=diagram,
         plant=main_plant,
     )
 
@@ -324,7 +324,7 @@ def create_lite6_pliant_for_simulation(
     diagram.set_name(config.get_name())
 
     return MultibodyPliantContainer(
-        diagram=diagram,
+        pliant_diagram=diagram,
         plant=main_plant,
         scene_graph=scene_graph,
         meshcat=meshcat,

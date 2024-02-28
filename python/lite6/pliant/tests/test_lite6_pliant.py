@@ -79,7 +79,7 @@ def test_create_lite6_pliant_with_supported_type(
     pliant = create_lite6_pliant(config=config)
 
     # TODO: Better tests.
-    assert isinstance(pliant.diagram, Diagram)
+    assert isinstance(pliant.pliant_diagram, Diagram)
     assert isinstance(pliant.plant, MultibodyPlant)
 
 

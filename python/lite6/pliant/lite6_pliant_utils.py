@@ -38,6 +38,7 @@ LITE6_PLIANT_SUPPORTED_MODEL_TYPES = (
     Lite6ModelType.ROBOT_WITH_RP_GRIPPER,
 )
 
+LITE6_PLIANT_NAME = "Lite6Pliant"
 
 # Positions desired
 LITE6_PLIANT_PD_IP_NAME = "pd_input"
@@ -94,6 +95,9 @@ class Lite6PliantConfig:
     inverse_dynamics_pid_gains: PIDGains
     plant_config: MultibodyPlantConfig
     object_model_configs: Optional[Sequence[ObjectModelConfig]] = None
+
+    def get_name(self) -> str:
+        return f"{LITE6_PLIANT_NAME}{self.lite6_pliant_type.name.title()}"
 
 
 @contextmanager

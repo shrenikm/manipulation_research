@@ -72,10 +72,12 @@ class Lite6HardwareInterface(LeafSystem):
 
         # Set up the connection to the robot and enable motion.
         self._logger.info("Connecting to the robot ...")
-        self.arm = XArmAPI(
-            port=LITE6_ROBOT_IP,
-            is_radian=True,
-        )
+        #self.arm = XArmAPI(
+        #    port=LITE6_ROBOT_IP,
+        #    is_radian=True,
+        #)
+        import mock
+        self.arm = mock.MagicMock()
         self._logger.info("Connected to the robot!")
 
         self._logger.info("Resetting the robot before start.")
@@ -119,6 +121,8 @@ class Lite6HardwareInterface(LeafSystem):
         print(velocities_desired_vector)
         print(gripper_status_desired)
         print("==========")
+
+        return
 
         # if self.config.lite6_control_type == Lite6ControlType.STATE:
         #    self.arm.set_servo_angle_j(

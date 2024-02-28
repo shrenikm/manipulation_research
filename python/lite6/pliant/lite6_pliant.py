@@ -2,12 +2,7 @@ from typing import Optional, Tuple
 
 import numpy as np
 from pydrake.common.value import Value
-from pydrake.geometry import (
-    Meshcat,
-    MeshcatParams,
-    SceneGraph,
-    StartMeshcat,
-)
+from pydrake.geometry import Meshcat, MeshcatParams, SceneGraph, StartMeshcat
 from pydrake.multibody.parsing import Parser
 from pydrake.multibody.plant import (
     AddMultibodyPlant,
@@ -165,6 +160,7 @@ def create_lite6_pliant_for_hardware(
     )
 
     diagram = builder.Build()
+    diagram.set_name(config.get_name())
 
     return MultibodyPliantContainer(
         diagram=diagram,
@@ -319,6 +315,7 @@ def create_lite6_pliant_for_simulation(
     )
 
     diagram = builder.Build()
+    diagram.set_name(config.get_name())
 
     return MultibodyPliantContainer(
         diagram=diagram,

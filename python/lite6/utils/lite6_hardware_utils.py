@@ -195,7 +195,7 @@ class Lite6HardwareInterface(LeafSystem):
 
         # The xArm API returns a vector of size 7 so we need to drop the last value.
         positions_estimated_vector = np.array(
-            [positions_estimated_list], dtype=np.float64
+            positions_estimated_list, dtype=np.float64
         )[:LITE6_DOF]
 
         output_vector.SetFromVector(
@@ -215,8 +215,9 @@ class Lite6HardwareInterface(LeafSystem):
 
         # The xArm API returns a vector of size 7 so we need to drop the last value.
         velocities_estimated_vector = np.array(
-            [velocities_estimated_list], dtype=np.float64
+            velocities_estimated_list, dtype=np.float64
         )[:LITE6_DOF]
+        print("ve:", velocities_estimated_vector)
 
         output_vector.SetFromVector(
             value=velocities_estimated_vector,

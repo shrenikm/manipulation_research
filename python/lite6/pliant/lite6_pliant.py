@@ -168,9 +168,16 @@ def create_lite6_pliant_for_hardware(
     diagram = builder.Build()
     diagram.set_name(config.get_name())
 
+    def _post_run_hook(pliant_diagram: Diagram) -> None:
+        lite6_hardware_interface = pliant_diagram.GetSubsystemByName(
+            name=Lite6HardwareInterface.get_system_name()
+        )
+        lite6_hardware_interface.reset()
+
     return MultibodyPliantContainer(
         pliant_diagram=diagram,
         plant=main_plant,
+        post_run_hook=_post_run_hook,
     )
 
 

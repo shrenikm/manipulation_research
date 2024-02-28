@@ -53,7 +53,7 @@ def analyze_lite6_pliant(
 
     lite6_pliant: Diagram = builder.AddNamedSystem(
         name="lite6_pliant",
-        system=lite6_pliant_container.diagram,
+        system=lite6_pliant_container.pliant_diagram,
     )
 
     choreographer_controller = builder.AddSystem(
@@ -92,7 +92,7 @@ def analyze_lite6_pliant(
 
     with lite6_pliant_container.auto_meshcat_recording():
         simulator.AdvanceTo(
-            boundary_time=120.0,
+            boundary_time=30.0,
             interruptible=True,
         )
 
@@ -103,7 +103,7 @@ if __name__ == "__main__":
 
     lite6_model_type = Lite6ModelType.ROBOT_WITH_RP_GRIPPER
     lite6_control_type = Lite6ControlType.VELOCITY
-    lite6_pliant_type = Lite6PliantType.SIMULATION
+    lite6_pliant_type = Lite6PliantType.HARDWARE
     inverse_dynamics_pid_gains = PIDGains.from_scalar_gains(
         size=8,
         kp_scalar=100.0,

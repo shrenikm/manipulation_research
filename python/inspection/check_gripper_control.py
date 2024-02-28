@@ -70,7 +70,7 @@ def check_gripper_control(
 
     lite6_pliant: Diagram = builder.AddNamedSystem(
         name="lite6_pliant",
-        system=lite6_pliant_container.diagram,
+        system=lite6_pliant_container.pliant_diagram,
     )
 
     gripper_controller = builder.AddSystem(
@@ -103,12 +103,6 @@ def check_gripper_control(
             boundary_time=6.0,
             interruptible=True,
         )
-
-    # TODO: consolidate.
-    lite6_hardware_interface = lite6_pliant.GetSubsystemByName(
-        name=Lite6HardwareInterface.get_system_name()
-    )
-    lite6_hardware_interface.reset()
 
 
 if __name__ == "__main__":

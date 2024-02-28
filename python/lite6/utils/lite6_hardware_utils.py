@@ -2,7 +2,13 @@ import time
 
 import numpy as np
 from pydrake.common.value import AbstractValue, Value
-from pydrake.systems.framework import BasicVector, Context, EventStatus, LeafSystem
+from pydrake.systems.framework import (
+    BasicVector,
+    Context,
+    DependencyTicket,
+    EventStatus,
+    LeafSystem,
+)
 from xarm.wrapper import XArmAPI
 
 from python.common.logging import MRLogger
@@ -58,16 +64,19 @@ class Lite6HardwareInterface(LeafSystem):
             name=LITE6_HARDWARE_PREFIX + LITE6_PLIANT_PE_OP_NAME,
             size=LITE6_DOF,
             calc=self._compute_positions_estimated_output,
+            prerequisites_of_calc={self.nothing_ticket()},
         )
         self.ve_output_port = self.DeclareVectorOutputPort(
             name=LITE6_HARDWARE_PREFIX + LITE6_PLIANT_VE_OP_NAME,
             size=LITE6_DOF,
             calc=self._compute_velocities_estimated_output,
+            prerequisites_of_calc={self.nothing_ticket()},
         )
         self.gse_output_port = self.DeclareAbstractOutputPort(
             name=LITE6_HARDWARE_PREFIX + LITE6_PLIANT_GSE_OP_NAME,
             alloc=lambda: Value(Lite6GripperStatus.NEUTRAL),
             calc=self._compute_gripper_status_estimated_output,
+            prerequisites_of_calc={self.nothing_ticket()},
         )
 
         # Set up the connection to the robot and enable motion.
@@ -83,9 +92,10 @@ class Lite6HardwareInterface(LeafSystem):
 
         self._logger.info("Resetting the robot before start.")
 
+        self.arm.clean_error()
         self.arm.motion_enable(enable=True)
         self.arm.set_state(state=0)
-        self.arm.reset(wait=True)
+        # self.arm.reset(wait=True)
         # Also stop the gripper
         self.arm.stop_lite6_gripper()
 
@@ -109,12 +119,18 @@ class Lite6HardwareInterface(LeafSystem):
         Reset the arm once we're done using it through the system setup.
         """
         self._logger.info("Resetting the robot after end.")
-        self.arm.stop_lite6_gripper()
-        self.arm.reset(wait=True)
+        # self.arm.reset(wait=True)
         # Instead of disabling motion (which is stressful on the joints/motors), we just set the state to stop
         # so that we don't execute any stray commands by accident.
-        self.arm.set_state(state=4)
+        # self.arm.set_state(state=4)
+
+        self.arm.clean_error()
+        self.arm.motion_enable(enable=True)
+        self.arm.stop_lite6_gripper()
+        self.arm.set_mode(mode=0)
+        self.arm.set_state(state=0)
         time.sleep(1.0)
+        self.arm.move_gohome(wait=True)
 
     def _send_commands(self, context: Context) -> EventStatus:
         positions_desired_vector = self.pd_input_port.Eval(context)
@@ -123,20 +139,27 @@ class Lite6HardwareInterface(LeafSystem):
 
         ret_code = 0
 
-        # if self.config.lite6_control_type == Lite6ControlType.STATE:
-        #    ret_code = self.arm.set_servo_angle_j(
-        #        angles=positions_desired_vector,
-        #        speed=velocities_desired_vector,
-        #        is_radian=True,
-        #    ) or ret_code
-        # elif self.config.lite6_control_type == Lite6ControlType.VELOCITY:
-        #    ret_code = self.arm.vc_set_joint_velocity(
-        #        speeds=velocities_desired_vector,
-        #        is_radian=True,
-        #        # duration=0,
-        #    ) or ret_code
-        # else:
-        #    raise NotImplementedError("Invalid control type")
+        if self.config.lite6_control_type == Lite6ControlType.STATE:
+            ret_code = (
+                self.arm.set_servo_angle_j(
+                    angles=positions_desired_vector,
+                    speed=velocities_desired_vector,
+                    is_radian=True,
+                )
+                or ret_code
+            )
+        elif self.config.lite6_control_type == Lite6ControlType.VELOCITY:
+            velocities_desired_vector[2] = 0.1
+            ret_code = (
+                self.arm.vc_set_joint_velocity(
+                    speeds=velocities_desired_vector,
+                    is_radian=True,
+                    duration=0,
+                )
+                or ret_code
+            )
+        else:
+            raise NotImplementedError("Invalid control type")
 
         if self._gripper_status == gripper_status_desired:
             return EventStatus.Succeeded() if ret_code == 0 else EventStatus.Failed()
@@ -170,8 +193,13 @@ class Lite6HardwareInterface(LeafSystem):
         )
         assert ret_code == 0
 
+        # The xArm API returns a vector of size 7 so we need to drop the last value.
+        positions_estimated_vector = np.array(
+            [positions_estimated_list], dtype=np.float64
+        )[:LITE6_DOF]
+
         output_vector.SetFromVector(
-            value=np.array(positions_estimated_list, dtype=np.float64),
+            value=positions_estimated_vector,
         )
 
     def _compute_velocities_estimated_output(
@@ -180,15 +208,18 @@ class Lite6HardwareInterface(LeafSystem):
         output_vector: BasicVector,
     ) -> None:
 
-        ret_code, positions_estimated_list = self.arm.get_servo_angle(is_radian=True)
-        assert ret_code == 0
-
         ret_code, (_, velocities_estimated_list, _) = self.arm.get_joint_states(
             is_radian=True
         )
+        assert ret_code == 0
+
+        # The xArm API returns a vector of size 7 so we need to drop the last value.
+        velocities_estimated_vector = np.array(
+            [velocities_estimated_list], dtype=np.float64
+        )[:LITE6_DOF]
 
         output_vector.SetFromVector(
-            value=np.array(velocities_estimated_list, dtype=np.float64),
+            value=velocities_estimated_vector,
         )
 
     def _compute_gripper_status_estimated_output(

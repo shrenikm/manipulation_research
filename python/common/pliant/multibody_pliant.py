@@ -1,5 +1,5 @@
 from contextlib import contextmanager
-from typing import Generator, Optional
+from typing import Callable, Generator, Optional
 
 import attr
 from pydrake.geometry import Meshcat, SceneGraph
@@ -18,6 +18,8 @@ class MultibodyPliantContainer:
     scene_graph: Optional[SceneGraph] = None
     meshcat: Optional[Meshcat] = None
 
+    post_run_hook: Optional[Callable[[Diagram], None]] = None
+
     @contextmanager
     def auto_meshcat_recording(self) -> Generator[None, None, None]:
         """
@@ -33,3 +35,7 @@ class MultibodyPliantContainer:
         if self.meshcat is not None:
             self.meshcat.StopRecording()
             self.meshcat.PublishRecording()
+
+        # Post hook
+        if self.post_run_hook is not None:
+            self.post_run_hook(self.pliant_diagram)

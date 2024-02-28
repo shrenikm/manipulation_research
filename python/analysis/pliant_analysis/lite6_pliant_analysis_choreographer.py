@@ -200,19 +200,24 @@ class Lite6PliantChoreographerController(LeafSystem):
                 == len(self._estimated_velocities_map[joint_index])
             )
             num_sections = len(self._times_map[joint_index])
-            fig, axes = plt.subplots(
-                *self._get_subplots_size_for_num_sections(num_sections=num_sections)
+            nrows, ncols = self._get_subplots_size_for_num_sections(
+                num_sections=num_sections
             )
-            # Flattening axes as it returns a nested 2d list smh.
-            axes = [ax for axes_row in axes for ax in axes_row]
-            fig.suptitle("Choreographer Analysis Plots")
+            fig, axes = plt.subplots(
+                nrows=nrows,
+                ncols=ncols,
+            )
+            # Flattening axes if it returns a nested 2d list.
+            if nrows > 1:
+                axes = [ax for axes_row in axes for ax in axes_row]
+            fig.suptitle(f"Choreographer Analysis Plots - Joint {joint_index + 1}")
             for section_index in range(num_sections):
                 ax = axes[section_index]
                 t = self._times_map[joint_index][section_index]
                 tv = self._target_velocities_map[joint_index][section_index]
                 ev = self._estimated_velocities_map[joint_index][section_index]
 
-                ax.set_title(f"Joint {joint_index + 1}/{self.num_choreographed_joints}")
+                ax.set_title(f"Section {section_index + 1}/{num_sections}")
                 ax.plot(t, tv, color="blue", label="Target velocities")
                 ax.plot(t, ev, color="orange", label="Estimated velocities")
                 ax.set_xlabel("t (sec)")

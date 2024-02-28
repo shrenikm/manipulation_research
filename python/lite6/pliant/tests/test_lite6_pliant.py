@@ -1,5 +1,6 @@
 import pytest
-from pydrake.multibody.plant import MultibodyPlantConfig
+from pydrake.multibody.plant import MultibodyPlant, MultibodyPlantConfig
+from pydrake.systems.framework import Diagram
 
 from python.common.control.constructs import PIDGains
 from python.common.testing_utils import execute_pytest_file
@@ -78,7 +79,11 @@ def test_create_lite6_pliant_with_supported_type(
         plant_config=MultibodyPlantConfig(time_step=0.001),
     )
 
-    create_lite6_pliant(config=config)
+    pliant = create_lite6_pliant(config=config)
+
+    # TODO: Better tests.
+    assert isinstance(pliant.diagram, Diagram)
+    assert isinstance(pliant.plant, MultibodyPlant)
 
 
 if __name__ == "__main__":

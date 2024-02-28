@@ -13,6 +13,6 @@ class MultibodyPliantContainer:
     """
 
     diagram: Diagram
-    plant: Optional[MultibodyPlant] = None
+    plant: MultibodyPlant
     scene_graph: Optional[SceneGraph] = None
     meshcat: Optional[MeshcatVisualizer] = None

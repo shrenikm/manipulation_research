@@ -38,7 +38,7 @@ class Lite6HardwareInterface(LeafSystem):
         self._logger = MRLogger(self.__class__.__name__)
 
         # Declare a per step event to send the commands.
-        #self.DeclarePerStepPublishEvent(publish=self._send_commands)
+        self.DeclarePerStepPublishEvent(publish=self._send_commands)
 
         # Declare input and output ports.
         self.pd_input_port = self.DeclareVectorInputPort(
@@ -120,19 +120,19 @@ class Lite6HardwareInterface(LeafSystem):
         print(gripper_status_desired)
         print("==========")
 
-        #if self.config.lite6_control_type == Lite6ControlType.STATE:
+        # if self.config.lite6_control_type == Lite6ControlType.STATE:
         #    self.arm.set_servo_angle_j(
         #        angles=positions_desired_vector,
         #        speed=velocities_desired_vector,
         #        is_radian=True,
         #    )
-        #elif self.config.lite6_control_type == Lite6ControlType.VELOCITY:
+        # elif self.config.lite6_control_type == Lite6ControlType.VELOCITY:
         #    self.arm.vc_set_joint_velocity(
         #        speeds=velocities_desired_vector,
         #        is_radian=True,
         #        # duration=0,
         #    )
-        #else:
+        # else:
         #    raise NotImplementedError("Invalid control type")
 
         if gripper_status_desired == Lite6GripperStatus.CLOSED:

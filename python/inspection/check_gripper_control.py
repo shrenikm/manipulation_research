@@ -42,6 +42,7 @@ class GripperCheckController(LeafSystem):
         context: Context,
         output_value: AbstractValue,
     ) -> None:
+        print(context.get_time())
 
         partition = context.get_time() // self.check_time_s
         if partition % 2 == 0:
@@ -94,6 +95,8 @@ def check_gripper_control(
             set_visualizations_while_recording=False
         )
 
+    simulator.set_target_realtime_rate(1.)
+    print(simulator.get_target_realtime_rate())
     simulator.AdvanceTo(
         boundary_time=20.0,
         interruptible=True,
@@ -107,7 +110,7 @@ if __name__ == "__main__":
 
     lite6_model_type = Lite6ModelType.ROBOT_WITH_RP_GRIPPER
     lite6_control_type = Lite6ControlType.VELOCITY
-    lite6_pliant_type = Lite6PliantType.SIMULATION
+    lite6_pliant_type = Lite6PliantType.HARDWARE
     inverse_dynamics_pid_gains = PIDGains.from_scalar_gains(
         size=8,
         kp_scalar=100.0,

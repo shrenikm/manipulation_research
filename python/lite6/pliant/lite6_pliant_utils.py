@@ -16,6 +16,7 @@ from python.lite6.utils.lite6_model_utils import (
     Lite6GripperStatus,
     Lite6ModelType,
     Lite6PliantType,
+    add_gripper_positions_and_velocities_to_lite6_state,
     create_lite6_state,
     get_gripper_status_from_lite6_state,
     get_joint_positions_from_lite6_state,
@@ -166,6 +167,13 @@ class Lite6PliantMultiplexer(LeafSystem):
             )
         else:
             raise NotImplementedError
+
+        # If the desired gripper position is neutral,
+        #state_output_vector = add_gripper_positions_and_velocities_to_lite6_state(
+        #    lite6_model_type=self.config.lite6_model_type,
+        #    state_vector=state_output_vector,
+        #    gripper_positions=
+        #)
 
         output_vector.SetFromVector(
             value=state_output_vector,

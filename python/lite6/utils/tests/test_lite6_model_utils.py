@@ -13,7 +13,9 @@ from python.lite6.utils.lite6_model_utils import (
     add_joint_velocities_to_lite6_state,
     create_lite6_state,
     get_drake_lite6_urdf_path,
+    get_gripper_positions_from_lite6_state,
     get_gripper_status_from_lite6_state,
+    get_gripper_velocities_from_lite6_state,
     get_joint_positions_from_lite6_state,
     get_joint_velocities_from_lite6_state,
     get_lite6_num_actuators,
@@ -280,13 +282,33 @@ def test_add_gripper_status_to_lite6_state() -> None:
         state_vector_initial = np.arange(0, 16, dtype=np.float64)
         state_vector = np.copy(state_vector_initial)
 
-        # Undefined isn't allowed.
-        with pytest.raises(AssertionError):
-            add_gripper_status_to_lite6_state(
-                lite6_model_type=lite6_model_type,
-                state_vector=state_vector,
-                lite6_gripper_status=Lite6GripperStatus.NEUTRAL,
-            )
+        # For neutral, the gripper positions must be zero.
+        new_state_vector = add_gripper_status_to_lite6_state(
+            lite6_model_type=lite6_model_type,
+            state_vector=state_vector,
+            lite6_gripper_status=Lite6GripperStatus.NEUTRAL,
+        )
+        np.testing.assert_array_equal(
+            new_state_vector,
+            [
+                0.0,
+                1.0,
+                2.0,
+                3.0,
+                4.0,
+                5.0,
+                0.0,
+                0.0,
+                8.0,
+                9.0,
+                10.0,
+                11.0,
+                12.0,
+                13.0,
+                0.0,
+                0.0,
+            ],
+        )
 
         lite6_gripper_status = Lite6GripperStatus.CLOSED
         new_state_vector = add_gripper_status_to_lite6_state(
@@ -294,6 +316,7 @@ def test_add_gripper_status_to_lite6_state() -> None:
             state_vector=state_vector,
             lite6_gripper_status=lite6_gripper_status,
         )
+
         # No mutation test.
         np.testing.assert_array_equal(state_vector_initial, state_vector)
         # Test values of the new state vector.
@@ -492,6 +515,68 @@ def test_get_joint_velocities_from_lite6_state() -> None:
             positions_vector,
             [8.0, 9.0, 10.0, 11.0, 12.0, 13.0],
         )
+
+
+def test_get_gripper_positions_from_lite6_state() -> None:
+    # Test for non supported model types.
+    for lite6_model_type in (
+        Lite6ModelType.NP_GRIPPER,
+        Lite6ModelType.RP_GRIPPER,
+        Lite6ModelType.V_GRIPPER,
+        Lite6ModelType.ROBOT_WITH_V_GRIPPER,
+        Lite6ModelType.ROBOT_WITHOUT_GRIPPER,
+    ):
+        with pytest.raises(AssertionError):
+            get_gripper_positions_from_lite6_state(
+                lite6_model_type=lite6_model_type,
+                state_vector=np.zeros(12),
+            )
+
+    for lite6_model_type in (
+        Lite6ModelType.ROBOT_WITH_NP_GRIPPER,
+        Lite6ModelType.ROBOT_WITH_RP_GRIPPER,
+    ):
+        state_vector = np.arange(0, 16, dtype=np.float64)
+
+        gripper_positions = get_gripper_positions_from_lite6_state(
+            lite6_model_type=lite6_model_type,
+            state_vector=state_vector,
+        )
+        assert isinstance(gripper_positions, tuple)
+        assert len(gripper_positions) == 2
+        np.testing.assert_array_equal(gripper_positions[0], 6.0)
+        np.testing.assert_array_equal(gripper_positions[1], 7.0)
+
+
+def test_get_gripper_velocities_from_lite6_state() -> None:
+    # Test for non supported model types.
+    for lite6_model_type in (
+        Lite6ModelType.NP_GRIPPER,
+        Lite6ModelType.RP_GRIPPER,
+        Lite6ModelType.V_GRIPPER,
+        Lite6ModelType.ROBOT_WITH_V_GRIPPER,
+        Lite6ModelType.ROBOT_WITHOUT_GRIPPER,
+    ):
+        with pytest.raises(AssertionError):
+            get_gripper_velocities_from_lite6_state(
+                lite6_model_type=lite6_model_type,
+                state_vector=np.zeros(12),
+            )
+
+    for lite6_model_type in (
+        Lite6ModelType.ROBOT_WITH_NP_GRIPPER,
+        Lite6ModelType.ROBOT_WITH_RP_GRIPPER,
+    ):
+        state_vector = np.arange(0, 16, dtype=np.float64)
+
+        gripper_velocities = get_gripper_velocities_from_lite6_state(
+            lite6_model_type=lite6_model_type,
+            state_vector=state_vector,
+        )
+        assert isinstance(gripper_velocities, tuple)
+        assert len(gripper_velocities) == 2
+        np.testing.assert_array_equal(gripper_velocities[0], 14.0)
+        np.testing.assert_array_equal(gripper_velocities[1], 15.0)
 
 
 def test_get_gripper_status_from_lite6_state() -> None:

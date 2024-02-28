@@ -30,7 +30,6 @@ from python.lite6.pliant.lite6_pliant_utils import (
     LITE6_PLIANT_VD_IP_NAME,
     LITE6_PLIANT_VE_OP_NAME,
     Lite6PliantConfig,
-    auto_meshcat_recording,
     create_simulator_for_lite6_pliant,
 )
 from python.lite6.utils.lite6_model_utils import (
@@ -91,10 +90,7 @@ def analyze_lite6_pliant(
 
     diagram.ForcedPublish(simulator_context)
 
-    with auto_meshcat_recording(
-        config=config,
-        meshcat=lite6_pliant_container.meshcat,
-    ):
+    with lite6_pliant_container.auto_meshcat_recording():
         simulator.AdvanceTo(
             boundary_time=120.0,
             interruptible=True,

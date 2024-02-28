@@ -1,5 +1,5 @@
 from contextlib import contextmanager
-from typing import Optional
+from typing import Generator, Optional
 
 import attr
 from pydrake.geometry import Meshcat, SceneGraph
@@ -17,3 +17,19 @@ class MultibodyPliantContainer:
     plant: MultibodyPlant
     scene_graph: Optional[SceneGraph] = None
     meshcat: Optional[Meshcat] = None
+
+    @contextmanager
+    def auto_meshcat_recording(self) -> Generator[None, None, None]:
+        """
+        Sets up meshcat recording if a meshcat instance is given.
+
+        Usage:
+            with container.auto_meshcat_recording():
+                simulator.AdvanceTo(...)
+        """
+        if self.meshcat is not None:
+            self.meshcat.StartRecording(set_visualizations_while_recording=False)
+        yield
+        if self.meshcat is not None:
+            self.meshcat.StopRecording()
+            self.meshcat.PublishRecording()

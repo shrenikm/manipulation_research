@@ -100,27 +100,6 @@ class Lite6PliantConfig:
         return f"{LITE6_PLIANT_NAME}{self.lite6_pliant_type.name.title()}"
 
 
-@contextmanager
-def auto_meshcat_recording(
-    config: Lite6PliantConfig,
-    meshcat: Optional[Meshcat] = None,
-) -> Generator[None, None, None]:
-    """
-    Sets up meshcat recording if the pliant type is SIMULATION.
-    Nothing is done for HARDWARE.
-
-    Usage:
-        with auto_meshcat_recording(config, meshcat):
-            simulator.AdvanceTo(...)
-    """
-    if config.lite6_pliant_type == Lite6PliantType.SIMULATION and meshcat is not None:
-        meshcat.StartRecording(set_visualizations_while_recording=False)
-    yield
-    if config.lite6_pliant_type == Lite6PliantType.SIMULATION and meshcat is not None:
-        meshcat.StopRecording()
-        meshcat.PublishRecording()
-
-
 def create_simulator_for_lite6_pliant(
     config: Lite6PliantConfig,
     diagram: Diagram,

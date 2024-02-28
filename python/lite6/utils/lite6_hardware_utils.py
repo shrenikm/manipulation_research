@@ -72,12 +72,13 @@ class Lite6HardwareInterface(LeafSystem):
 
         # Set up the connection to the robot and enable motion.
         self._logger.info("Connecting to the robot ...")
-        #self.arm = XArmAPI(
-        #    port=LITE6_ROBOT_IP,
-        #    is_radian=True,
-        #)
-        import mock
-        self.arm = mock.MagicMock()
+        # import mock
+        # self.arm = mock.MagicMock()
+        self.arm = XArmAPI(
+            port=LITE6_ROBOT_IP,
+            is_radian=True,
+        )
+
         self._logger.info("Connected to the robot!")
 
         self._logger.info("Resetting the robot before start.")
@@ -122,29 +123,32 @@ class Lite6HardwareInterface(LeafSystem):
         print(gripper_status_desired)
         print("==========")
 
-        return
+        ret_code = 0
 
         # if self.config.lite6_control_type == Lite6ControlType.STATE:
-        #    self.arm.set_servo_angle_j(
+        #    ret_code = self.arm.set_servo_angle_j(
         #        angles=positions_desired_vector,
         #        speed=velocities_desired_vector,
         #        is_radian=True,
-        #    )
+        #    ) or ret_code
         # elif self.config.lite6_control_type == Lite6ControlType.VELOCITY:
-        #    self.arm.vc_set_joint_velocity(
+        #    ret_code = self.arm.vc_set_joint_velocity(
         #        speeds=velocities_desired_vector,
         #        is_radian=True,
         #        # duration=0,
-        #    )
+        #    ) or ret_code
         # else:
         #    raise NotImplementedError("Invalid control type")
 
+        if self._gripper_status == gripper_status_desired:
+            return EventStatus.Succeeded() if ret_code == 0 else EventStatus.Failed()
+
         if gripper_status_desired == Lite6GripperStatus.CLOSED:
-            ret_code = self.arm.close_lite6_gripper()
+            ret_code = self.arm.close_lite6_gripper() or ret_code
         elif gripper_status_desired == Lite6GripperStatus.OPEN:
-            ret_code = self.arm.open_lite6_gripper()
+            ret_code = self.arm.open_lite6_gripper() or ret_code
         elif gripper_status_desired == Lite6GripperStatus.NEUTRAL:
-            ret_code = self.arm.stop_lite6_gripper()
+            ret_code = self.arm.stop_lite6_gripper() or ret_code
         else:
             raise NotImplementedError("Invalid desired gripper status")
 
@@ -152,9 +156,9 @@ class Lite6HardwareInterface(LeafSystem):
             self._gripper_status = gripper_status_desired
             return EventStatus.Succeeded()
         else:
-            self._logger.info(
-                f"Warning: Failed to set gripper to {gripper_status_desired}"
-            )
+            #self._logger.info(
+            #    f"Warning: Failed to set gripper to {gripper_status_desired}"
+            #)
             return EventStatus.Failed()
 
     def _compute_positions_estimated_output(

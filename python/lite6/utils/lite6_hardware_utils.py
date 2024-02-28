@@ -23,7 +23,7 @@ from python.lite6.utils.lite6_model_utils import (
 
 LITE6_ROBOT_IP = "192.168.1.178"
 
-LITE6_HARDWARE_PREFIX = "HARDWARE_"
+LITE6_HARDWARE_PREFIX = "hardware_"
 
 
 class Lite6HardwareInterface(LeafSystem):
@@ -100,7 +100,11 @@ class Lite6HardwareInterface(LeafSystem):
             raise NotImplementedError("Invalid control type")
         time.sleep(1.0)
 
-    def __del__(self):
+    @staticmethod
+    def get_system_name() -> str:
+        return "lite6_hardware_interface"
+
+    def reset(self):
         """
         Reset the arm once we're done using it through the system setup.
         """
@@ -116,12 +120,6 @@ class Lite6HardwareInterface(LeafSystem):
         positions_desired_vector = self.pd_input_port.Eval(context)
         velocities_desired_vector = self.vd_input_port.Eval(context)
         gripper_status_desired = self.gsd_input_port.Eval(context)
-
-        print("==========")
-        print(positions_desired_vector)
-        print(velocities_desired_vector)
-        print(gripper_status_desired)
-        print("==========")
 
         ret_code = 0
 
@@ -156,9 +154,9 @@ class Lite6HardwareInterface(LeafSystem):
             self._gripper_status = gripper_status_desired
             return EventStatus.Succeeded()
         else:
-            #self._logger.info(
+            # self._logger.info(
             #    f"Warning: Failed to set gripper to {gripper_status_desired}"
-            #)
+            # )
             return EventStatus.Failed()
 
     def _compute_positions_estimated_output(

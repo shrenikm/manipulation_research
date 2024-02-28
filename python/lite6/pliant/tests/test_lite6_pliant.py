@@ -9,12 +9,9 @@ from python.lite6.pliant.lite6_pliant_utils import (
     LITE6_PLIANT_SUPPORTED_MODEL_TYPES,
     Lite6ControlType,
     Lite6PliantConfig,
-)
-from python.lite6.utils.lite6_model_utils import (
-    Lite6ModelType,
     Lite6PliantType,
-    get_lite6_num_positions,
 )
+from python.lite6.utils.lite6_model_utils import Lite6ModelType, get_lite6_num_positions
 
 
 @pytest.mark.parametrize(

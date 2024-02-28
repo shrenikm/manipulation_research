@@ -33,12 +33,12 @@ from python.lite6.pliant.lite6_pliant_utils import (
     Lite6PliantConfig,
     Lite6PliantDeMultiplexer,
     Lite6PliantMultiplexer,
+    Lite6PliantType,
 )
 from python.lite6.utils.lite6_hardware_utils import Lite6HardwareInterface
 from python.lite6.utils.lite6_model_utils import (
     LITE6_DOF,
     Lite6GripperStatus,
-    Lite6PliantType,
     add_lite6_model_to_plant,
 )
 
@@ -84,25 +84,25 @@ def create_lite6_pliant_for_hardware(
 ) -> MultibodyPliantContainer:
     builder: DiagramBuilder = DiagramBuilder()
 
-    #main_plant: MultibodyPlant
-    #main_plant, _ = AddMultibodyPlant(
+    # main_plant: MultibodyPlant
+    # main_plant, _ = AddMultibodyPlant(
     #    config=config.plant_config,
     #    builder=builder,
-    #)
+    # )
 
-    #if config.plant_config is not None:
+    # if config.plant_config is not None:
     #    ApplyMultibodyPlantConfig(config.plant_config, main_plant)
 
     ## Load the model
-    #add_lite6_model_to_plant(
+    # add_lite6_model_to_plant(
     #    plant=main_plant,
     #    lite6_model_type=config.lite6_model_type,
     #    place_on_table=True,
-    #)
-    #add_object_models_to_plant(
+    # )
+    # add_object_models_to_plant(
     #    plant=main_plant,
     #    object_model_configs=config.object_model_configs,
-    #)
+    # )
 
     main_plant, _ = AddMultibodyPlant(
         config=config.plant_config,
@@ -120,8 +120,9 @@ def create_lite6_pliant_for_hardware(
         builder=builder,
     )
 
-    lite6_hardware_interface = builder.AddSystem(
-        Lite6HardwareInterface(config=config),
+    lite6_hardware_interface = builder.AddNamedSystem(
+        name=Lite6HardwareInterface.get_system_name(),
+        system=Lite6HardwareInterface(config=config),
     )
 
     # Connections.

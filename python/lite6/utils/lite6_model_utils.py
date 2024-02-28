@@ -49,15 +49,6 @@ LITE6_RP_GRIPPER_CLOSED_POSITIONS = (0.0, 0.0)
 LITE6_TABLE_HEIGHT = 0.7366
 
 
-class Lite6PliantType(Enum):
-    """
-    Simulation or Hardware pliant type.
-    """
-
-    SIMULATION = auto()
-    HARDWARE = auto()
-
-
 class Lite6ControlType(Enum):
     # Control both q and qdot -- Specify what joint angles to reach and how fast
     # Each joint should move.

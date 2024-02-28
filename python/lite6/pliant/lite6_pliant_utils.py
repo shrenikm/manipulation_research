@@ -1,5 +1,5 @@
 from contextlib import contextmanager
-from enum import Enum
+from enum import Enum, auto
 from typing import Generator, Optional, Sequence
 
 import attr
@@ -18,7 +18,6 @@ from python.lite6.utils.lite6_model_utils import (
     Lite6ControlType,
     Lite6GripperStatus,
     Lite6ModelType,
-    Lite6PliantType,
     add_gripper_positions_and_velocities_to_lite6_state,
     create_lite6_state,
     get_gripper_positions_from_lite6_state,
@@ -85,6 +84,15 @@ LITE6_PLIANT_MULTIPLEXER_VE_OP_NAME = (
 LITE6_PLIANT_MULTIPLEXER_GSE_OP_NAME = (
     LITE6_PLIANT_MULTIPLEXER_PREFIX + LITE6_PLIANT_GSE_OP_NAME
 )
+
+
+class Lite6PliantType(Enum):
+    """
+    Simulation or Hardware pliant type.
+    """
+
+    SIMULATION = auto()
+    HARDWARE = auto()
 
 
 @attr.frozen

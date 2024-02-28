@@ -30,13 +30,13 @@ from python.lite6.pliant.lite6_pliant_utils import (
     LITE6_PLIANT_VD_IP_NAME,
     LITE6_PLIANT_VE_OP_NAME,
     Lite6PliantConfig,
+    Lite6PliantType,
     create_simulator_for_lite6_pliant,
 )
 from python.lite6.utils.lite6_model_utils import (
     Lite6ControlType,
     Lite6GripperStatus,
     Lite6ModelType,
-    Lite6PliantType,
 )
 
 

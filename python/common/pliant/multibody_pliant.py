@@ -1,7 +1,8 @@
+from contextlib import contextmanager
 from typing import Optional
 
 import attr
-from pydrake.geometry import MeshcatVisualizer, SceneGraph
+from pydrake.geometry import Meshcat, SceneGraph
 from pydrake.multibody.plant import MultibodyPlant
 from pydrake.systems.framework import Diagram
 
@@ -15,4 +16,4 @@ class MultibodyPliantContainer:
     diagram: Diagram
     plant: MultibodyPlant
     scene_graph: Optional[SceneGraph] = None
-    meshcat: Optional[MeshcatVisualizer] = None
+    meshcat: Optional[Meshcat] = None

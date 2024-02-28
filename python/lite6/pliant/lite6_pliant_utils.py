@@ -1,11 +1,14 @@
+from contextlib import contextmanager
 from enum import Enum
-from typing import Optional, Sequence
+from typing import Generator, Optional, Sequence
 
 import attr
 import numpy as np
 from pydrake.common.value import AbstractValue, Value
+from pydrake.geometry import Meshcat
 from pydrake.multibody.plant import MultibodyPlantConfig
-from pydrake.systems.framework import BasicVector, Context, LeafSystem
+from pydrake.systems.analysis import Simulator
+from pydrake.systems.framework import BasicVector, Context, Diagram, LeafSystem
 
 from python.common.class_utils import StrEnum
 from python.common.control.constructs import PIDGains
@@ -18,7 +21,9 @@ from python.lite6.utils.lite6_model_utils import (
     Lite6PliantType,
     add_gripper_positions_and_velocities_to_lite6_state,
     create_lite6_state,
+    get_gripper_positions_from_lite6_state,
     get_gripper_status_from_lite6_state,
+    get_gripper_velocities_from_lite6_state,
     get_joint_positions_from_lite6_state,
     get_joint_velocities_from_lite6_state,
     get_lite6_num_positions,
@@ -89,6 +94,45 @@ class Lite6PliantConfig:
     inverse_dynamics_pid_gains: PIDGains
     plant_config: MultibodyPlantConfig
     object_model_configs: Optional[Sequence[ObjectModelConfig]] = None
+
+
+@contextmanager
+def auto_meshcat_recording(
+    config: Lite6PliantConfig,
+    meshcat: Optional[Meshcat] = None,
+) -> Generator[None, None, None]:
+    """
+    Sets up meshcat recording if the pliant type is SIMULATION.
+    Nothing is done for HARDWARE.
+
+    Usage:
+        with auto_meshcat_recording(config, meshcat):
+            simulator.AdvanceTo(...)
+    """
+    if config.lite6_pliant_type == Lite6PliantType.SIMULATION and meshcat is not None:
+        meshcat.StartRecording(set_visualizations_while_recording=False)
+    yield
+    if config.lite6_pliant_type == Lite6PliantType.SIMULATION and meshcat is not None:
+        meshcat.StopRecording()
+        meshcat.PublishRecording()
+
+
+def create_simulator_for_lite6_pliant(
+    config: Lite6PliantConfig,
+    diagram: Diagram,
+) -> Simulator:
+    """
+    Note that diagram here isn't the diagram of the pliant, but rather the
+    diagram of the entire setup including external controllers, planners, etc.
+    """
+    simulator = Simulator(diagram)
+    # Set the rate to 1. for hardware testing on the actual robot.
+    if config.lite6_pliant_type == Lite6PliantType.HARDWARE:
+        simulator.set_target_realtime_rate(realtime_rate=1.0)
+
+    # TODO: Optionally set other simulator config options here.
+
+    return simulator
 
 
 class Lite6PliantMultiplexer(LeafSystem):
@@ -168,12 +212,23 @@ class Lite6PliantMultiplexer(LeafSystem):
         else:
             raise NotImplementedError
 
-        # If the desired gripper position is neutral,
-        #state_output_vector = add_gripper_positions_and_velocities_to_lite6_state(
-        #    lite6_model_type=self.config.lite6_model_type,
-        #    state_vector=state_output_vector,
-        #    gripper_positions=
-        #)
+        # If the desired gripper position is neutral, we need to avoid actuating
+        # the parallel gripper joints. To do this, we set the output state of the
+        # gripper, the same as the estimated state so that the inverse dynamics
+        # controller will cancel them out.
+        if gripper_status_desired == Lite6GripperStatus.NEUTRAL:
+            state_output_vector = add_gripper_positions_and_velocities_to_lite6_state(
+                lite6_model_type=self.config.lite6_model_type,
+                state_vector=state_output_vector,
+                gripper_positions=get_gripper_positions_from_lite6_state(
+                    lite6_model_type=self.config.lite6_model_type,
+                    state_vector=state_estimated_vector,
+                ),
+                gripper_velocities=get_gripper_velocities_from_lite6_state(
+                    lite6_model_type=self.config.lite6_model_type,
+                    state_vector=state_estimated_vector,
+                ),
+            )
 
         output_vector.SetFromVector(
             value=state_output_vector,

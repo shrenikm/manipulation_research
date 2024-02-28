@@ -30,6 +30,8 @@ from python.lite6.pliant.lite6_pliant_utils import (
     LITE6_PLIANT_VD_IP_NAME,
     LITE6_PLIANT_VE_OP_NAME,
     Lite6PliantConfig,
+    auto_meshcat_recording,
+    create_simulator_for_lite6_pliant,
 )
 from python.lite6.utils.lite6_model_utils import (
     Lite6ControlType,
@@ -54,7 +56,6 @@ def analyze_lite6_pliant(
         name="lite6_pliant",
         system=lite6_pliant_container.diagram,
     )
-    meshcat = lite6_pliant_container.meshcat
 
     choreographer_controller = builder.AddSystem(
         Lite6PliantChoreographerController(
@@ -77,7 +78,10 @@ def analyze_lite6_pliant(
     )
 
     diagram = builder.Build()
-    simulator = Simulator(diagram)
+    simulator = create_simulator_for_lite6_pliant(
+        config=config,
+        diagram=diagram,
+    )
     simulator_context = simulator.get_mutable_context()
     lite6_pliant_context = lite6_pliant.GetMyContextFromRoot(simulator_context)
 
@@ -87,12 +91,14 @@ def analyze_lite6_pliant(
 
     diagram.ForcedPublish(simulator_context)
 
-    meshcat.StartRecording(set_visualizations_while_recording=False)
-    simulator.AdvanceTo(
-        boundary_time=120.0,
-        interruptible=True,
-    )
-    meshcat.PublishRecording()
+    with auto_meshcat_recording(
+        config=config,
+        meshcat=lite6_pliant_container.meshcat,
+    ):
+        simulator.AdvanceTo(
+            boundary_time=120.0,
+            interruptible=True,
+        )
 
     choreographer_controller.plot_recordings()
 

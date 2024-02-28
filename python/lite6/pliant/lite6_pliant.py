@@ -5,7 +5,6 @@ from pydrake.common.value import Value
 from pydrake.geometry import (
     Meshcat,
     MeshcatParams,
-    MeshcatVisualizer,
     SceneGraph,
     StartMeshcat,
 )

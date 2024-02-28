@@ -30,7 +30,7 @@ joint1_choreograph:
   section4:
     start_time_delay: 1.
     end_time_delay: 1.
-    active_time: 2.
+    active_time: 1.75
     start_joint_positions: [1.5, 1.57, 3.14, 0., 0., 0.]
     control_signal:
       type: "step"

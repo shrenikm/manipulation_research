@@ -8,7 +8,7 @@ import attr
 import matplotlib.pyplot as plt
 import numpy as np
 import yaml
-from pydrake.systems.framework import BasicVector, Context, LeafSystem
+from pydrake.systems.framework import BasicVector, Context, EventStatus, LeafSystem
 
 from python.common.control.signals import (
     ControlSignal,
@@ -74,6 +74,7 @@ class Lite6PliantChoreographer:
         with open(file=yaml_filepath, mode="r") as stream:
             parsed_yaml = yaml.safe_load(stream=stream)
         jcs = []
+        # TODO: Validate joint index duplicates?
         for jcs_dict in parsed_yaml.values():
             joint_index = jcs_dict.pop("joint_index")
             sections = []
@@ -208,6 +209,8 @@ class Lite6PliantChoreographerController(LeafSystem):
                 ncols=ncols,
             )
             # Flattening axes if it returns a nested 2d list.
+            if nrows == 1 and ncols == 1:
+                axes = [axes]
             if nrows > 1:
                 axes = [ax for axes_row in axes for ax in axes_row]
             fig.suptitle(f"Choreographer Analysis Plots - Joint {joint_index + 1}")
@@ -225,6 +228,9 @@ class Lite6PliantChoreographerController(LeafSystem):
 
             plt.tight_layout()
             plt.show()
+
+    def is_done(self) -> bool:
+        return self._done
 
     def _compute_control_velocities_output(
         self,

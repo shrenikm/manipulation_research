@@ -1,11 +1,12 @@
 from typing import Optional, Sequence
 
 import numpy as np
+from attr.setters import frozen
 from pydrake.all import DiagramBuilder, StartMeshcat
 from pydrake.common.value import Value
 from pydrake.multibody.plant import MultibodyPlantConfig
 from pydrake.systems.analysis import Simulator
-from pydrake.systems.framework import Diagram, System
+from pydrake.systems.framework import Context, Diagram, EventStatus, System
 from pydrake.visualization import (
     AddDefaultVisualization,
     ApplyVisualizationConfig,
@@ -90,9 +91,20 @@ def analyze_lite6_pliant(
 
     diagram.ForcedPublish(simulator_context)
 
+    def f(*_):
+        if choreographer_controller.is_done():
+            return EventStatus.ReachedTermination(
+                diagram, "Choreography and recording done!"
+            )
+
+    # Monitor to stop the simulation after choreography is done.
+    simulator.set_monitor(
+        monitor=f,
+    )
+
     with lite6_pliant_container.auto_meshcat_recording():
         simulator.AdvanceTo(
-            boundary_time=120.0,
+            boundary_time=np.inf,
             interruptible=True,
         )
 
@@ -103,7 +115,7 @@ if __name__ == "__main__":
 
     lite6_model_type = Lite6ModelType.ROBOT_WITH_RP_GRIPPER
     lite6_control_type = Lite6ControlType.VELOCITY
-    lite6_pliant_type = Lite6PliantType.HARDWARE
+    lite6_pliant_type = Lite6PliantType.SIMULATION
     inverse_dynamics_pid_gains = PIDGains.from_scalar_gains(
         size=8,
         kp_scalar=100.0,

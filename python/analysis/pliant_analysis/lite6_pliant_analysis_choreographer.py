@@ -322,7 +322,7 @@ class Lite6PliantChoreographerController(LeafSystem):
                 self._current_recorded_estimated_velocities = np.hstack(
                     (
                         self._current_recorded_estimated_velocities,
-                        ve_vector[self._current_joint_ind],
+                        ve_vector[joint_index],
                     )
                 )
 

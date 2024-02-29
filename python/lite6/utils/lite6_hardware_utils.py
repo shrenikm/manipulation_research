@@ -97,13 +97,14 @@ class Lite6HardwareInterface(LeafSystem):
 
         # Set up the connection to the robot and enable motion.
         self._logger.info("Connecting to the robot ...")
-        import mock
 
-        self.arm = mock.MagicMock()
-        # self.arm = XArmAPI(
-        #    port=LITE6_ROBOT_IP,
-        #    is_radian=True,
-        # )
+        # import mock
+        # self.arm = mock.MagicMock()
+
+        self.arm = XArmAPI(
+            port=LITE6_ROBOT_IP,
+            is_radian=True,
+        )
 
         self._logger.info("Connected to the robot!")
 
@@ -112,9 +113,7 @@ class Lite6HardwareInterface(LeafSystem):
         self.arm.clean_error()
         self.arm.motion_enable(enable=True)
         self.arm.set_state(state=0)
-        # self.arm.reset(wait=True)
-        # Also stop the gripper
-        self.arm.stop_lite6_gripper()
+        self.arm.reset(wait=True)
 
         # Set the mode depending on the type of control.
         if self.config.lite6_control_type == Lite6ControlType.STATE:
@@ -125,10 +124,15 @@ class Lite6HardwareInterface(LeafSystem):
             self.arm.set_mode(mode=4)
         else:
             raise NotImplementedError("Invalid control type")
+
+        # Also stop the gripper
+        self.arm.stop_lite6_gripper()
         time.sleep(1.0)
 
     def _estimate_lite6_state(
-        self, context: Context, discrete_state: DiscreteValues
+        self,
+        context: Context,
+        discrete_state: DiscreteValues,
     ) -> None:
         ret_code, (
             positions_estimated_list,
@@ -166,11 +170,12 @@ class Lite6HardwareInterface(LeafSystem):
 
         self.arm.clean_error()
         self.arm.motion_enable(enable=True)
-        self.arm.stop_lite6_gripper()
         self.arm.set_mode(mode=0)
         self.arm.set_state(state=0)
         time.sleep(1.0)
         self.arm.move_gohome(wait=True)
+        self.arm.stop_lite6_gripper()
+        time.sleep(1.0)
 
     def _send_commands(self, context: Context) -> EventStatus:
         positions_desired_vector = self.pd_input_port.Eval(context)

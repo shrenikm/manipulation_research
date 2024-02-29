@@ -99,7 +99,7 @@ def check_gripper_control(
 
     with lite6_pliant_container.auto_meshcat_recording():
         simulator.AdvanceTo(
-            boundary_time=6.0,
+            boundary_time=9.0,
             interruptible=True,
         )
 

@@ -187,6 +187,7 @@ def create_lite6_pliant_for_simulation(
     meshcat = Meshcat(
         params=MeshcatParams(),
     )
+    meshcat.DeleteAddedControls()
     builder: DiagramBuilder = DiagramBuilder()
     main_plant: MultibodyPlant
     scene_graph: SceneGraph

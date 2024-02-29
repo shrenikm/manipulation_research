@@ -311,7 +311,7 @@ class Lite6PliantChoreographerController(LeafSystem):
                 signal = cs.control_signal.compute_signal(
                     time_step=current_time - self._section_active_time
                 )
-                velocities_output_vector[self._current_joint_ind] = signal
+                velocities_output_vector[joint_index] = signal
                 # Record data.
                 self._current_recorded_times = np.hstack(
                     (self._current_recorded_times, current_time)

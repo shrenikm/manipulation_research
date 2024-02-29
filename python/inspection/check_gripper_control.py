@@ -46,7 +46,6 @@ class GripperCheckController(LeafSystem):
         context: Context,
         output_value: AbstractValue,
     ) -> None:
-        print(context.get_time())
 
         partition = context.get_time() // self.check_time_s
         if partition % 3 == 0:

@@ -6,6 +6,7 @@ from pydrake.systems.framework import (
     BasicVector,
     Context,
     DependencyTicket,
+    DiscreteValues,
     EventStatus,
     LeafSystem,
 )
@@ -46,6 +47,13 @@ class Lite6HardwareInterface(LeafSystem):
         # Declare a per step event to send the commands.
         self.DeclarePerStepPublishEvent(publish=self._send_commands)
 
+        _lite6_state_estimated_index = self.DeclareDiscreteState(2 * LITE6_DOF)
+        self.DeclarePeriodicDiscreteUpdateEvent(
+            period_sec=self.config.plant_config.time_step,
+            offset_sec=0.0,
+            update=self._estimate_lite6_state,
+        )
+
         # Declare input and output ports.
         self.pd_input_port = self.DeclareVectorInputPort(
             name=LITE6_HARDWARE_PREFIX + LITE6_PLIANT_PD_IP_NAME,
@@ -60,33 +68,42 @@ class Lite6HardwareInterface(LeafSystem):
             model_value=Value(Lite6GripperStatus.CLOSED),
         )
 
+        # TODO: Hacky dependency tickets to keep the simulation rolling.
+        # Declare states instead?
         self.pe_output_port = self.DeclareVectorOutputPort(
             name=LITE6_HARDWARE_PREFIX + LITE6_PLIANT_PE_OP_NAME,
             size=LITE6_DOF,
             calc=self._compute_positions_estimated_output,
-            prerequisites_of_calc={self.nothing_ticket()},
+            prerequisites_of_calc={
+                self.discrete_state_ticket(_lite6_state_estimated_index)
+            },
         )
         self.ve_output_port = self.DeclareVectorOutputPort(
             name=LITE6_HARDWARE_PREFIX + LITE6_PLIANT_VE_OP_NAME,
             size=LITE6_DOF,
             calc=self._compute_velocities_estimated_output,
-            prerequisites_of_calc={self.nothing_ticket()},
+            prerequisites_of_calc={
+                self.discrete_state_ticket(_lite6_state_estimated_index)
+            },
         )
         self.gse_output_port = self.DeclareAbstractOutputPort(
             name=LITE6_HARDWARE_PREFIX + LITE6_PLIANT_GSE_OP_NAME,
             alloc=lambda: Value(Lite6GripperStatus.NEUTRAL),
             calc=self._compute_gripper_status_estimated_output,
-            prerequisites_of_calc={self.nothing_ticket()},
+            prerequisites_of_calc={
+                self.discrete_state_ticket(_lite6_state_estimated_index)
+            },
         )
 
         # Set up the connection to the robot and enable motion.
         self._logger.info("Connecting to the robot ...")
-        # import mock
-        # self.arm = mock.MagicMock()
-        self.arm = XArmAPI(
-            port=LITE6_ROBOT_IP,
-            is_radian=True,
-        )
+        import mock
+
+        self.arm = mock.MagicMock()
+        # self.arm = XArmAPI(
+        #    port=LITE6_ROBOT_IP,
+        #    is_radian=True,
+        # )
 
         self._logger.info("Connected to the robot!")
 
@@ -109,6 +126,29 @@ class Lite6HardwareInterface(LeafSystem):
         else:
             raise NotImplementedError("Invalid control type")
         time.sleep(1.0)
+
+    def _estimate_lite6_state(
+        self, context: Context, discrete_state: DiscreteValues
+    ) -> None:
+        ret_code, (
+            positions_estimated_list,
+            velocities_estimated_list,
+            _,
+        ) = self.arm.get_joint_states(is_radian=True)
+        assert ret_code == 0
+
+        # The xArm API returns a vector of size 7 for the positions and velocities, so we need to drop the last value.
+        positions_estimated_vector = np.array(
+            positions_estimated_list, dtype=np.float64
+        )[:LITE6_DOF]
+        velocities_estimated_vector = np.array(
+            velocities_estimated_list, dtype=np.float64
+        )[:LITE6_DOF]
+        state_estimated_vector = np.hstack(
+            (positions_estimated_vector, velocities_estimated_vector)
+        )
+
+        discrete_state.set_value(state_estimated_vector)
 
     @staticmethod
     def get_system_name() -> str:
@@ -149,7 +189,6 @@ class Lite6HardwareInterface(LeafSystem):
                 or ret_code
             )
         elif self.config.lite6_control_type == Lite6ControlType.VELOCITY:
-            velocities_desired_vector[2] = 0.1
             ret_code = (
                 self.arm.vc_set_joint_velocity(
                     speeds=velocities_desired_vector,
@@ -188,40 +227,17 @@ class Lite6HardwareInterface(LeafSystem):
         output_vector: BasicVector,
     ) -> None:
 
-        ret_code, (positions_estimated_list, _, _) = self.arm.get_joint_states(
-            is_radian=True
-        )
-        assert ret_code == 0
-
-        # The xArm API returns a vector of size 7 so we need to drop the last value.
-        positions_estimated_vector = np.array(
-            positions_estimated_list, dtype=np.float64
-        )[:LITE6_DOF]
-
-        output_vector.SetFromVector(
-            value=positions_estimated_vector,
-        )
+        state_estimated = context.get_discrete_state_vector().value()
+        output_vector.set_value(state_estimated[:LITE6_DOF])
+        return
 
     def _compute_velocities_estimated_output(
         self,
         context: Context,
         output_vector: BasicVector,
     ) -> None:
-
-        ret_code, (_, velocities_estimated_list, _) = self.arm.get_joint_states(
-            is_radian=True
-        )
-        assert ret_code == 0
-
-        # The xArm API returns a vector of size 7 so we need to drop the last value.
-        velocities_estimated_vector = np.array(
-            velocities_estimated_list, dtype=np.float64
-        )[:LITE6_DOF]
-        print("ve:", velocities_estimated_vector)
-
-        output_vector.SetFromVector(
-            value=velocities_estimated_vector,
-        )
+        state_estimated = context.get_discrete_state_vector().value()
+        output_vector.set_value(state_estimated[LITE6_DOF:])
 
     def _compute_gripper_status_estimated_output(
         self,

@@ -223,8 +223,158 @@
 #      amplitude: 0.1
 #      frequency: 4.
 
-joint4_choreography:
-  joint_index: 3
+#joint4_choreography:
+#  joint_index: 3
+#  section1:
+#    start_time_delay: 1.
+#    end_time_delay: 1.
+#    active_time: 7.
+#    start_joint_positions: [0., 0., 1.57, 0., 0., 0.]
+#    control_signal:
+#      type: "step"
+#      value: 0.1
+#      delay_time: 2.
+#  section2:
+#    start_time_delay: 1.
+#    end_time_delay: 1.
+#    active_time: 2.
+#    start_joint_positions: [0., 0., 1.57, 0.78, 0., 0.]
+#    control_signal:
+#      type: "step"
+#      value: -0.5
+#      delay_time: 1.
+#  section3:
+#    start_time_delay: 1.
+#    end_time_delay: 1.
+#    active_time: 2.
+#    start_joint_positions: [0., 0., 1.57, -1.57, 0., 0.]
+#    control_signal:
+#      type: "step"
+#      value: 1.
+#      delay_time: 1.
+#  section4:
+#    start_time_delay: 1.
+#    end_time_delay: 1.
+#    active_time: 1.75
+#    start_joint_positions: [0., 0., 1.57, 0., 0., 0.]
+#    control_signal:
+#      type: "step"
+#      value: -3.
+#      delay_time: 1.
+#  section5:
+#    start_time_delay: 1.
+#    end_time_delay: 1.
+#    active_time: 1.
+#    start_joint_positions: [0., 0., 1.57, 0., 0., 0.]
+#    control_signal:
+#      type: "sine"
+#      amplitude: 3.
+#      frequency: 1.
+#  section6:
+#    start_time_delay: 1.
+#    end_time_delay: 1.
+#    active_time: 5.
+#    start_joint_positions: [0., 0., 1.57, 0., 0., 0.]
+#    control_signal:
+#      type: "sine"
+#      amplitude: -1.
+#      frequency: 2.
+#  section7:
+#    start_time_delay: 1.
+#    end_time_delay: 1.
+#    active_time: 5.
+#    start_joint_positions: [0., 0., 1.57, -1.57, 0., 0.]
+#    control_signal:
+#      type: "sine"
+#      amplitude: 0.5
+#      frequency: 3.
+#  section8:
+#    start_time_delay: 1.
+#    end_time_delay: 1.
+#    active_time: 10.
+#    start_joint_positions: [0., 0., 1.57, 1.57, 0., 0.]
+#    control_signal:
+#      type: "sine"
+#      amplitude: -0.1
+#      frequency: 4.
+
+#joint5_choreography:
+#  joint_index: 4
+#  section1:
+#    start_time_delay: 1.
+#    end_time_delay: 1.
+#    active_time: 7.
+#    start_joint_positions: [0., 0., 1.57, 0., 0., 0.]
+#    control_signal:
+#      type: "step"
+#      value: 0.1
+#      delay_time: 2.
+#  section2:
+#    start_time_delay: 1.
+#    end_time_delay: 1.
+#    active_time: 2.
+#    start_joint_positions: [0., 0., 1.57, 0., 0.78, 0.]
+#    control_signal:
+#      type: "step"
+#      value: -0.5
+#      delay_time: 1.
+#  section3:
+#    start_time_delay: 1.
+#    end_time_delay: 1.
+#    active_time: 2.
+#    start_joint_positions: [0., 0., 1.57, 0., -1.57, 0.]
+#    control_signal:
+#      type: "step"
+#      value: 1.
+#      delay_time: 1.
+#  section4:
+#    start_time_delay: 1.
+#    end_time_delay: 1.
+#    active_time: 1.75
+#    start_joint_positions: [0., 0., 1.57, 0., 1.57, 0.]
+#    control_signal:
+#      type: "step"
+#      value: -3.
+#      delay_time: 1.
+#  section5:
+#    start_time_delay: 1.
+#    end_time_delay: 1.
+#    active_time: 1.
+#    start_joint_positions: [0., 0., 1.57, 0., -1.57, 0.]
+#    control_signal:
+#      type: "sine"
+#      amplitude: 3.
+#      frequency: 1.
+#  section6:
+#    start_time_delay: 1.
+#    end_time_delay: 1.
+#    active_time: 5.
+#    start_joint_positions: [0., 0., 1.57, 0., 1.57, 0.]
+#    control_signal:
+#      type: "sine"
+#      amplitude: -1.
+#      frequency: 2.
+#  section7:
+#    start_time_delay: 1.
+#    end_time_delay: 1.
+#    active_time: 5.
+#    start_joint_positions: [0., 0., 1.57, 0., -1.57, 0.]
+#    control_signal:
+#      type: "sine"
+#      amplitude: 0.5
+#      frequency: 3.
+#  section8:
+#    start_time_delay: 1.
+#    end_time_delay: 1.
+#    active_time: 10.
+#    start_joint_positions: [0., 0., 1.57, 0., 0., 0.]
+#    control_signal:
+#      type: "sine"
+#      amplitude: -0.1
+#      frequency: 4.
+
+joint6_choreography:
+  joint_index: 5
   section1:
     start_time_delay: 1.
     end_time_delay: 1.
@@ -238,7 +388,7 @@ joint4_choreography:
     start_time_delay: 1.
     end_time_delay: 1.
     active_time: 2.
-    start_joint_positions: [0., 0., 1.57, 1.57, 0., 0.]
+    start_joint_positions: [0., 0., 1.57, 0., 0., 0.78]
     control_signal:
       type: "step"
       value: -0.5
@@ -247,7 +397,7 @@ joint4_choreography:
     start_time_delay: 1.
     end_time_delay: 1.
     active_time: 2.
-    start_joint_positions: [0., 0., 1.57, -1.57, 0., 0.]
+    start_joint_positions: [0., 0., 1.57, 0., 0., -1.57]
     control_signal:
       type: "step"
       value: 1.
@@ -283,7 +433,7 @@ joint4_choreography:
     start_time_delay: 1.
     end_time_delay: 1.
     active_time: 5.
-    start_joint_positions: [0., 0., 1.57, -1.57, 0., 0.]
+    start_joint_positions: [0., 0., 1.57, 0., 0., -1.57]
     control_signal:
       type: "sine"
       amplitude: 0.5
@@ -292,12 +442,9 @@ joint4_choreography:
     start_time_delay: 1.
     end_time_delay: 1.
     active_time: 10.
-    start_joint_positions: [0., 0., 1.57, 1.57, 0., 0.]
+    start_joint_positions: [0., 0., 1.57, 0., 0., 1.57]
     control_signal:
       type: "sine"
       amplitude: -0.1
       frequency: 4.
 
-
-
-      

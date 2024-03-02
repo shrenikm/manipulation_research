@@ -1,3 +1,4 @@
+import sys
 from contextlib import contextmanager
 from typing import Callable, Generator, Optional
 
@@ -5,6 +6,9 @@ import attr
 from pydrake.geometry import Meshcat, SceneGraph
 from pydrake.multibody.plant import MultibodyPlant
 from pydrake.systems.framework import Diagram
+
+from python.common.exceptions import Lite6PliantError
+from python.common.logging_utils import MRLogger
 
 
 @attr.define
@@ -14,7 +18,7 @@ class MultibodyPliantContainer:
     """
 
     pliant_diagram: Diagram
-    plant: MultibodyPlant
+    plant: Optional[MultibodyPlant] = None
     scene_graph: Optional[SceneGraph] = None
     meshcat: Optional[Meshcat] = None
 
@@ -31,11 +35,19 @@ class MultibodyPliantContainer:
         """
         if self.meshcat is not None:
             self.meshcat.StartRecording(set_visualizations_while_recording=False)
-        yield
+        try:
+            yield
+        except (Lite6PliantError, KeyboardInterrupt) as e:
+            # If interrupted, we log, run the post hook cleanup and then exit.
+            MRLogger(self.__class__.__name__).info(f"Simulation interrupted: {e}")
+            if self.post_run_hook is not None:
+                self.post_run_hook(self.pliant_diagram)
+            sys.exit(1)
+
+        # Post hook for any cleanup/reset in the simulation or hardware.
+        if self.post_run_hook is not None:
+            self.post_run_hook(self.pliant_diagram)
+
         if self.meshcat is not None:
             self.meshcat.StopRecording()
             self.meshcat.PublishRecording()
-
-        # Post hook
-        if self.post_run_hook is not None:
-            self.post_run_hook(self.pliant_diagram)

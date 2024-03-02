@@ -91,7 +91,7 @@ def analyze_lite6_pliant(
 
     diagram.ForcedPublish(simulator_context)
 
-    def f(*_):
+    def simulation_end_monitor(*_):
         if choreographer_controller.is_done():
             return EventStatus.ReachedTermination(
                 diagram, "Choreography and recording done!"
@@ -99,7 +99,7 @@ def analyze_lite6_pliant(
 
     # Monitor to stop the simulation after choreography is done.
     simulator.set_monitor(
-        monitor=f,
+        monitor=simulation_end_monitor,
     )
 
     with lite6_pliant_container.auto_meshcat_recording():
@@ -115,7 +115,7 @@ if __name__ == "__main__":
 
     lite6_model_type = Lite6ModelType.ROBOT_WITH_RP_GRIPPER
     lite6_control_type = Lite6ControlType.VELOCITY
-    lite6_pliant_type = Lite6PliantType.SIMULATION
+    lite6_pliant_type = Lite6PliantType.HARDWARE
     inverse_dynamics_pid_gains = PIDGains.from_scalar_gains(
         size=8,
         kp_scalar=100.0,
@@ -123,6 +123,7 @@ if __name__ == "__main__":
         kd_scalar=20.0,
     )
     plant_config = MultibodyPlantConfig(time_step=0.001)
+    hardware_control_loop_time_step = 0.001
 
     lite6_pliant_config = Lite6PliantConfig(
         lite6_model_type=lite6_model_type,
@@ -130,6 +131,7 @@ if __name__ == "__main__":
         lite6_pliant_type=lite6_pliant_type,
         inverse_dynamics_pid_gains=inverse_dynamics_pid_gains,
         plant_config=plant_config,
+        hardware_control_loop_time_step=hardware_control_loop_time_step,
     )
     choreographer = Lite6PliantChoreographer.from_yaml(
         yaml_filepath=get_choreographer_config_yaml_filepath(),

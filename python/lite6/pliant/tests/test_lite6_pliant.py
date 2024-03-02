@@ -41,6 +41,7 @@ def test_create_lite6_pliant_with_unsupported_model_type(
         lite6_pliant_type=Lite6PliantType.SIMULATION,
         inverse_dynamics_pid_gains=id_pid_gains,
         plant_config=MultibodyPlantConfig(time_step=0.001),
+        hardware_control_loop_time_step=0.001,
     )
 
     with pytest.raises(AssertionError):
@@ -74,6 +75,7 @@ def test_create_lite6_pliant_with_supported_type(
         lite6_pliant_type=Lite6PliantType.SIMULATION,
         inverse_dynamics_pid_gains=id_pid_gains,
         plant_config=MultibodyPlantConfig(time_step=0.001),
+        hardware_control_loop_time_step=0.001,
     )
 
     pliant = create_lite6_pliant(config=config)

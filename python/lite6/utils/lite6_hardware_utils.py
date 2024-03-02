@@ -12,6 +12,7 @@ from pydrake.systems.framework import (
 )
 from xarm.wrapper import XArmAPI
 
+from python.common.exceptions import Lite6PliantError
 from python.common.logging_utils import MRLogger
 from python.lite6.pliant.lite6_pliant_utils import (
     LITE6_PLIANT_GSD_IP_NAME,
@@ -44,14 +45,11 @@ class Lite6HardwareInterface(LeafSystem):
         self._gripper_status = Lite6GripperStatus.NEUTRAL
         self._logger = MRLogger(self.__class__.__name__)
 
-        # Declare a per step event to send the commands.
-        self.DeclarePerStepPublishEvent(publish=self._send_commands)
-
         _lite6_state_estimated_index = self.DeclareDiscreteState(2 * LITE6_DOF)
         self.DeclarePeriodicDiscreteUpdateEvent(
-            period_sec=self.config.plant_config.time_step,
+            period_sec=self.config.hardware_control_loop_time_step,
             offset_sec=0.0,
-            update=self._estimate_lite6_state,
+            update=self._estimate_state_and_send_commands,
         )
 
         # Declare input and output ports.
@@ -68,14 +66,13 @@ class Lite6HardwareInterface(LeafSystem):
             model_value=Value(Lite6GripperStatus.CLOSED),
         )
 
-        # TODO: Hacky dependency tickets to keep the simulation rolling.
-        # Declare states instead?
         self.pe_output_port = self.DeclareVectorOutputPort(
             name=LITE6_HARDWARE_PREFIX + LITE6_PLIANT_PE_OP_NAME,
             size=LITE6_DOF,
             calc=self._compute_positions_estimated_output,
             prerequisites_of_calc={
-                self.discrete_state_ticket(_lite6_state_estimated_index)
+                # self.all_input_ports_ticket(),
+                self.discrete_state_ticket(_lite6_state_estimated_index),
             },
         )
         self.ve_output_port = self.DeclareVectorOutputPort(
@@ -83,7 +80,8 @@ class Lite6HardwareInterface(LeafSystem):
             size=LITE6_DOF,
             calc=self._compute_velocities_estimated_output,
             prerequisites_of_calc={
-                self.discrete_state_ticket(_lite6_state_estimated_index)
+                # self.all_input_ports_ticket(),
+                self.discrete_state_ticket(_lite6_state_estimated_index),
             },
         )
         self.gse_output_port = self.DeclareAbstractOutputPort(
@@ -91,7 +89,8 @@ class Lite6HardwareInterface(LeafSystem):
             alloc=lambda: Value(Lite6GripperStatus.NEUTRAL),
             calc=self._compute_gripper_status_estimated_output,
             prerequisites_of_calc={
-                self.discrete_state_ticket(_lite6_state_estimated_index)
+                # self.all_input_ports_ticket(),
+                self.discrete_state_ticket(_lite6_state_estimated_index),
             },
         )
 
@@ -129,17 +128,22 @@ class Lite6HardwareInterface(LeafSystem):
         self.arm.stop_lite6_gripper()
         time.sleep(1.0)
 
-    def _estimate_lite6_state(
+    def _estimate_state_and_send_commands(
         self,
         context: Context,
         discrete_state: DiscreteValues,
-    ) -> None:
+    ) -> EventStatus:
+        # First we estimate the current state using the xArm API.
         ret_code, (
             positions_estimated_list,
             velocities_estimated_list,
             _,
         ) = self.arm.get_joint_states(is_radian=True)
-        assert ret_code == 0
+        if ret_code != 0:
+            self.arm.emergency_stop()
+            raise Lite6PliantError(
+                f"Error while estimating state!. Error code: {ret_code}"
+            )
 
         # The xArm API returns a vector of size 7 for the positions and velocities, so we need to drop the last value.
         positions_estimated_vector = np.array(
@@ -153,6 +157,64 @@ class Lite6HardwareInterface(LeafSystem):
         )
 
         discrete_state.set_value(state_estimated_vector)
+
+        # Next we send the current commands from the input port.
+        positions_desired_vector = self.pd_input_port.Eval(context)
+        velocities_desired_vector = self.vd_input_port.Eval(context)
+        gripper_status_desired = self.gsd_input_port.Eval(context)
+
+        ret_code = 0
+        if self.config.lite6_control_type == Lite6ControlType.STATE:
+            ret_code = self.arm.set_servo_angle_j(
+                angles=positions_desired_vector,
+                speed=velocities_desired_vector,
+                is_radian=True,
+            )
+            if ret_code != 0:
+                self.arm.emergency_stop()
+                raise Lite6PliantError(
+                    f"Error while trying to send position commands! Error code: {ret_code}"
+                )
+        elif self.config.lite6_control_type == Lite6ControlType.VELOCITY:
+            ret_code = self.arm.vc_set_joint_velocity(
+                speeds=velocities_desired_vector,
+                is_radian=True,
+                duration=0,
+            )
+            if ret_code != 0:
+                self.arm.emergency_stop()
+                raise Lite6PliantError(
+                    f"Error while trying to send velocity commands! Error code: {ret_code}"
+                )
+        else:
+            raise NotImplementedError("Invalid control type")
+
+        # If the desired gripper state and current gripper state is the same don't do anything.
+        # We don't want to keep commanding the same gripper state at a high frequency as it tends to break things.
+        if self._gripper_status == gripper_status_desired:
+            return EventStatus.Succeeded()
+
+        ret_code = 0
+        if gripper_status_desired == Lite6GripperStatus.CLOSED:
+            ret_code = self.arm.close_lite6_gripper()
+        elif gripper_status_desired == Lite6GripperStatus.OPEN:
+            ret_code = self.arm.open_lite6_gripper() or ret_code
+        elif gripper_status_desired == Lite6GripperStatus.NEUTRAL:
+            ret_code = self.arm.stop_lite6_gripper() or ret_code
+        else:
+            raise NotImplementedError("Invalid desired gripper status")
+
+        if ret_code != 0:
+            self.arm.emergency_stop()
+            raise Lite6PliantError(
+                f"Error while trying to command the gripper! Error code: {ret_code}"
+            )
+
+        # Update the current gripper status.
+        if ret_code == 0:
+            self._gripper_status = gripper_status_desired
+
+        return EventStatus.Succeeded()
 
     @staticmethod
     def get_system_name() -> str:
@@ -250,4 +312,5 @@ class Lite6HardwareInterface(LeafSystem):
         output_value: AbstractValue,
     ) -> None:
 
+        output_value.set_value(self._gripper_status)
         output_value.set_value(self._gripper_status)

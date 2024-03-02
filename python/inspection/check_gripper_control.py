@@ -116,6 +116,7 @@ if __name__ == "__main__":
         kd_scalar=20.0,
     )
     plant_config = MultibodyPlantConfig(time_step=0.001)
+    hardware_control_loop_time_step = 0.001
 
     lite6_pliant_config = Lite6PliantConfig(
         lite6_model_type=lite6_model_type,
@@ -123,6 +124,7 @@ if __name__ == "__main__":
         lite6_pliant_type=lite6_pliant_type,
         inverse_dynamics_pid_gains=inverse_dynamics_pid_gains,
         plant_config=plant_config,
+        hardware_control_loop_time_step=hardware_control_loop_time_step,
     )
     check_time_s = 3.0
 

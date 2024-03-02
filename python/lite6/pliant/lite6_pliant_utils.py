@@ -102,6 +102,8 @@ class Lite6PliantConfig:
     lite6_pliant_type: Lite6PliantType
     inverse_dynamics_pid_gains: PIDGains
     plant_config: MultibodyPlantConfig
+    # The estimation and command time step while running on actual hardware.
+    hardware_control_loop_time_step: float
     object_model_configs: Optional[Sequence[ObjectModelConfig]] = None
 
     def get_name(self) -> str:

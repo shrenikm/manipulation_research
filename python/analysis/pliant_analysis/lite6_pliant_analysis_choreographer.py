@@ -269,7 +269,7 @@ class Lite6PliantChoreographerController(LeafSystem):
                     f"[Joint {joint_index + 1}][Section {self._current_section_ind + 1}] Start delay done."
                 )
         elif self._status == ChoreographedSectionStatus.PRE_ACTIVE:
-            if np.allclose(pe_vector, cs.start_joint_positions, atol=0.005):
+            if np.allclose(pe_vector, cs.start_joint_positions, atol=0.01):
                 self._status = ChoreographedSectionStatus.ACTIVE
                 self._section_active_time = current_time
                 self._logger.info(

@@ -87,7 +87,7 @@ def analyze_lite6_pliant(
 
     lite6_pliant.GetInputPort(
         port_name=LITE6_PLIANT_GSD_IP_NAME,
-    ).FixValue(lite6_pliant_context, Value(Lite6GripperStatus.CLOSED))
+    ).FixValue(lite6_pliant_context, Value(Lite6GripperStatus.NEUTRAL))
 
     diagram.ForcedPublish(simulator_context)
 

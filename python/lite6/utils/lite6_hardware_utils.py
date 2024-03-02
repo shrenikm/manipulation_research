@@ -12,7 +12,7 @@ from pydrake.systems.framework import (
 )
 from xarm.wrapper import XArmAPI
 
-from python.common.logging import MRLogger
+from python.common.logging_utils import MRLogger
 from python.lite6.pliant.lite6_pliant_utils import (
     LITE6_PLIANT_GSD_IP_NAME,
     LITE6_PLIANT_GSE_OP_NAME,

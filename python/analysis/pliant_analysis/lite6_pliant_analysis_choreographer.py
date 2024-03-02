@@ -17,7 +17,7 @@ from python.common.control.signals import (
 )
 from python.common.custom_types import FilePath, PositionsVector
 from python.common.exceptions import Lite6PliantChoreographerError, Lite6PliantError
-from python.common.logging import MRLogger
+from python.common.logging_utils import MRLogger
 from python.lite6.pliant.lite6_pliant_utils import Lite6PliantConfig
 from python.lite6.utils.lite6_model_utils import LITE6_DOF, Lite6ControlType
 

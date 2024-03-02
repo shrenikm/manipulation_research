@@ -111,7 +111,6 @@ class Lite6HardwareInterface(LeafSystem):
 
         self.arm.clean_error()
         self.arm.motion_enable(enable=True)
-        self.arm.set_state(state=0)
         self.arm.reset(wait=True)
 
         # Set the mode depending on the type of control.
@@ -124,8 +123,30 @@ class Lite6HardwareInterface(LeafSystem):
         else:
             raise NotImplementedError("Invalid control type")
 
+        # It is important that we set the mode and then set the state.
+        # This order is important for the API to work (smh).
+        self.arm.set_state(state=0)
         # Also stop the gripper
         self.arm.stop_lite6_gripper()
+        time.sleep(1.0)
+
+    def reset(self):
+        """
+        Reset the arm once we're done using it through the system setup.
+        """
+        self._logger.info("Resetting the robot after end.")
+        # self.arm.reset(wait=True)
+        # Instead of disabling motion (which is stressful on the joints/motors), we just set the state to stop
+        # so that we don't execute any stray commands by accident.
+        # self.arm.set_state(state=4)
+
+        self.arm.clean_error()
+        self.arm.motion_enable(enable=True)
+        self.arm.set_mode(mode=0)
+        self.arm.set_state(state=0)
+        self.arm.stop_lite6_gripper()
+        time.sleep(1.0)
+        self.arm.move_gohome(wait=True)
         time.sleep(1.0)
 
     def _estimate_state_and_send_commands(
@@ -219,25 +240,6 @@ class Lite6HardwareInterface(LeafSystem):
     @staticmethod
     def get_system_name() -> str:
         return "lite6_hardware_interface"
-
-    def reset(self):
-        """
-        Reset the arm once we're done using it through the system setup.
-        """
-        self._logger.info("Resetting the robot after end.")
-        # self.arm.reset(wait=True)
-        # Instead of disabling motion (which is stressful on the joints/motors), we just set the state to stop
-        # so that we don't execute any stray commands by accident.
-        # self.arm.set_state(state=4)
-
-        self.arm.clean_error()
-        self.arm.motion_enable(enable=True)
-        self.arm.set_mode(mode=0)
-        self.arm.set_state(state=0)
-        time.sleep(1.0)
-        self.arm.move_gohome(wait=True)
-        self.arm.stop_lite6_gripper()
-        time.sleep(1.0)
 
     def _send_commands(self, context: Context) -> EventStatus:
         positions_desired_vector = self.pd_input_port.Eval(context)

@@ -110,14 +110,31 @@ class Lite6PliantConfig:
         return f"{LITE6_PLIANT_NAME}{self.lite6_pliant_type.name.title()}"
 
 
-def get_tuned_pid_gains_for_pliant_id_controller() -> PIDGains:
-    return PIDGains(
-        kp=np.array(
-            [100.0, 100.0, 100.0, 100.0, 100.0, 100.0, 100.0, 100.0], dtype=np.float64
-        ),
-        ki=np.array([0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0], dtype=np.float64),
-        kd=np.array([50.0, 50.0, 50.0, 75.0, 75.0, 75.0, 0.0, 0.0], dtype=np.float64),
-    )
+def get_tuned_pid_gains_for_pliant_id_controller(
+    lite6_control_type: Lite6ControlType,
+) -> PIDGains:
+    if lite6_control_type == Lite6ControlType.VELOCITY:
+        # Note that because of how velocity control is implemented in the pliant,
+        # only the pd gains matter. This is because in the ID controller, desired
+        # positions is set to estimated positions, and so this difference is always
+        # zero.
+        # The joint gains have been tuned using the analysis plots of the choreographer. (See lite6_pliant_analysis.py)
+        # The gripper gains have been tuned for them to open/close as fast as the real robot (~200-250 ms)
+        return PIDGains(
+            kp=np.array(
+                [100.0, 100.0, 100.0, 100.0, 100.0, 100.0, 500.0, 500.0],
+                dtype=np.float64,
+            ),
+            ki=np.array([0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 50.0, 50.0], dtype=np.float64),
+            kd=np.array(
+                [50.0, 50.0, 50.0, 75.0, 75.0, 75.0, 50.0, 50.0], dtype=np.float64
+            ),
+        )
+    else:
+        # Has not been tuned for other control types.
+        raise NotImplementedError(
+            f"ID PID gains have not been tuned for control type {lite6_control_type}"
+        )
 
 
 def create_simulator_for_lite6_pliant(

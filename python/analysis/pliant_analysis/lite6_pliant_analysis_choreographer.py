@@ -105,7 +105,6 @@ class Lite6PliantChoreographer:
                     choreographed_sections=sections,
                 )
             )
-        #jcs = [jcs[0]]
         return cls(
             joint_choreographed_sections=jcs,
         )

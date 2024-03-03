@@ -110,6 +110,16 @@ class Lite6PliantConfig:
         return f"{LITE6_PLIANT_NAME}{self.lite6_pliant_type.name.title()}"
 
 
+def get_tuned_pid_gains_for_pliant_id_controller() -> PIDGains:
+    return PIDGains(
+        kp=np.array(
+            [100.0, 100.0, 100.0, 100.0, 100.0, 100.0, 100.0, 100.0], dtype=np.float64
+        ),
+        ki=np.array([0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0], dtype=np.float64),
+        kd=np.array([50.0, 50.0, 50.0, 75.0, 75.0, 75.0, 0.0, 0.0], dtype=np.float64),
+    )
+
+
 def create_simulator_for_lite6_pliant(
     config: Lite6PliantConfig,
     diagram: Diagram,

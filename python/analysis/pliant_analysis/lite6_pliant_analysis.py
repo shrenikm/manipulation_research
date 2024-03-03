@@ -118,9 +118,12 @@ if __name__ == "__main__":
     lite6_pliant_type = Lite6PliantType.SIMULATION
     inverse_dynamics_pid_gains = PIDGains.from_scalar_gains(
         size=8,
+        #kp_scalar=100.0,
+        #ki_scalar=1.0,
+        #kd_scalar=20.0,
         kp_scalar=100.0,
-        ki_scalar=1.0,
-        kd_scalar=20.0,
+        ki_scalar=0.0,
+        kd_scalar=50.0,
     )
     plant_config = MultibodyPlantConfig(time_step=0.001)
     hardware_control_loop_time_step = 0.001

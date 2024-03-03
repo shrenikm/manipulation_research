@@ -82,8 +82,7 @@ class Lite6HardwareInterface(LeafSystem):
             size=LITE6_DOF,
             calc=self._compute_positions_estimated_output,
             prerequisites_of_calc={
-                self.nothing_ticket(),
-                #self.discrete_state_ticket(_lite6_state_estimated_index),
+                self.discrete_state_ticket(_lite6_state_estimated_index),
             },
         )
         self.ve_output_port = self.DeclareVectorOutputPort(
@@ -91,8 +90,7 @@ class Lite6HardwareInterface(LeafSystem):
             size=LITE6_DOF,
             calc=self._compute_velocities_estimated_output,
             prerequisites_of_calc={
-                self.nothing_ticket(),
-                #self.discrete_state_ticket(_lite6_state_estimated_index),
+                self.discrete_state_ticket(_lite6_state_estimated_index),
             },
         )
         self.gse_output_port = self.DeclareAbstractOutputPort(
@@ -100,8 +98,7 @@ class Lite6HardwareInterface(LeafSystem):
             alloc=lambda: Value(Lite6GripperStatus.NEUTRAL),
             calc=self._compute_gripper_status_estimated_output,
             prerequisites_of_calc={
-                self.nothing_ticket(),
-                #self.discrete_state_ticket(_lite6_state_estimated_index),
+                self.discrete_state_ticket(_lite6_state_estimated_index),
             },
         )
 

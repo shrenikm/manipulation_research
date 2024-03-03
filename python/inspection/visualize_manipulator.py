@@ -7,7 +7,9 @@ from pydrake.all import (
     JointSliders,
     StartMeshcat,
 )
-from pydrake.visualization import AddDefaultVisualization
+from pydrake.multibody.plant import MultibodyPlant
+from pydrake.multibody.tree import FrameIndex, RigidBody
+from pydrake.visualization import AddDefaultVisualization, AddFrameTriadIllustration
 
 from python.common.model_utils import (
     ObjectModelConfig,
@@ -29,13 +31,14 @@ def visualize_manipulator(
 ) -> None:
     builder = DiagramBuilder()
 
-    plant, _ = AddMultibodyPlantSceneGraph(builder, time_step=0)
-    add_lite6_model_to_plant(
+    plant: MultibodyPlant
+    plant, scene_graph = AddMultibodyPlantSceneGraph(builder, time_step=0)
+    lite6_model = add_lite6_model_to_plant(
         plant=plant,
         lite6_model_type=lite6_model_type,
         place_on_table=place_on_table,
     )
-    add_object_models_to_plant(
+    object_models = add_object_models_to_plant(
         plant=plant,
         object_model_configs=object_model_configs,
     )
@@ -45,6 +48,21 @@ def visualize_manipulator(
 
     sliders = builder.AddSystem(JointSliders(meshcat, plant))
     AddDefaultVisualization(builder=builder, meshcat=meshcat)
+
+    if show_frames:
+        print("Body frames that are going to be illustrated:")
+        for model_instance in [lite6_model] + object_models:
+            for body_index in plant.GetBodyIndices(model_instance=model_instance):
+                body: RigidBody = plant.get_body(body_index)
+                print(body.name())
+                # Add frame triad.
+                AddFrameTriadIllustration(
+                    scene_graph=scene_graph,
+                    plant=plant,
+                    body=body,
+                    length=0.2,
+                    radius=0.001,
+                )
 
     diagram = builder.Build()
     sliders.Run(diagram, None)

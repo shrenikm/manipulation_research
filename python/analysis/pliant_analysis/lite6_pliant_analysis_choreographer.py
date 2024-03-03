@@ -105,6 +105,7 @@ class Lite6PliantChoreographer:
                     choreographed_sections=sections,
                 )
             )
+        #jcs = [jcs[0]]
         return cls(
             joint_choreographed_sections=jcs,
         )
@@ -221,9 +222,14 @@ class Lite6PliantChoreographerController(LeafSystem):
                 tv = self._target_velocities_map[joint_ind][section_ind]
                 ev = self._estimated_velocities_map[joint_ind][section_ind]
 
+                # Make sure that the times are offset and start from zero for each
+                # of the section plots.
+                zero_start_t = np.copy(t)
+                zero_start_t -= zero_start_t[0]
+
                 ax.set_title(f"Section {section_ind + 1}/{num_sections}")
-                ax.plot(t, tv, color="blue", label="Target velocities")
-                ax.plot(t, ev, color="orange", label="Estimated velocities")
+                ax.plot(zero_start_t, tv, color="blue", label="Target velocities")
+                ax.plot(zero_start_t, ev, color="orange", label="Estimated velocities")
                 ax.set_xlabel("t (sec)")
                 ax.set_ylabel("qdot (rad/s)")
 

@@ -45,6 +45,8 @@ class Lite6HardwareInterface(LeafSystem):
         self._gripper_status = Lite6GripperStatus.NEUTRAL
         self._logger = MRLogger(self.__class__.__name__)
 
+        # TODO: Maybe split into state update and send command updates
+        # if we need both running at different frequencies.
         _lite6_state_estimated_index = self.DeclareDiscreteState(2 * LITE6_DOF)
         self.DeclarePeriodicDiscreteUpdateEvent(
             period_sec=self.config.hardware_control_loop_time_step,
@@ -66,13 +68,22 @@ class Lite6HardwareInterface(LeafSystem):
             model_value=Value(Lite6GripperStatus.CLOSED),
         )
 
+        # Note that we explicitly specify the depenency tickets through
+        # the prerequisites_of_calc. If we don't do this, Drake assumes
+        # that the outputs are a function of the inputs, which then results
+        # an a closed algebraic loop as the output of the pliant will feed
+        # into the inputs of a controller which then feeds back into the
+        # input of the pliant.
+        # Hence we need to make sure that Drake knows that the hardware pliant
+        # outputs are not a function of the inputs as they are estimates of the
+        # manipulator state through the xArm API.
         self.pe_output_port = self.DeclareVectorOutputPort(
             name=LITE6_HARDWARE_PREFIX + LITE6_PLIANT_PE_OP_NAME,
             size=LITE6_DOF,
             calc=self._compute_positions_estimated_output,
             prerequisites_of_calc={
-                # self.all_input_ports_ticket(),
-                self.discrete_state_ticket(_lite6_state_estimated_index),
+                self.nothing_ticket(),
+                #self.discrete_state_ticket(_lite6_state_estimated_index),
             },
         )
         self.ve_output_port = self.DeclareVectorOutputPort(
@@ -80,8 +91,8 @@ class Lite6HardwareInterface(LeafSystem):
             size=LITE6_DOF,
             calc=self._compute_velocities_estimated_output,
             prerequisites_of_calc={
-                # self.all_input_ports_ticket(),
-                self.discrete_state_ticket(_lite6_state_estimated_index),
+                self.nothing_ticket(),
+                #self.discrete_state_ticket(_lite6_state_estimated_index),
             },
         )
         self.gse_output_port = self.DeclareAbstractOutputPort(
@@ -89,8 +100,8 @@ class Lite6HardwareInterface(LeafSystem):
             alloc=lambda: Value(Lite6GripperStatus.NEUTRAL),
             calc=self._compute_gripper_status_estimated_output,
             prerequisites_of_calc={
-                # self.all_input_ports_ticket(),
-                self.discrete_state_ticket(_lite6_state_estimated_index),
+                self.nothing_ticket(),
+                #self.discrete_state_ticket(_lite6_state_estimated_index),
             },
         )
 

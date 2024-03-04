@@ -47,6 +47,8 @@ LITE6_RP_GRIPPER_OPEN_POSITIONS = (0.008, -0.008)
 LITE6_RP_GRIPPER_CLOSED_POSITIONS = (0.0, 0.0)
 
 LITE6_TABLE_HEIGHT = 0.7366
+# This is a conservative estimate. The gripper takes ~200-250 ms to open/close
+LITE6_GRIPPER_ACTIVATION_TIME = 0.3
 
 
 class Lite6ControlType(Enum):

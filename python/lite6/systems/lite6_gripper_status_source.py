@@ -30,7 +30,7 @@ class Lite6GripperStatusSource(LeafSystem):
         self._times = times
         self._statuses = statuses
 
-        self.gsd_output_port = self.DeclareAbstractOutputPort(
+        self.gss_output_port = self.DeclareAbstractOutputPort(
             name=LITE6_GSS_OP_NAME,
             alloc=lambda: Value(Lite6GripperStatus.NEUTRAL),
             calc=self._compute_gripper_status_source_output,
@@ -44,15 +44,17 @@ class Lite6GripperStatusSource(LeafSystem):
         context: Context,
         output_value: AbstractValue,
     ) -> None:
-
         # If we're at the last index, the rest of the simulation will have this system
         # output the final state at its output port.
         if self._index == self._n - 1:
+            print("last!", context.get_time())
             output_value.set_value(self._statuses[self._index])
             return
 
         current_time = context.get_time()
-        while current_time >= self._times[self._index + 1]:
+        while (
+            self._index < self._n - 1 and current_time >= self._times[self._index + 1]
+        ):
             self._index += 1
 
         output_value.set_value(self._statuses[self._index])

@@ -1,3 +1,5 @@
+from typing import List
+
 import numpy as np
 from pydrake.all import DiagramBuilder
 from pydrake.common.value import AbstractValue, Value
@@ -14,6 +16,7 @@ from python.lite6.pliant.lite6_pliant_utils import (
     create_simulator_for_lite6_pliant,
     get_tuned_pid_gains_for_pliant_id_controller,
 )
+from python.lite6.systems.lite6_gripper_status_source import Lite6GripperStatusSource
 from python.lite6.utils.lite6_model_utils import (
     LITE6_DOF,
     Lite6ControlType,
@@ -25,7 +28,8 @@ from python.lite6.utils.lite6_model_utils import (
 class GripperCheckController(LeafSystem):
     def __init__(
         self,
-        check_time_s: float,
+        times: List[float],
+        statuses: List[Lite6GripperStatus],
     ):
         super().__init__()
 
@@ -54,7 +58,8 @@ class GripperCheckController(LeafSystem):
 
 def check_gripper_control(
     config: Lite6PliantConfig,
-    check_time_s: float,
+    times: List[float],
+    statuses: List[Lite6GripperStatus],
 ) -> None:
 
     builder = DiagramBuilder()
@@ -68,12 +73,12 @@ def check_gripper_control(
         system=lite6_pliant_container.pliant_diagram,
     )
 
-    gripper_controller = builder.AddSystem(
-        GripperCheckController(check_time_s=check_time_s),
+    gripper_status_source = builder.AddSystem(
+        Lite6GripperStatusSource(times=times, statuses=statuses),
     )
 
     builder.Connect(
-        gripper_controller.gsd_output_port,
+        gripper_status_source.gss_output_port,
         lite6_pliant.GetInputPort(LITE6_PLIANT_GSD_IP_NAME),
     )
 
@@ -119,9 +124,17 @@ if __name__ == "__main__":
         plant_config=plant_config,
         hardware_control_loop_time_step=hardware_control_loop_time_step,
     )
-    check_time_s = 3.0
+    times = [0.0, 2.0, 4.0, 6.0, 8.0]
+    statuses = [
+        Lite6GripperStatus.CLOSED,
+        Lite6GripperStatus.NEUTRAL,
+        Lite6GripperStatus.OPEN,
+        Lite6GripperStatus.CLOSED,
+        Lite6GripperStatus.CLOSED,
+    ]
 
     check_gripper_control(
         config=lite6_pliant_config,
-        check_time_s=check_time_s,
+        times=times,
+        statuses=statuses,
     )

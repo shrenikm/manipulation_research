@@ -1,6 +1,10 @@
+"""
+Simple pick and place of a 1 inch block.
+"""
 import numpy as np
 from pydrake.all import DiagramBuilder
 from pydrake.common.value import Value
+from pydrake.math import RigidTransform
 from pydrake.multibody.plant import MultibodyPlantConfig
 from pydrake.systems.framework import Diagram, EventStatus
 
@@ -9,6 +13,7 @@ from python.analysis.pliant_analysis.lite6_pliant_analysis_choreographer import 
     Lite6PliantChoreographerController,
     get_choreographer_config_yaml_filepath,
 )
+from python.common.model_utils import ObjectModelConfig, ObjectModelType
 from python.lite6.pliant.lite6_pliant import create_lite6_pliant
 from python.lite6.pliant.lite6_pliant_utils import (
     LITE6_PLIANT_GSD_IP_NAME,
@@ -24,11 +29,14 @@ from python.lite6.utils.lite6_model_utils import (
     Lite6ControlType,
     Lite6GripperStatus,
     Lite6ModelType,
+    get_default_height_for_object_model_type,
 )
 
 
 def execute_simple_pick_and_place(
     config: Lite6PliantConfig,
+    X_OPickW: RigidTransform,
+    X_OPlaceW: RigidTransform,
 ) -> None:
 
     builder = DiagramBuilder()
@@ -36,17 +44,15 @@ def execute_simple_pick_and_place(
     lite6_pliant_container = create_lite6_pliant(
         config=config,
     )
+    main_plant = lite6_pliant_container.plant
 
     lite6_pliant: Diagram = builder.AddNamedSystem(
         name="lite6_pliant",
         system=lite6_pliant_container.pliant_diagram,
     )
 
-    choreographer_controller = builder.AddSystem(
-        Lite6PliantChoreographerController(
-            config=config,
-            choreographer=choreographer,
-        ),
+    X_WG = main_plant.EvalBodyPoseInWorld(
+
     )
 
     builder.Connect(
@@ -108,6 +114,22 @@ if __name__ == "__main__":
     hardware_control_loop_time_step = 0.001
     plant_config = MultibodyPlantConfig(time_step=time_step)
 
+    object_model_configs = [
+        ObjectModelConfig(
+            object_model_type=ObjectModelType.CUBE_1_INCH,
+            position=np.array(
+                [
+                    0.0,
+                    0.0,
+                    get_default_height_for_object_model_type(
+                        ObjectModelType.CUBE_1_INCH
+                    ),
+                ]
+            ),
+        ),
+    ]
+    pick_object = object_model_configs[0]
+
     lite6_pliant_config = Lite6PliantConfig(
         lite6_model_type=lite6_model_type,
         lite6_control_type=lite6_control_type,
@@ -115,8 +137,16 @@ if __name__ == "__main__":
         inverse_dynamics_pid_gains=id_controller_pid_gains,
         plant_config=plant_config,
         hardware_control_loop_time_step=hardware_control_loop_time_step,
+        object_model_configs=object_model_configs,
     )
+
+    X_OPickW = RigidTransform(p=pick_object.position)
+    place_position = np.copy(pick_object.position)
+    place_position[0] += 0.1
+    X_OPlaceW = RigidTransform(p=place_position)
 
     execute_simple_pick_and_place(
         config=lite6_pliant_config,
+        X_OPickW=X_OPickW,
+        X_OPlaceW=X_OPlaceW,
     )

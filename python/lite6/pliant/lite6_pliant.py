@@ -40,6 +40,7 @@ from python.lite6.utils.lite6_model_utils import (
     LITE6_DOF,
     Lite6GripperStatus,
     add_lite6_model_to_plant,
+    get_default_lite6_joint_positions,
 )
 
 
@@ -180,8 +181,15 @@ def create_lite6_pliant_for_simulation(
         plant=main_plant,
         object_model_configs=config.object_model_configs,
     )
-
     main_plant.Finalize()
+
+    # Set the default starting joint positions.
+    main_plant.SetDefaultPositions(
+        model_instance=lite6_model,
+        q_instance=get_default_lite6_joint_positions(
+            lite6_model_type=config.lite6_model_type,
+        ),
+    )
 
     AddDefaultVisualization(
         builder=builder,
@@ -206,6 +214,14 @@ def create_lite6_pliant_for_simulation(
         lite6_model_type=config.lite6_model_type,
     )
     lite6_controller_plant.Finalize()
+
+    # Set the default starting joint positions for the controller plant as well.
+    lite6_controller_plant.SetDefaultPositions(
+        model_instance=lite6_controller_model,
+        q_instance=get_default_lite6_joint_positions(
+            lite6_model_type=config.lite6_model_type,
+        ),
+    )
 
     id_controller = builder.AddNamedSystem(
         name="id_controller",

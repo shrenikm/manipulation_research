@@ -12,6 +12,7 @@ from python.lite6.utils.lite6_model_utils import (
     add_joint_positions_to_lite6_state,
     add_joint_velocities_to_lite6_state,
     create_lite6_state,
+    get_default_lite6_joint_positions,
     get_drake_lite6_urdf_path,
     get_gripper_positions_from_lite6_state,
     get_gripper_status_from_lite6_state,
@@ -25,6 +26,8 @@ from python.lite6.utils.lite6_model_utils import (
     get_lite6_table_urdf_lite6_position_frame_name,
     get_lite6_table_urdf_path,
     get_lite6_urdf_base_frame_name,
+    get_positions_from_lite6_state,
+    get_velocities_from_lite6_state,
 )
 
 
@@ -470,6 +473,24 @@ def test_get_joint_positions_from_lite6_state() -> None:
                 state_vector=np.zeros(12),
             )
 
+    # For robots with no gripper actuation.
+    for lite6_model_type in (
+        Lite6ModelType.ROBOT_WITH_V_GRIPPER,
+        Lite6ModelType.ROBOT_WITHOUT_GRIPPER,
+    ):
+        state_vector = np.arange(0, 12, dtype=np.float64)
+
+        positions_vector = get_joint_positions_from_lite6_state(
+            lite6_model_type=lite6_model_type,
+            state_vector=state_vector,
+        )
+        # Test values of the new state.
+        np.testing.assert_array_equal(
+            positions_vector,
+            [0.0, 1.0, 2.0, 3.0, 4.0, 5.0],
+        )
+
+    # For parallel gripper robots.
     for lite6_model_type in (
         Lite6ModelType.ROBOT_WITH_NP_GRIPPER,
         Lite6ModelType.ROBOT_WITH_RP_GRIPPER,
@@ -500,6 +521,24 @@ def test_get_joint_velocities_from_lite6_state() -> None:
                 state_vector=np.zeros(12),
             )
 
+    # For robots with no gripper actuation.
+    for lite6_model_type in (
+        Lite6ModelType.ROBOT_WITH_V_GRIPPER,
+        Lite6ModelType.ROBOT_WITHOUT_GRIPPER,
+    ):
+        state_vector = np.arange(0, 12, dtype=np.float64)
+
+        positions_vector = get_joint_velocities_from_lite6_state(
+            lite6_model_type=lite6_model_type,
+            state_vector=state_vector,
+        )
+        # Test values of the new state.
+        np.testing.assert_array_equal(
+            positions_vector,
+            [6.0, 7.0, 8.0, 9.0, 10.0, 11.0],
+        )
+
+    # For parallel gripper robots.
     for lite6_model_type in (
         Lite6ModelType.ROBOT_WITH_NP_GRIPPER,
         Lite6ModelType.ROBOT_WITH_RP_GRIPPER,
@@ -514,6 +553,102 @@ def test_get_joint_velocities_from_lite6_state() -> None:
         np.testing.assert_array_equal(
             positions_vector,
             [8.0, 9.0, 10.0, 11.0, 12.0, 13.0],
+        )
+
+
+def test_get_positions_from_lite6_state() -> None:
+    # Test for non supported model types.
+    for lite6_model_type in (
+        Lite6ModelType.NP_GRIPPER,
+        Lite6ModelType.RP_GRIPPER,
+        Lite6ModelType.V_GRIPPER,
+    ):
+        with pytest.raises(AssertionError):
+            get_positions_from_lite6_state(
+                lite6_model_type=lite6_model_type,
+                state_vector=np.zeros(12),
+            )
+
+    # For non actuated gripper robots.
+    for lite6_model_type in (
+        Lite6ModelType.ROBOT_WITH_V_GRIPPER,
+        Lite6ModelType.ROBOT_WITHOUT_GRIPPER,
+    ):
+        state_vector = np.arange(0, 12, dtype=np.float64)
+
+        positions_vector = get_positions_from_lite6_state(
+            lite6_model_type=lite6_model_type,
+            state_vector=state_vector,
+        )
+        # Test values of the new state.
+        np.testing.assert_array_equal(
+            positions_vector,
+            [0.0, 1.0, 2.0, 3.0, 4.0, 5.0],
+        )
+
+    # For parallel gripper robots.
+    for lite6_model_type in (
+        Lite6ModelType.ROBOT_WITH_NP_GRIPPER,
+        Lite6ModelType.ROBOT_WITH_RP_GRIPPER,
+    ):
+        state_vector = np.arange(0, 16, dtype=np.float64)
+
+        positions_vector = get_positions_from_lite6_state(
+            lite6_model_type=lite6_model_type,
+            state_vector=state_vector,
+        )
+        # Test values of the new state.
+        np.testing.assert_array_equal(
+            positions_vector,
+            [0.0, 1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0],
+        )
+
+
+def test_get_velocities_from_lite6_state() -> None:
+    # Test for non supported model types.
+    for lite6_model_type in (
+        Lite6ModelType.NP_GRIPPER,
+        Lite6ModelType.RP_GRIPPER,
+        Lite6ModelType.V_GRIPPER,
+    ):
+        with pytest.raises(AssertionError):
+            get_velocities_from_lite6_state(
+                lite6_model_type=lite6_model_type,
+                state_vector=np.zeros(12),
+            )
+
+    # For non actuated gripper robots.
+    for lite6_model_type in (
+        Lite6ModelType.ROBOT_WITH_V_GRIPPER,
+        Lite6ModelType.ROBOT_WITHOUT_GRIPPER,
+    ):
+        state_vector = np.arange(0, 12, dtype=np.float64)
+
+        positions_vector = get_velocities_from_lite6_state(
+            lite6_model_type=lite6_model_type,
+            state_vector=state_vector,
+        )
+        # Test values of the new state.
+        np.testing.assert_array_equal(
+            positions_vector,
+            [6.0, 7.0, 8.0, 9.0, 10.0, 11.0],
+        )
+
+    # For parallel gripper robots.
+    for lite6_model_type in (
+        Lite6ModelType.ROBOT_WITH_NP_GRIPPER,
+        Lite6ModelType.ROBOT_WITH_RP_GRIPPER,
+    ):
+        state_vector = np.arange(0, 16, dtype=np.float64)
+
+        positions_vector = get_velocities_from_lite6_state(
+            lite6_model_type=lite6_model_type,
+            state_vector=state_vector,
+        )
+        # Test values of the new state.
+        np.testing.assert_array_equal(
+            positions_vector,
+            [8.0, 9.0, 10.0, 11.0, 12.0, 13.0, 14.0, 15.0],
         )
 
 
@@ -628,6 +763,47 @@ def test_get_gripper_status_from_lite6_state() -> None:
             state_vector=estimated_state_vector,
         )
         assert lite6_gripper_status == estimated_lite6_gripper_status
+
+
+def test_get_default_lite6_joint_positions() -> None:
+    # Test for non supported model types.
+    for lite6_model_type in (
+        Lite6ModelType.NP_GRIPPER,
+        Lite6ModelType.RP_GRIPPER,
+        Lite6ModelType.V_GRIPPER,
+    ):
+        with pytest.raises(AssertionError):
+            get_default_lite6_joint_positions(
+                lite6_model_type=lite6_model_type,
+            )
+
+    # For non actuated gripper robots.
+    for lite6_model_type in (
+        Lite6ModelType.ROBOT_WITH_V_GRIPPER,
+        Lite6ModelType.ROBOT_WITHOUT_GRIPPER,
+    ):
+        positions_vector = get_default_lite6_joint_positions(
+            lite6_model_type=lite6_model_type,
+        )
+
+        np.testing.assert_array_equal(
+            positions_vector,
+            np.zeros(6),
+        )
+
+    # For parallel gripper robots.
+    for lite6_model_type in (
+        Lite6ModelType.ROBOT_WITH_NP_GRIPPER,
+        Lite6ModelType.ROBOT_WITH_RP_GRIPPER,
+    ):
+        positions_vector = get_default_lite6_joint_positions(
+            lite6_model_type=lite6_model_type,
+        )
+
+        np.testing.assert_array_equal(
+            positions_vector,
+            np.zeros(8),
+        )
 
 
 if __name__ == "__main__":

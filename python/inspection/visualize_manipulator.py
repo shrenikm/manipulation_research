@@ -16,6 +16,7 @@ from python.common.model_utils import (
     ObjectModelType,
     add_object_models_to_plant,
 )
+from python.lite6.pliant.lite6_pliant import create_lite6_pliant_for_simulation
 from python.lite6.utils.lite6_model_utils import (
     Lite6ModelType,
     add_lite6_model_to_plant,
@@ -33,6 +34,7 @@ def visualize_manipulator(
 
     plant: MultibodyPlant
     plant, scene_graph = AddMultibodyPlantSceneGraph(builder, time_step=0)
+
     lite6_model = add_lite6_model_to_plant(
         plant=plant,
         lite6_model_type=lite6_model_type,

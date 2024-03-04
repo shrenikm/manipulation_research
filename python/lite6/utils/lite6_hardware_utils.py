@@ -121,6 +121,8 @@ class Lite6HardwareInterface(LeafSystem):
         self.arm.motion_enable(enable=True)
         self.arm.reset(wait=True)
 
+        # TODO: Decide if we want to move_gohome here.
+
         # Set the mode depending on the type of control.
         if self.config.lite6_control_type == Lite6ControlType.STATE:
             self._logger.info("Setting robot to position control mode.")
@@ -134,7 +136,9 @@ class Lite6HardwareInterface(LeafSystem):
         # It is important that we set the mode and then set the state.
         # This order is important for the API to work (smh).
         self.arm.set_state(state=0)
-        # Also stop the gripper
+        # Default state of the gripper is closed. Close and then stop the gripper.
+        self.arm.close_lite6_gripper()
+        time.sleep(1.0)
         self.arm.stop_lite6_gripper()
         time.sleep(1.0)
 

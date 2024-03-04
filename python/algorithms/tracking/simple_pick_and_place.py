@@ -27,9 +27,8 @@ from python.lite6.utils.lite6_model_utils import (
 )
 
 
-def analyze_lite6_pliant(
+def execute_simple_pick_and_place(
     config: Lite6PliantConfig,
-    choreographer: Lite6PliantChoreographer,
 ) -> None:
 
     builder = DiagramBuilder()
@@ -105,8 +104,9 @@ if __name__ == "__main__":
     id_controller_pid_gains = get_tuned_pid_gains_for_pliant_id_controller(
         lite6_control_type=lite6_control_type,
     )
-    plant_config = MultibodyPlantConfig(time_step=0.001)
+    time_step = 0.001
     hardware_control_loop_time_step = 0.001
+    plant_config = MultibodyPlantConfig(time_step=time_step)
 
     lite6_pliant_config = Lite6PliantConfig(
         lite6_model_type=lite6_model_type,
@@ -116,11 +116,7 @@ if __name__ == "__main__":
         plant_config=plant_config,
         hardware_control_loop_time_step=hardware_control_loop_time_step,
     )
-    choreographer = Lite6PliantChoreographer.from_yaml(
-        yaml_filepath=get_choreographer_config_yaml_filepath(),
-    )
 
-    analyze_lite6_pliant(
+    execute_simple_pick_and_place(
         config=lite6_pliant_config,
-        choreographer=choreographer,
     )

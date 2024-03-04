@@ -1,13 +1,9 @@
-from typing import Generator
-
 import numpy as np
 from pydrake.all import DiagramBuilder
 from pydrake.common.value import AbstractValue, Value
 from pydrake.multibody.plant import MultibodyPlantConfig
-from pydrake.systems.analysis import Simulator
 from pydrake.systems.framework import Context, Diagram, LeafSystem, System
 
-from python.common.control.constructs import PIDGains
 from python.lite6.pliant.lite6_pliant import create_lite6_pliant
 from python.lite6.pliant.lite6_pliant_utils import (
     LITE6_PLIANT_GSD_IP_NAME,
@@ -18,7 +14,6 @@ from python.lite6.pliant.lite6_pliant_utils import (
     create_simulator_for_lite6_pliant,
     get_tuned_pid_gains_for_pliant_id_controller,
 )
-from python.lite6.utils.lite6_hardware_utils import Lite6HardwareInterface
 from python.lite6.utils.lite6_model_utils import (
     LITE6_DOF,
     Lite6ControlType,

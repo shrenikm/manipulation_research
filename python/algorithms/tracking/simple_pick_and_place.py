@@ -26,6 +26,7 @@ from python.lite6.pliant.lite6_pliant_utils import (
     create_simulator_for_lite6_pliant,
     get_tuned_pid_gains_for_pliant_id_controller,
 )
+from python.lite6.systems.lite6_gripper_status_source import Lite6GripperStatusSource
 from python.lite6.utils.lite6_model_utils import (
     LITE6_GRIPPER_ACTIVATION_TIME,
     Lite6ControlType,
@@ -137,7 +138,6 @@ def execute_simple_pick_and_place(
         0.0,
         LITE6_GRIPPER_ACTIVATION_TIME,
         GFPick_time + G_F_TIME,
-        GFPick_time + G_F_TIME + LITE6_GRIPPER_ACTIVATION_TIME,
         pick_time + GPickFPlace_time + G_F_TIME,
         pick_time + GPickFPlace_time + G_F_TIME + LITE6_GRIPPER_ACTIVATION_TIME,
     ]
@@ -148,6 +148,18 @@ def execute_simple_pick_and_place(
         Lite6GripperStatus.OPEN,
         Lite6GripperStatus.NEUTRAL,
     ]
+
+    gripper_status_source = builder.AddSystem(
+        Lite6GripperStatusSource(
+            times=gripper_times,
+            statuses=gripper_statuses,
+        ),
+    )
+
+    builder.Connect(
+        gripper_status_source.get_output_port(),
+        lite6_pliant.GetInputPort(LITE6_PLIANT_GSD_IP_NAME),
+    )
 
     # builder.Connect(
     #    lite6_pliant.GetOutputPort(LITE6_PLIANT_PE_OP_NAME),

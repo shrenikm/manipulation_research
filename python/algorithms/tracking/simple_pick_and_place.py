@@ -43,7 +43,7 @@ from python.lite6.utils.lite6_model_utils import (
 )
 
 OBJECT_TO_GRIPPER_Z = 0.0
-G_TO_F_Z = -0.0
+G_TO_F_Z = -0.02
 G_F_TIME = 2.0
 G_WAIT_TIME = 2.0
 
@@ -169,6 +169,7 @@ def execute_simple_pick_and_place(
             ),
         ),
     )
+    print(X_WG)
 
     gripper_V_trajectory_source, gripper_status_source = _construct_trajectory_sources(
         X_WG=X_WG,
@@ -258,7 +259,7 @@ def execute_simple_pick_and_place(
 
     with lite6_pliant_container.auto_meshcat_recording():
         simulator.AdvanceTo(
-            boundary_time=5.0,
+            boundary_time=10.0,
             interruptible=True,
         )
 
@@ -304,9 +305,12 @@ if __name__ == "__main__":
     pick_position = np.copy(pick_object.position)
     place_position = np.copy(pick_object.position)
 
-    pick_position[2] += 0.04
-    #place_position[1] += 0.1
-    #place_position[2] += 0.1
+    # place_position[1] += 0.1
+    # place_position[2] += 0.1
+
+    # place_position[0] += 0.1
+    # place_position[1] -= 0.05
+    # place_position[2] += 0.05
 
     X_WOPick = RigidTransform(p=pick_position)
     X_WOPlace = RigidTransform(p=place_position)

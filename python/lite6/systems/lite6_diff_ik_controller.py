@@ -96,8 +96,6 @@ class Lite6DiffIKController(LeafSystem):
         context: Context,
         output_vector: BasicVector,
     ) -> None:
-        print(context.get_time())
-
         joint_q = self.ik_pe_input_port.Eval(context)
         joint_v = self.ik_ve_input_port.Eval(context)
         gripper_V = self.ik_gvd_input_port.Eval(context)
@@ -113,10 +111,10 @@ class Lite6DiffIKController(LeafSystem):
             joint_q = np.hstack((joint_q, np.zeros(LITE6_GRIPPER_DOF)))
             joint_v = np.hstack((joint_v, np.zeros(LITE6_GRIPPER_DOF)))
 
-        #self._plant.SetPositions(
-        #    self._context,
-        #    joint_q,
-        #)
+        self._plant.SetPositions(
+            self._context,
+            joint_q,
+        )
         jacobian = self._plant.CalcJacobianSpatialVelocity(
             context=self._context,
             with_respect_to=JacobianWrtVariable.kV,

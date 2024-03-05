@@ -1,12 +1,15 @@
 """
 Simple pick and place of a 1 inch block.
 """
+from typing import Tuple
+
 import numpy as np
 from pydrake.all import DiagramBuilder
 from pydrake.common.value import Value
 from pydrake.math import RigidTransform, RotationMatrix
 from pydrake.multibody.plant import MultibodyPlantConfig
 from pydrake.systems.framework import Diagram, EventStatus
+from pydrake.systems.primitives import TrajectorySource
 from pydrake.trajectories import PiecewisePose
 
 from python.analysis.pliant_analysis.lite6_pliant_analysis_choreographer import (
@@ -26,6 +29,7 @@ from python.lite6.pliant.lite6_pliant_utils import (
     create_simulator_for_lite6_pliant,
     get_tuned_pid_gains_for_pliant_id_controller,
 )
+from python.lite6.systems.lite6_diff_ik_controller import Lite6DiffIKController
 from python.lite6.systems.lite6_gripper_status_source import Lite6GripperStatusSource
 from python.lite6.utils.lite6_model_utils import (
     LITE6_GRIPPER_ACTIVATION_TIME,
@@ -42,35 +46,11 @@ G_F_TIME = 2.0
 G_WAIT_TIME = 2.0
 
 
-def execute_simple_pick_and_place(
-    config: Lite6PliantConfig,
+def _construct_trajectory_sources(
+    X_WG: RigidTransform,
     X_WOPick: RigidTransform,
     X_WOPlace: RigidTransform,
-) -> None:
-
-    builder = DiagramBuilder()
-
-    lite6_pliant_container = create_lite6_pliant(
-        config=config,
-    )
-    # TODO: Handle plant stuff for hardware pliant
-    main_plant = lite6_pliant_container.plant
-
-    lite6_pliant: Diagram = builder.AddNamedSystem(
-        name="lite6_pliant",
-        system=lite6_pliant_container.pliant_diagram,
-    )
-
-    main_plant_context = main_plant.CreateDefaultContext()
-    X_WG = main_plant.EvalBodyPoseInWorld(
-        context=main_plant_context,
-        body=main_plant.GetBodyByName(
-            name=get_lite6_urdf_eef_tip_frame_name(
-                lite6_model_type=config.lite6_model_type,
-            ),
-        ),
-    )
-    # X_OPickGPick = X_OPlaceGPlace = X_OG
+) -> Tuple[TrajectorySource, Lite6GripperStatusSource]:
     X_OG = RigidTransform(
         R=RotationMatrix.MakeXRotation(theta=np.pi),
         p=np.array([0.0, 0.0, OBJECT_TO_GRIPPER_Z], dtype=np.float64),
@@ -134,6 +114,8 @@ def execute_simple_pick_and_place(
     )
     V_WG_trajectory = X_WG_trajectory.MakeDerivative(derivative_order=1)
 
+    gripper_V_trajectory_source = TrajectorySource(V_WG_trajectory)
+
     gripper_times = [
         0.0,
         LITE6_GRIPPER_ACTIVATION_TIME,
@@ -149,10 +131,61 @@ def execute_simple_pick_and_place(
         Lite6GripperStatus.NEUTRAL,
     ]
 
+    gripper_status_source = Lite6GripperStatusSource(
+        times=gripper_times,
+        statuses=gripper_statuses,
+    )
+
+    return gripper_V_trajectory_source, gripper_status_source
+
+
+def execute_simple_pick_and_place(
+    config: Lite6PliantConfig,
+    X_WOPick: RigidTransform,
+    X_WOPlace: RigidTransform,
+) -> None:
+
+    builder = DiagramBuilder()
+
+    lite6_pliant_container = create_lite6_pliant(
+        config=config,
+    )
+    # TODO: Handle plant stuff for hardware pliant
+    main_plant = lite6_pliant_container.plant
+
+    lite6_pliant: Diagram = builder.AddNamedSystem(
+        name="lite6_pliant",
+        system=lite6_pliant_container.pliant_diagram,
+    )
+
+    main_plant_context = main_plant.CreateDefaultContext()
+    X_WG = main_plant.EvalBodyPoseInWorld(
+        context=main_plant_context,
+        body=main_plant.GetBodyByName(
+            name=get_lite6_urdf_eef_tip_frame_name(
+                lite6_model_type=config.lite6_model_type,
+            ),
+        ),
+    )
+
+    gripper_V_trajectory_source, gripper_status_source = _construct_trajectory_sources(
+        X_WG=X_WG,
+        X_WOPick=X_WOPick,
+        X_WOPlace=X_WOPlace,
+    )
+
+    gripper_V_trajectory_source = builder.AddSystem(
+        gripper_V_trajectory_source,
+    )
+
     gripper_status_source = builder.AddSystem(
-        Lite6GripperStatusSource(
-            times=gripper_times,
-            statuses=gripper_statuses,
+        gripper_status_source,
+    )
+
+    lite6_diff_ik_controller = builder.AddSystem(
+        Lite6DiffIKController(
+            config=config,
+            plant=ik_plant,
         ),
     )
 
@@ -161,18 +194,17 @@ def execute_simple_pick_and_place(
         lite6_pliant.GetInputPort(LITE6_PLIANT_GSD_IP_NAME),
     )
 
-    # builder.Connect(
-    #    lite6_pliant.GetOutputPort(LITE6_PLIANT_PE_OP_NAME),
-    #    choreographer_controller.cc_pe_input_port,
-    # )
-    # builder.Connect(
-    #    lite6_pliant.GetOutputPort(LITE6_PLIANT_VE_OP_NAME),
-    #    choreographer_controller.cc_ve_input_port,
-    # )
-    # builder.Connect(
-    #    choreographer_controller.cc_output_port,
-    #    lite6_pliant.GetInputPort(LITE6_PLIANT_VD_IP_NAME),
-    # )
+    builder.Connect(
+        lite6_pliant.GetOutputPort(LITE6_PLIANT_PE_OP_NAME),
+    )
+    builder.Connect(
+        lite6_pliant.GetOutputPort(LITE6_PLIANT_VE_OP_NAME),
+        choreographer_controller.cc_ve_input_port,
+    )
+    builder.Connect(
+        choreographer_controller.cc_output_port,
+        lite6_pliant.GetInputPort(LITE6_PLIANT_VD_IP_NAME),
+    )
 
     # diagram = builder.Build()
     # simulator = create_simulator_for_lite6_pliant(

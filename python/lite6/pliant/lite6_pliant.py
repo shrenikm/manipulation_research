@@ -40,6 +40,7 @@ from python.lite6.utils.lite6_model_utils import (
     LITE6_DOF,
     Lite6GripperStatus,
     add_lite6_model_to_plant,
+    create_lite6_plant_for_system,
     get_default_lite6_joint_positions,
 )
 
@@ -208,12 +209,13 @@ def create_lite6_pliant_for_simulation(
         builder=builder,
     )
 
-    lite6_controller_plant = MultibodyPlant(time_step=config.plant_config.time_step)
-    lite6_controller_model = add_lite6_model_to_plant(
-        plant=lite6_controller_plant,
+    lite6_controller_plant = create_lite6_plant_for_system(
+        time_step=config.plant_config.time_step,
         lite6_model_type=config.lite6_model_type,
     )
-    lite6_controller_plant.Finalize()
+    lite6_controller_model = lite6_controller_plant.GetModelInstanceByName(
+        name=config.lite6_model_type.value,
+    )
 
     # Set the default starting joint positions for the controller plant as well.
     lite6_controller_plant.SetDefaultPositions(

@@ -23,6 +23,7 @@ from python.common.model_utils import (
     get_robot_models_directory_path,
 )
 
+LITE6_URDF_DESCRIPTION_EXTENSION = "urdf"
 LITE6_TABLE_FILENAME = "lite6_table.urdf"
 LITE6_DESCRIPTION_DIRNAME = "lite6_description"
 LITE6_GRIPPER_URDF_FILENAME_PREFIXES = (
@@ -70,13 +71,13 @@ class Lite6GripperStatus(Enum):
 
 
 class Lite6ModelType(StrEnum):
-    NP_GRIPPER = "lite6_normal_parallel_gripper.urdf"
-    RP_GRIPPER = "lite6_reverse_parallel_gripper.urdf"
-    V_GRIPPER = "lite6_vacuum_gripper.urdf"
-    ROBOT_WITHOUT_GRIPPER = "lite6_robot_without_gripper.urdf"
-    ROBOT_WITH_NP_GRIPPER = "lite6_robot_with_normal_parallel_gripper.urdf"
-    ROBOT_WITH_RP_GRIPPER = "lite6_robot_with_reverse_parallel_gripper.urdf"
-    ROBOT_WITH_V_GRIPPER = "lite6_robot_with_vacuum_gripper.urdf"
+    NP_GRIPPER = "lite6_normal_parallel_gripper"
+    RP_GRIPPER = "lite6_reverse_parallel_gripper"
+    V_GRIPPER = "lite6_vacuum_gripper"
+    ROBOT_WITHOUT_GRIPPER = "lite6_robot_without_gripper"
+    ROBOT_WITH_NP_GRIPPER = "lite6_robot_with_normal_parallel_gripper"
+    ROBOT_WITH_RP_GRIPPER = "lite6_robot_with_reverse_parallel_gripper"
+    ROBOT_WITH_V_GRIPPER = "lite6_robot_with_vacuum_gripper"
 
 
 class Lite6ModelGroups:
@@ -109,7 +110,9 @@ class Lite6ModelGroups:
 
 def get_drake_lite6_urdf_path(lite6_model_type: Lite6ModelType) -> FilePath:
 
-    lite6_urdf_filename = lite6_model_type.value
+    lite6_urdf_filename = (
+        lite6_model_type.value + "." + LITE6_URDF_DESCRIPTION_EXTENSION
+    )
 
     if LITE6_ROBOT_WITH_GRIPPER_URDF_FILENAME_PREFIX in lite6_urdf_filename:
         subdir = LITE6_ROBOT_WITH_GRIPPER_SUBDIR
@@ -530,3 +533,23 @@ def add_lite6_model_to_plant(
         )
         plant.WeldFrames(plant.world_frame(), plant.GetFrameByName(base_frame_name))
         return lite6_model
+
+
+def create_lite6_plant_for_system(
+    time_step: float,
+    lite6_model_type: Lite6ModelType,
+) -> MultibodyPlant:
+    """
+    Return a finalized MultiBodyPlant for the given Lite6 model type.
+    This is useful for different systems (like controllers) that require the plant
+    to compute things like Jacobians, etc.
+    """
+
+    lite6_system_plant = MultibodyPlant(time_step=time_step)
+    add_lite6_model_to_plant(
+        plant=lite6_system_plant,
+        lite6_model_type=lite6_model_type,
+        place_on_table=True,
+    )
+    lite6_system_plant.Finalize()
+    return lite6_system_plant

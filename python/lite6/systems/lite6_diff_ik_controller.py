@@ -54,11 +54,11 @@ class Lite6DiffIKController(LeafSystem):
             num_positions=plant.num_positions(),
             num_velocities=plant.num_velocities(),
         )
-        self._diff_ik_parameters.set_nominal_joint_position(
-            get_default_lite6_joint_positions(
-                lite6_model_type=config.lite6_model_type,
-            ),
-        )
+        # self._diff_ik_parameters.set_nominal_joint_position(
+        #    get_default_lite6_joint_positions(
+        #        lite6_model_type=config.lite6_model_type,
+        #    ),
+        # )
         self._diff_ik_parameters.set_time_step(dt=config.plant_config.time_step)
         self._diff_ik_parameters.set_joint_position_limits(
             (plant.GetPositionLowerLimits(), plant.GetPositionUpperLimits()),
@@ -86,7 +86,8 @@ class Lite6DiffIKController(LeafSystem):
 
         self.ik_vd_output_port = self.DeclareVectorOutputPort(
             name=IK_VD_OP_NAME,
-            size=LITE6_DOF,
+            # TODO: Clean up
+            size=8,
             calc=self._compute_diff_ik_velocities_output,
         )
 
@@ -95,6 +96,7 @@ class Lite6DiffIKController(LeafSystem):
         context: Context,
         output_vector: BasicVector,
     ) -> None:
+        print(context.get_time())
 
         joint_q = self.ik_pe_input_port.Eval(context)
         joint_v = self.ik_ve_input_port.Eval(context)
@@ -111,10 +113,10 @@ class Lite6DiffIKController(LeafSystem):
             joint_q = np.hstack((joint_q, np.zeros(LITE6_GRIPPER_DOF)))
             joint_v = np.hstack((joint_v, np.zeros(LITE6_GRIPPER_DOF)))
 
-        self._plant.SetPositions(
-            self._context,
-            joint_q,
-        )
+        #self._plant.SetPositions(
+        #    self._context,
+        #    joint_q,
+        #)
         jacobian = self._plant.CalcJacobianSpatialVelocity(
             context=self._context,
             with_respect_to=JacobianWrtVariable.kV,
@@ -123,9 +125,12 @@ class Lite6DiffIKController(LeafSystem):
             frame_A=self._plant.world_frame(),
             frame_E=self._plant.world_frame(),
         )
-        print(jacobian)
-        print(jacobian.shape)
-        input()
+        # Removing the gripper information from the Jacobian.
+        # jacobian = jacobian[:, :LITE6_DOF]
+        #print(joint_q.round(2))
+        #print(joint_v.round(2))
+        #print(jacobian.round(2))
+        #print("=====")
 
         diff_ik_result = DoDifferentialInverseKinematics(
             joint_q,
@@ -136,7 +141,7 @@ class Lite6DiffIKController(LeafSystem):
         )
 
         if diff_ik_result.status != DifferentialInverseKinematicsStatus.kSolutionFound:
-            raise Lite6SystemError("Diff IK failed!")
+            raise Lite6SystemError(f"Diff IK failed! status: {diff_ik_result.status}")
         output_vector.SetFromVector(
-            value=diff_ik_result.joint_velocities(),
+            value=diff_ik_result.joint_velocities,
         )

@@ -9,7 +9,7 @@ from pydrake.common.value import Value
 from pydrake.math import RigidTransform, RotationMatrix
 from pydrake.multibody.plant import MultibodyPlantConfig
 from pydrake.systems.framework import Diagram, EventStatus
-from pydrake.systems.primitives import TrajectorySource
+from pydrake.systems.primitives import Demultiplexer, Multiplexer, TrajectorySource
 from pydrake.trajectories import PiecewisePose
 
 from python.analysis.pliant_analysis.lite6_pliant_analysis_choreographer import (
@@ -32,16 +32,18 @@ from python.lite6.pliant.lite6_pliant_utils import (
 from python.lite6.systems.lite6_diff_ik_controller import Lite6DiffIKController
 from python.lite6.systems.lite6_gripper_status_source import Lite6GripperStatusSource
 from python.lite6.utils.lite6_model_utils import (
+    LITE6_DOF,
     LITE6_GRIPPER_ACTIVATION_TIME,
     Lite6ControlType,
     Lite6GripperStatus,
     Lite6ModelType,
+    create_lite6_plant_for_system,
     get_default_height_for_object_model_type,
     get_lite6_urdf_eef_tip_frame_name,
 )
 
 OBJECT_TO_GRIPPER_Z = 0.0
-G_TO_F_Z = -0.05
+G_TO_F_Z = -0.0
 G_F_TIME = 2.0
 G_WAIT_TIME = 2.0
 
@@ -182,11 +184,51 @@ def execute_simple_pick_and_place(
         gripper_status_source,
     )
 
+    ik_plant = create_lite6_plant_for_system(
+        time_step=config.plant_config.time_step,
+        lite6_model_type=config.lite6_model_type,
+    )
     lite6_diff_ik_controller = builder.AddSystem(
         Lite6DiffIKController(
             config=config,
             plant=ik_plant,
         ),
+    )
+    builder.AddSystem(
+        Lite6DiffIKController(
+            config=config,
+            plant=ik_plant,
+        ),
+    )
+    demux = builder.AddSystem(
+        Demultiplexer(
+            output_ports_sizes=[LITE6_DOF, 2],
+        ),
+    )
+
+    # Connect the IK controller.
+    builder.Connect(
+        lite6_pliant.GetOutputPort(LITE6_PLIANT_PE_OP_NAME),
+        lite6_diff_ik_controller.ik_pe_input_port,
+    )
+    builder.Connect(
+        lite6_pliant.GetOutputPort(LITE6_PLIANT_VE_OP_NAME),
+        lite6_diff_ik_controller.ik_ve_input_port,
+    )
+    builder.Connect(
+        gripper_V_trajectory_source.get_output_port(),
+        lite6_diff_ik_controller.ik_gvd_input_port,
+    )
+
+    # Connect the Pliant.
+    builder.Connect(
+        lite6_diff_ik_controller.ik_vd_output_port,
+        # lite6_pliant.GetInputPort(LITE6_PLIANT_VD_IP_NAME),
+        demux.get_input_port(),
+    )
+    builder.Connect(
+        demux.get_output_port(0),
+        lite6_pliant.GetInputPort(LITE6_PLIANT_VD_IP_NAME),
     )
 
     builder.Connect(
@@ -194,31 +236,14 @@ def execute_simple_pick_and_place(
         lite6_pliant.GetInputPort(LITE6_PLIANT_GSD_IP_NAME),
     )
 
-    builder.Connect(
-        lite6_pliant.GetOutputPort(LITE6_PLIANT_PE_OP_NAME),
+    diagram = builder.Build()
+    simulator = create_simulator_for_lite6_pliant(
+        config=config,
+        diagram=diagram,
     )
-    builder.Connect(
-        lite6_pliant.GetOutputPort(LITE6_PLIANT_VE_OP_NAME),
-        choreographer_controller.cc_ve_input_port,
-    )
-    builder.Connect(
-        choreographer_controller.cc_output_port,
-        lite6_pliant.GetInputPort(LITE6_PLIANT_VD_IP_NAME),
-    )
+    simulator_context = simulator.get_mutable_context()
 
-    # diagram = builder.Build()
-    # simulator = create_simulator_for_lite6_pliant(
-    #    config=config,
-    #    diagram=diagram,
-    # )
-    # simulator_context = simulator.get_mutable_context()
-    # lite6_pliant_context = lite6_pliant.GetMyContextFromRoot(simulator_context)
-
-    # lite6_pliant.GetInputPort(
-    #    port_name=LITE6_PLIANT_GSD_IP_NAME,
-    # ).FixValue(lite6_pliant_context, Value(Lite6GripperStatus.NEUTRAL))
-
-    # diagram.ForcedPublish(simulator_context)
+    diagram.ForcedPublish(simulator_context)
 
     # def simulation_end_monitor(*_):
     #    if choreographer_controller.is_done():
@@ -231,11 +256,11 @@ def execute_simple_pick_and_place(
     #    monitor=simulation_end_monitor,
     # )
 
-    # with lite6_pliant_container.auto_meshcat_recording():
-    #    simulator.AdvanceTo(
-    #        boundary_time=np.inf,
-    #        interruptible=True,
-    #    )
+    with lite6_pliant_container.auto_meshcat_recording():
+        simulator.AdvanceTo(
+            boundary_time=5.0,
+            interruptible=True,
+        )
 
 
 if __name__ == "__main__":
@@ -276,9 +301,14 @@ if __name__ == "__main__":
         object_model_configs=object_model_configs,
     )
 
-    X_WOPick = RigidTransform(p=pick_object.position)
+    pick_position = np.copy(pick_object.position)
     place_position = np.copy(pick_object.position)
-    place_position[0] += 0.1
+
+    pick_position[2] += 0.04
+    #place_position[1] += 0.1
+    #place_position[2] += 0.1
+
+    X_WOPick = RigidTransform(p=pick_position)
     X_WOPlace = RigidTransform(p=place_position)
     print(X_WOPick)
     print(X_WOPlace)

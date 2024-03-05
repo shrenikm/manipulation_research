@@ -7,7 +7,7 @@ from pydrake.geometry import Meshcat, SceneGraph
 from pydrake.multibody.plant import MultibodyPlant
 from pydrake.systems.framework import Diagram
 
-from python.common.exceptions import Lite6PliantError
+from python.common.exceptions import Lite6Error
 from python.common.logging_utils import MRLogger
 
 
@@ -37,7 +37,7 @@ class MultibodyPliantContainer:
             self.meshcat.StartRecording(set_visualizations_while_recording=False)
         try:
             yield
-        except (Lite6PliantError, KeyboardInterrupt) as e:
+        except (Lite6Error, KeyboardInterrupt) as e:
             # If interrupted, we log, run the post hook cleanup and then exit.
             MRLogger(self.__class__.__name__).info(f"Simulation interrupted: {e}")
             if self.post_run_hook is not None:

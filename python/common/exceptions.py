@@ -12,3 +12,7 @@ class Lite6HardwarePliant(Lite6PliantError):
 
 class Lite6PliantChoreographerError(Lite6PliantError):
     pass
+
+
+class Lite6SystemError(Exception):
+    pass

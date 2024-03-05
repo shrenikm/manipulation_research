@@ -47,7 +47,6 @@ class Lite6GripperStatusSource(LeafSystem):
         # If we're at the last index, the rest of the simulation will have this system
         # output the final state at its output port.
         if self._index == self._n - 1:
-            print("last!", context.get_time())
             output_value.set_value(self._statuses[self._index])
             return
 

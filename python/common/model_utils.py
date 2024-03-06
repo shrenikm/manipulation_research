@@ -16,6 +16,8 @@ OBJECT_MODELS_DIRNAME = "objects"
 ROBOT_MODELS_DIRNAME = "robot_models"
 ROBOT_MODELS_DRAKE_URDF_DIRNAME = "drake_urdf"
 
+# TODO: Tests.
+
 
 class ObjectModelType(StrEnum):
     CUBE_1_INCH = "cube_1_inch.urdf"

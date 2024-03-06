@@ -54,11 +54,11 @@ class Lite6DiffIKController(LeafSystem):
             num_positions=plant.num_positions(),
             num_velocities=plant.num_velocities(),
         )
-        # self._diff_ik_parameters.set_nominal_joint_position(
-        #    get_default_lite6_joint_positions(
-        #        lite6_model_type=config.lite6_model_type,
-        #    ),
-        # )
+        #self._diff_ik_parameters.set_nominal_joint_position(
+        #   get_default_lite6_joint_positions(
+        #       lite6_model_type=config.lite6_model_type,
+        #   ),
+        #)
         self._diff_ik_parameters.set_time_step(dt=config.plant_config.time_step)
         self._diff_ik_parameters.set_joint_position_limits(
             (plant.GetPositionLowerLimits(), plant.GetPositionUpperLimits()),

@@ -305,11 +305,9 @@ if __name__ == "__main__":
     pick_position = np.copy(pick_object.position)
     place_position = np.copy(pick_object.position)
 
-    pick_position[2] += 0.1
-
-    # place_position[0] += 0.1
+    #place_position[0] += 0.1
     # place_position[1] -= 0.01
-    place_position[2] += 0.1
+    place_position[2] += 0.05
 
     X_WOPick = RigidTransform(p=pick_position)
     X_WOPlace = RigidTransform(p=place_position)

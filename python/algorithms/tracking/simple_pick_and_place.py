@@ -257,9 +257,9 @@ def execute_simple_pick_and_place(
     #    monitor=simulation_end_monitor,
     # )
 
-    with lite6_pliant_container.auto_meshcat_recording():
+    with lite6_pliant_container.auto_meshcat_visualization(record=False):
         simulator.AdvanceTo(
-            boundary_time=10.0,
+            boundary_time=20.0,
             interruptible=True,
         )
 
@@ -305,12 +305,11 @@ if __name__ == "__main__":
     pick_position = np.copy(pick_object.position)
     place_position = np.copy(pick_object.position)
 
-    # place_position[1] += 0.1
-    # place_position[2] += 0.1
+    pick_position[2] += 0.1
 
     # place_position[0] += 0.1
-    # place_position[1] -= 0.05
-    # place_position[2] += 0.05
+    # place_position[1] -= 0.01
+    place_position[2] += 0.1
 
     X_WOPick = RigidTransform(p=pick_position)
     X_WOPlace = RigidTransform(p=place_position)

@@ -98,9 +98,9 @@ def check_gripper_control(
         port_name=LITE6_PLIANT_VD_IP_NAME,
     ).FixValue(lite6_pliant_context, np.zeros(LITE6_DOF, dtype=np.float64))
 
-    with lite6_pliant_container.auto_meshcat_recording():
+    with lite6_pliant_container.auto_meshcat_visualization(record=False):
         simulator.AdvanceTo(
-            boundary_time=15.0,
+            boundary_time=30.0,
             interruptible=True,
         )
 

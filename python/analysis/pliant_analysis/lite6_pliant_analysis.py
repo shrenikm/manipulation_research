@@ -88,7 +88,7 @@ def analyze_lite6_pliant(
         monitor=simulation_end_monitor,
     )
 
-    with lite6_pliant_container.auto_meshcat_recording():
+    with lite6_pliant_container.auto_meshcat_visualization(record=False):
         simulator.AdvanceTo(
             boundary_time=np.inf,
             interruptible=True,

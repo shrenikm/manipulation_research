@@ -25,15 +25,22 @@ class MultibodyPliantContainer:
     post_run_hook: Optional[Callable[[Diagram], None]] = None
 
     @contextmanager
-    def auto_meshcat_recording(self) -> Generator[None, None, None]:
+    def auto_meshcat_visualization(
+        self,
+        record: bool,
+    ) -> Generator[None, None, None]:
         """
         Sets up meshcat recording if a meshcat instance is given.
 
         Usage:
-            with container.auto_meshcat_recording():
+            with container.auto_meshcat_visualization(record=...):
                 simulator.AdvanceTo(...)
+
+        TODO: Maybe "record" needs to be renamed.
+        If record is True, records and publishes the recording instead of playing it live.
+        If False, plays the recording live.
         """
-        if self.meshcat is not None:
+        if self.meshcat is not None and record:
             self.meshcat.StartRecording(set_visualizations_while_recording=False)
         try:
             yield
@@ -48,6 +55,6 @@ class MultibodyPliantContainer:
         if self.post_run_hook is not None:
             self.post_run_hook(self.pliant_diagram)
 
-        if self.meshcat is not None:
+        if self.meshcat is not None and record:
             self.meshcat.StopRecording()
             self.meshcat.PublishRecording()

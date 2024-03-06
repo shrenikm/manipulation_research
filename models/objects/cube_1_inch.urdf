@@ -13,20 +13,87 @@
   <!-- Table represented as a box of size 24" x 40" x 29" -->
   <link name="link_cube_1_inch">
     <visual>
+      <origin xyz="0 0 0" rpy="0 0 0"/>
       <geometry>
         <box size="0.0254 0.0254 0.0254"/>
       </geometry>
       <material name="blue"/>
     </visual>
+
+    <!--
     <collision>
       <geometry>
         <box size="0.0254 0.0254 0.0254"/>
       </geometry>
+      <drake:proximity_properties>
+        <drake:mu_static value="0.2"/>
+        <drake:mu_dynamic value="0.15"/>
+        <drake:mu_static value="1."/>
+        <drake:mu_dynamic value="1."/>
+      </drake:proximity_properties>
     </collision>
+    -->
+
+    <collision>
+      <geometry>
+        <box size="0.0244 0.0244 0.0244"/>
+      </geometry>
+    </collision>
+
+    <collision>
+      <origin xyz="0.0127 0.0127 0.0127" rpy="0 0 0"/>
+      <geometry>
+        <sphere radius="1e-7"/>
+      </geometry>
+    </collision>
+    <collision>
+      <origin xyz="0.0127 0.0127 -0.0127" rpy="0 0 0"/>
+      <geometry>
+        <sphere radius="1e-7"/>
+      </geometry>
+    </collision>
+    <collision>
+      <origin xyz="0.0127 -0.0127 0.0127" rpy="0 0 0"/>
+      <geometry>
+        <sphere radius="1e-7"/>
+      </geometry>
+    </collision>
+    <collision>
+      <origin xyz="0.0127 -0.0127 -0.0127" rpy="0 0 0"/>
+      <geometry>
+        <sphere radius="1e-7"/>
+      </geometry>
+    </collision>
+    <collision>
+      <origin xyz="-0.0127 0.0127 0.0127" rpy="0 0 0"/>
+      <geometry>
+        <sphere radius="1e-7"/>
+      </geometry>
+    </collision>
+    <collision>
+      <origin xyz="-0.0127 0.0127 -0.0127" rpy="0 0 0"/>
+      <geometry>
+        <sphere radius="1e-7"/>
+      </geometry>
+    </collision>
+    <collision>
+      <origin xyz="-0.0127 -0.0127 0.0127" rpy="0 0 0"/>
+      <geometry>
+        <sphere radius="1e-7"/>
+      </geometry>
+    </collision>
+    <collision>
+      <origin xyz="-0.0127 -0.0127 -0.0127" rpy="0 0 0"/>
+      <geometry>
+        <sphere radius="1e-7"/>
+      </geometry>
+    </collision>
+
     <inertial>
       <mass value="0.006"/>
       <inertia ixx="0.000000645" ixy="0.0" ixz="0.0" iyy="0.000000645" iyz="0.0" izz="0.000000645"/>
     </inertial>
+
   </link>
 
 </robot>

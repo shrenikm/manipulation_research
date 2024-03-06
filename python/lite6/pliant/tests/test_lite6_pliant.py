@@ -16,7 +16,12 @@ from python.lite6.utils.lite6_model_utils import Lite6ModelType, get_lite6_num_p
 
 @pytest.mark.parametrize(
     "unsupported_model_type",
-    [Lite6ModelType.ROBOT_WITH_V_GRIPPER, Lite6ModelType.ROBOT_WITHOUT_GRIPPER],
+    [
+        Lite6ModelType.ROBOT_WITH_V_GRIPPER,
+        Lite6ModelType.ROBOT_WITHOUT_GRIPPER,
+        Lite6ModelType.ROBOT_WITH_UNP_GRIPPER,
+        Lite6ModelType.ROBOT_WITH_URP_GRIPPER,
+    ],
 )
 @pytest.mark.parametrize(
     "lite6_control_type",

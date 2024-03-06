@@ -40,6 +40,7 @@ from python.lite6.utils.lite6_model_utils import (
     create_lite6_plant_for_system,
     get_default_height_for_object_model_type,
     get_lite6_urdf_eef_tip_frame_name,
+    get_unactuated_parallel_gripper_counterpart,
 )
 
 OBJECT_TO_GRIPPER_Z = 0.0
@@ -147,6 +148,10 @@ def execute_simple_pick_and_place(
     X_WOPlace: RigidTransform,
 ) -> None:
 
+    unactuated_lite6_model_type = get_unactuated_parallel_gripper_counterpart(
+        lite6_model_type=config.lite6_model_type,
+    )
+
     builder = DiagramBuilder()
 
     lite6_pliant_container = create_lite6_pliant(
@@ -154,6 +159,7 @@ def execute_simple_pick_and_place(
     )
     # TODO: Handle plant stuff for hardware pliant
     main_plant = lite6_pliant_container.plant
+    assert main_plant is not None
 
     lite6_pliant: Diagram = builder.AddNamedSystem(
         name="lite6_pliant",
@@ -187,23 +193,12 @@ def execute_simple_pick_and_place(
 
     ik_plant = create_lite6_plant_for_system(
         time_step=config.plant_config.time_step,
-        lite6_model_type=config.lite6_model_type,
+        lite6_model_type=unactuated_lite6_model_type,
     )
     lite6_diff_ik_controller = builder.AddSystem(
         Lite6DiffIKController(
-            config=config,
             plant=ik_plant,
-        ),
-    )
-    builder.AddSystem(
-        Lite6DiffIKController(
-            config=config,
-            plant=ik_plant,
-        ),
-    )
-    demux = builder.AddSystem(
-        Demultiplexer(
-            output_ports_sizes=[LITE6_DOF, 2],
+            lite6_model_type=unactuated_lite6_model_type,
         ),
     )
 
@@ -224,11 +219,6 @@ def execute_simple_pick_and_place(
     # Connect the Pliant.
     builder.Connect(
         lite6_diff_ik_controller.ik_vd_output_port,
-        # lite6_pliant.GetInputPort(LITE6_PLIANT_VD_IP_NAME),
-        demux.get_input_port(),
-    )
-    builder.Connect(
-        demux.get_output_port(0),
         lite6_pliant.GetInputPort(LITE6_PLIANT_VD_IP_NAME),
     )
 
@@ -266,7 +256,7 @@ def execute_simple_pick_and_place(
 
 if __name__ == "__main__":
 
-    lite6_model_type = Lite6ModelType.ROBOT_WITH_RP_GRIPPER
+    lite6_model_type = Lite6ModelType.ROBOT_WITH_ARP_GRIPPER
     lite6_control_type = Lite6ControlType.VELOCITY
     lite6_pliant_type = Lite6PliantType.SIMULATION
     id_controller_pid_gains = get_tuned_pid_gains_for_pliant_id_controller(
@@ -305,7 +295,7 @@ if __name__ == "__main__":
     pick_position = np.copy(pick_object.position)
     place_position = np.copy(pick_object.position)
 
-    #place_position[0] += 0.1
+    # place_position[0] += 0.1
     # place_position[1] -= 0.01
     place_position[2] += 0.05
 

@@ -16,6 +16,7 @@ from python.lite6.utils.lite6_model_utils import (
     LITE6_GRIPPER_DOF,
     Lite6ControlType,
     Lite6ModelGroups,
+    Lite6ModelType,
     get_default_lite6_joint_positions,
     get_lite6_urdf_eef_tip_frame_name,
 )
@@ -29,24 +30,29 @@ IK_VD_OP_NAME = "vd_output"
 class Lite6DiffIKController(LeafSystem):
     def __init__(
         self,
-        config: Lite6PliantConfig,
+        lite6_model_type: Lite6ModelType,
         plant: MultibodyPlant,
     ):
-        # Currently only designed for velocity control
-        if config.lite6_control_type != Lite6ControlType.VELOCITY:
-            raise Lite6SystemError("Only velocity control is supported as of now.")
-        if config.lite6_model_type not in Lite6ModelGroups.LITE6_ROBOT_MODELS:
+        # Only supports unactuated gripper models
+        if (
+            lite6_model_type
+            not in Lite6ModelGroups.LITE6_ROBOT_WITH_UNACTUATED_GRIPPER_MODELS
+        ):
             raise Lite6SystemError("Invalid lite6 model type.")
 
         super().__init__()
 
-        self._config = config
         self._plant = plant
+
+        # Only non actuated models are allowed to be used here.
+        assert plant.num_positions() == LITE6_DOF
+        assert plant.num_velocities() == LITE6_DOF
+        assert plant.num_actuators() == LITE6_DOF
 
         self._context = plant.CreateDefaultContext()
         self._eef_tip_frame = plant.GetBodyByName(
             name=get_lite6_urdf_eef_tip_frame_name(
-                lite6_model_type=config.lite6_model_type,
+                lite6_model_type=lite6_model_type,
             ),
         ).body_frame()
 
@@ -54,12 +60,12 @@ class Lite6DiffIKController(LeafSystem):
             num_positions=plant.num_positions(),
             num_velocities=plant.num_velocities(),
         )
-        #self._diff_ik_parameters.set_nominal_joint_position(
+        # self._diff_ik_parameters.set_nominal_joint_position(
         #   get_default_lite6_joint_positions(
         #       lite6_model_type=config.lite6_model_type,
         #   ),
-        #)
-        self._diff_ik_parameters.set_time_step(dt=config.plant_config.time_step)
+        # )
+        self._diff_ik_parameters.set_time_step(dt=plant.time_step())
         self._diff_ik_parameters.set_joint_position_limits(
             (plant.GetPositionLowerLimits(), plant.GetPositionUpperLimits()),
         )
@@ -81,13 +87,12 @@ class Lite6DiffIKController(LeafSystem):
         )
         self.ik_gvd_input_port = self.DeclareVectorInputPort(
             name=IK_GVD_IP_NAME,
-            size=6,
+            size=LITE6_DOF,
         )
 
         self.ik_vd_output_port = self.DeclareVectorOutputPort(
             name=IK_VD_OP_NAME,
-            # TODO: Clean up
-            size=8,
+            size=LITE6_DOF,
             calc=self._compute_diff_ik_velocities_output,
         )
 
@@ -99,17 +104,6 @@ class Lite6DiffIKController(LeafSystem):
         joint_q = self.ik_pe_input_port.Eval(context)
         joint_v = self.ik_ve_input_port.Eval(context)
         gripper_V = self.ik_gvd_input_port.Eval(context)
-
-        # TODO: Hacky, setting gripper positions and velocities to zero now.
-        # We will remove this part of the jacobian anyway, so it doesn't matter
-        # what the value here is, but it's cleaner to give it the actual full
-        # position plant estimates.
-        if (
-            self._config.lite6_model_type
-            in Lite6ModelGroups.LITE6_ROBOT_WITH_PARALLEL_GRIPPER_MODELS
-        ):
-            joint_q = np.hstack((joint_q, np.zeros(LITE6_GRIPPER_DOF)))
-            joint_v = np.hstack((joint_v, np.zeros(LITE6_GRIPPER_DOF)))
 
         self._plant.SetPositions(
             self._context,
@@ -125,10 +119,10 @@ class Lite6DiffIKController(LeafSystem):
         )
         # Removing the gripper information from the Jacobian.
         # jacobian = jacobian[:, :LITE6_DOF]
-        #print(joint_q.round(2))
-        #print(joint_v.round(2))
-        #print(jacobian.round(2))
-        #print("=====")
+        # print(joint_q.round(2))
+        # print(joint_v.round(2))
+        # print(jacobian.round(2))
+        # print("=====")
 
         diff_ik_result = DoDifferentialInverseKinematics(
             joint_q,

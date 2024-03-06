@@ -206,6 +206,20 @@ def get_lite6_table_urdf_lite6_position_frame_name() -> str:
     return "link_lite6_position"
 
 
+def get_unactuated_parallel_gripper_counterpart(
+    lite6_model_type: Lite6ModelType,
+) -> Lite6ModelType:
+    assert (
+        lite6_model_type
+        in Lite6ModelGroups.LITE6_ROBOT_WITH_ACTUATED_PARALLEL_GRIPPER_MODELS
+    )
+
+    return {
+        Lite6ModelType.ROBOT_WITH_ANP_GRIPPER: Lite6ModelType.ROBOT_WITH_UNP_GRIPPER,
+        Lite6ModelType.ROBOT_WITH_ARP_GRIPPER: Lite6ModelType.ROBOT_WITH_URP_GRIPPER,
+    }[lite6_model_type]
+
+
 def get_lite6_num_actuators(lite6_model_type: Lite6ModelType) -> int:
     return {
         Lite6ModelType.NP_GRIPPER: LITE6_GRIPPER_DOF,
@@ -285,7 +299,10 @@ def add_joint_velocities_to_lite6_state(
 
     state_vector_with_added_velocities = np.copy(state_vector)
 
-    if lite6_model_type in Lite6ModelGroups.LITE6_ROBOT_WITH_ACTUATED_PARALLEL_GRIPPER_MODELS:
+    if (
+        lite6_model_type
+        in Lite6ModelGroups.LITE6_ROBOT_WITH_ACTUATED_PARALLEL_GRIPPER_MODELS
+    ):
         state_vector_with_added_velocities[
             LITE6_DOF + LITE6_GRIPPER_DOF : 2 * LITE6_DOF + LITE6_GRIPPER_DOF
         ] = velocities_vector
@@ -301,7 +318,10 @@ def get_parallel_gripper_positions(
     lite6_gripper_status: Lite6GripperStatus,
 ) -> Tuple[float, float]:
     # Only for actuated parallel gripper models.
-    assert lite6_model_type in Lite6ModelGroups.LITE6_ROBOT_WITH_ACTUATED_PARALLEL_GRIPPER_MODELS
+    assert (
+        lite6_model_type
+        in Lite6ModelGroups.LITE6_ROBOT_WITH_ACTUATED_PARALLEL_GRIPPER_MODELS
+    )
     # For neutral gripper position, we just return (0., 0.) and let the actual controller deal
     # with it. This is because we need to match the current estimated and desired so that they cancel
     # out and the gripper stops being actuated.
@@ -338,7 +358,10 @@ def add_gripper_positions_and_velocities_to_lite6_state(
     gripper_velocities: Tuple[float, float],
 ) -> StateVector:
     # Only for actuated parallel gripper models.
-    assert lite6_model_type in Lite6ModelGroups.LITE6_ROBOT_WITH_ACTUATED_PARALLEL_GRIPPER_MODELS
+    assert (
+        lite6_model_type
+        in Lite6ModelGroups.LITE6_ROBOT_WITH_ACTUATED_PARALLEL_GRIPPER_MODELS
+    )
 
     state_vector_with_added_gripper_state = np.copy(state_vector)
     state_vector_with_added_gripper_state[
@@ -385,7 +408,10 @@ def create_lite6_state(
     Creates the lite6 state from the given positions, velocities and gripper closed status.
     """
     # Only for actuated parallel gripper models.
-    assert lite6_model_type in Lite6ModelGroups.LITE6_ROBOT_WITH_ACTUATED_PARALLEL_GRIPPER_MODELS
+    assert (
+        lite6_model_type
+        in Lite6ModelGroups.LITE6_ROBOT_WITH_ACTUATED_PARALLEL_GRIPPER_MODELS
+    )
     state_vector = np.zeros(get_lite6_num_states(lite6_model_type), dtype=np.float64)
     state_vector = add_joint_positions_to_lite6_state(
         lite6_model_type=lite6_model_type,
@@ -420,7 +446,10 @@ def get_joint_velocities_from_lite6_state(
     assert lite6_model_type in Lite6ModelGroups.LITE6_ROBOT_MODELS
     nq = get_lite6_num_positions(lite6_model_type=lite6_model_type)
 
-    if lite6_model_type in Lite6ModelGroups.LITE6_ROBOT_WITH_ACTUATED_PARALLEL_GRIPPER_MODELS:
+    if (
+        lite6_model_type
+        in Lite6ModelGroups.LITE6_ROBOT_WITH_ACTUATED_PARALLEL_GRIPPER_MODELS
+    ):
         return state_vector[nq:-LITE6_GRIPPER_DOF]
     else:
         return state_vector[nq:]
@@ -449,7 +478,10 @@ def get_gripper_positions_from_lite6_state(
     """
     Left and right gripper positions.
     """
-    assert lite6_model_type in Lite6ModelGroups.LITE6_ROBOT_WITH_ACTUATED_PARALLEL_GRIPPER_MODELS
+    assert (
+        lite6_model_type
+        in Lite6ModelGroups.LITE6_ROBOT_WITH_ACTUATED_PARALLEL_GRIPPER_MODELS
+    )
     return state_vector[LITE6_DOF], state_vector[LITE6_DOF + 1]
 
 
@@ -460,7 +492,10 @@ def get_gripper_velocities_from_lite6_state(
     """
     Left and right gripper velocities.
     """
-    assert lite6_model_type in Lite6ModelGroups.LITE6_ROBOT_WITH_ACTUATED_PARALLEL_GRIPPER_MODELS
+    assert (
+        lite6_model_type
+        in Lite6ModelGroups.LITE6_ROBOT_WITH_ACTUATED_PARALLEL_GRIPPER_MODELS
+    )
     return (
         state_vector[2 * LITE6_DOF + LITE6_GRIPPER_DOF],
         state_vector[2 * LITE6_DOF + LITE6_GRIPPER_DOF + 1],
@@ -473,7 +508,10 @@ def get_gripper_status_from_lite6_state(
     tolerance: float = 1e-4,
 ) -> Lite6GripperStatus:
 
-    assert lite6_model_type in Lite6ModelGroups.LITE6_ROBOT_WITH_ACTUATED_PARALLEL_GRIPPER_MODELS
+    assert (
+        lite6_model_type
+        in Lite6ModelGroups.LITE6_ROBOT_WITH_ACTUATED_PARALLEL_GRIPPER_MODELS
+    )
 
     parallel_gripper_positions = state_vector[LITE6_DOF : LITE6_DOF + LITE6_GRIPPER_DOF]
     if lite6_model_type == Lite6ModelType.ROBOT_WITH_ANP_GRIPPER:
@@ -513,7 +551,10 @@ def get_default_lite6_joint_positions(
     assert lite6_model_type in Lite6ModelGroups.LITE6_ROBOT_MODELS
     state_vector = np.zeros(get_lite6_num_states(lite6_model_type), dtype=np.float64)
 
-    if lite6_model_type in Lite6ModelGroups.LITE6_ROBOT_WITH_ACTUATED_PARALLEL_GRIPPER_MODELS:
+    if (
+        lite6_model_type
+        in Lite6ModelGroups.LITE6_ROBOT_WITH_ACTUATED_PARALLEL_GRIPPER_MODELS
+    ):
         # Default gripper state is closed.
         state_vector = add_gripper_status_to_lite6_state(
             lite6_model_type=lite6_model_type,

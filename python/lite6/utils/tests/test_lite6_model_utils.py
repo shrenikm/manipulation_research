@@ -28,6 +28,7 @@ from python.lite6.utils.lite6_model_utils import (
     get_lite6_urdf_base_frame_name,
     get_lite6_urdf_eef_tip_frame_name,
     get_positions_from_lite6_state,
+    get_unactuated_parallel_gripper_counterpart,
     get_velocities_from_lite6_state,
 )
 
@@ -182,6 +183,35 @@ def test_get_lite6_urdf_eef_tip_frame_name() -> None:
 
 def test_get_lite6_table_urdf_lite6_position_frame_name() -> None:
     assert get_lite6_table_urdf_lite6_position_frame_name() == "link_lite6_position"
+
+
+def test_get_unactuated_parallel_gripper_counterpart() -> None:
+    for lite6_model_type in [
+        Lite6ModelType.NP_GRIPPER,
+        Lite6ModelType.RP_GRIPPER,
+        Lite6ModelType.V_GRIPPER,
+        Lite6ModelType.ROBOT_WITH_UNP_GRIPPER,
+        Lite6ModelType.ROBOT_WITH_URP_GRIPPER,
+        Lite6ModelType.ROBOT_WITH_V_GRIPPER,
+        Lite6ModelType.ROBOT_WITHOUT_GRIPPER,
+    ]:
+        with pytest.raises(AssertionError):
+            get_unactuated_parallel_gripper_counterpart(
+                lite6_model_type=lite6_model_type
+            )
+    assert (
+        get_unactuated_parallel_gripper_counterpart(
+            lite6_model_type=Lite6ModelType.ROBOT_WITH_ANP_GRIPPER,
+        )
+        == Lite6ModelType.ROBOT_WITH_UNP_GRIPPER
+    )
+
+    assert (
+        get_unactuated_parallel_gripper_counterpart(
+            lite6_model_type=Lite6ModelType.ROBOT_WITH_ARP_GRIPPER,
+        )
+        == Lite6ModelType.ROBOT_WITH_URP_GRIPPER
+    )
 
 
 def test_get_lite6_num_actuators() -> None:

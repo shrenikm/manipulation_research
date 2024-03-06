@@ -2,9 +2,8 @@ from typing import List
 
 import numpy as np
 from pydrake.all import DiagramBuilder
-from pydrake.common.value import AbstractValue, Value
 from pydrake.multibody.plant import MultibodyPlantConfig
-from pydrake.systems.framework import Context, Diagram, LeafSystem, System
+from pydrake.systems.framework import Diagram
 
 from python.lite6.pliant.lite6_pliant import create_lite6_pliant
 from python.lite6.pliant.lite6_pliant_utils import (
@@ -23,37 +22,6 @@ from python.lite6.utils.lite6_model_utils import (
     Lite6GripperStatus,
     Lite6ModelType,
 )
-
-
-class GripperCheckController(LeafSystem):
-    def __init__(
-        self,
-        times: List[float],
-        statuses: List[Lite6GripperStatus],
-    ):
-        super().__init__()
-
-        self.check_time_s = check_time_s
-
-        self.gsd_output_port = self.DeclareAbstractOutputPort(
-            name="gsd_output_port",
-            alloc=lambda: Value(Lite6GripperStatus.NEUTRAL),
-            calc=self._compute_gripper_status_desired_output,
-        )
-
-    def _compute_gripper_status_desired_output(
-        self,
-        context: Context,
-        output_value: AbstractValue,
-    ) -> None:
-
-        partition = context.get_time() // self.check_time_s
-        if partition % 3 == 0:
-            output_value.set_value(Lite6GripperStatus.CLOSED)
-        elif partition % 3 == 1:
-            output_value.set_value(Lite6GripperStatus.NEUTRAL)
-        elif partition % 3 == 2:
-            output_value.set_value(Lite6GripperStatus.OPEN)
 
 
 def check_gripper_control(
@@ -98,16 +66,16 @@ def check_gripper_control(
         port_name=LITE6_PLIANT_VD_IP_NAME,
     ).FixValue(lite6_pliant_context, np.zeros(LITE6_DOF, dtype=np.float64))
 
-    with lite6_pliant_container.auto_meshcat_visualization(record=False):
+    with lite6_pliant_container.auto_meshcat_visualization(record=True):
         simulator.AdvanceTo(
-            boundary_time=30.0,
+            boundary_time=10.0,
             interruptible=True,
         )
 
 
 if __name__ == "__main__":
 
-    lite6_model_type = Lite6ModelType.ROBOT_WITH_RP_GRIPPER
+    lite6_model_type = Lite6ModelType.ROBOT_WITH_ARP_GRIPPER
     lite6_control_type = Lite6ControlType.VELOCITY
     lite6_pliant_type = Lite6PliantType.SIMULATION
     id_controller_pid_gains = get_tuned_pid_gains_for_pliant_id_controller(

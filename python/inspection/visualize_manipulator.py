@@ -45,6 +45,7 @@ def visualize_manipulator(
         object_model_configs=object_model_configs,
     )
     plant.Finalize()
+    print(plant.num_positions(lite6_model))
 
     meshcat.DeleteAddedControls()
 
@@ -74,7 +75,7 @@ if __name__ == "__main__":
 
     meshcat = StartMeshcat()
 
-    lite6_model_type = Lite6ModelType.ROBOT_WITH_NP_GRIPPER
+    lite6_model_type = Lite6ModelType.ROBOT_WITH_ANP_GRIPPER
     object_model_configs = [
         ObjectModelConfig(
             object_model_type=ObjectModelType.CUBE_1_INCH,

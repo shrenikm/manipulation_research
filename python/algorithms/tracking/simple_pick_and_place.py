@@ -94,10 +94,8 @@ def _construct_trajectory_sources(
     FPlaceG_distance = np.linalg.norm(X_WFPlace.translation() - X_WG.translation())
     FPlaceG_time = FPlaceG_distance / gripper_velocity
 
-    print(GFPick_distance, GPickFPlace_distance)
-    print(GFPick_time, GPickFPlace_time)
-
     pick_time = GFPick_time + G_F_TIME + G_WAIT_TIME
+    place_time = pick_time + GPickFPlace_time + G_F_TIME
 
     times = [
         0.0,
@@ -105,10 +103,10 @@ def _construct_trajectory_sources(
         GFPick_time + G_F_TIME,
         pick_time,
         pick_time + GPickFPlace_time,
-        pick_time + GPickFPlace_time + G_F_TIME,
-        pick_time + GPickFPlace_time + G_F_TIME + G_WAIT_TIME,
-        pick_time + GPickFPlace_time + G_F_TIME + G_WAIT_TIME + G_F_TIME,
-        pick_time + GPickFPlace_time + G_F_TIME + G_WAIT_TIME + G_F_TIME + FPlaceG_time,
+        place_time,
+        place_time + G_WAIT_TIME,
+        place_time + G_WAIT_TIME + G_F_TIME,
+        place_time + G_WAIT_TIME + G_F_TIME + FPlaceG_time,
     ]
 
     X_WG_trajectory = PiecewisePose.MakeLinear(
@@ -121,16 +119,18 @@ def _construct_trajectory_sources(
 
     gripper_times = [
         0.0,
-        LITE6_GRIPPER_ACTIVATION_TIME,
+        #LITE6_GRIPPER_ACTIVATION_TIME,
         GFPick_time + G_F_TIME,
-        pick_time + GPickFPlace_time + G_F_TIME,
-        #pick_time + GPickFPlace_time + G_F_TIME + LITE6_GRIPPER_ACTIVATION_TIME,
+        place_time,
+        place_time + G_WAIT_TIME + G_F_TIME,
+        #place_time + G_WAIT_TIME + G_F_TIME + LITE6_GRIPPER_ACTIVATION_TIME,
     ]
     gripper_statuses = [
         Lite6GripperStatus.OPEN,
-        Lite6GripperStatus.NEUTRAL,
+        #Lite6GripperStatus.NEUTRAL,
         Lite6GripperStatus.CLOSED,
         Lite6GripperStatus.OPEN,
+        Lite6GripperStatus.CLOSED,
         #Lite6GripperStatus.NEUTRAL,
     ]
 
@@ -175,7 +175,6 @@ def execute_simple_pick_and_place(
             ),
         ),
     )
-    print(X_WG)
 
     gripper_V_trajectory_source, gripper_status_source = _construct_trajectory_sources(
         X_WG=X_WG,
@@ -238,7 +237,7 @@ def execute_simple_pick_and_place(
 
     with lite6_pliant_container.auto_meshcat_visualization(record=True):
         simulator.AdvanceTo(
-            boundary_time=20.0,
+            boundary_time=25.0,
             interruptible=True,
         )
 
@@ -312,8 +311,6 @@ if __name__ == "__main__":
 
     X_WOPick = RigidTransform(p=pick_position)
     X_WOPlace = RigidTransform(p=place_position)
-    print(X_WOPick)
-    print(X_WOPlace)
 
     execute_simple_pick_and_place(
         config=lite6_pliant_config,

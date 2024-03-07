@@ -49,15 +49,15 @@ LITE6_RP_GRIPPER_CLOSED_POSITIONS = (0.0, 0.0)
 
 # Gripper open and closed velocities from the URDF
 # Velocity is computed approximately as:
-# v = d/t = 1.6 cm / 200 ms (as the gripper takes 200 ms to open/close)
-# = 0.08 m/s approx 0.1 m/s
+# v = d/t = 0.8 cm / 200 ms (as the gripper takes 200 ms to open/close)
+# = 0.04 m/s
 # We want to be on the higher end of the estimate to ensure gripping during pick place.
 # Also the force dynamics for the gripper for the Lite6 are not that important.
-LITE6_NP_GRIPPER_OPEN_VELOCITIES = (0.0, 0.0)
-LITE6_NP_GRIPPER_CLOSED_VELOCITIES = (-0.1, 0.1)
+LITE6_NP_GRIPPER_OPEN_VELOCITIES = (0.05, -0.05)
+LITE6_NP_GRIPPER_CLOSED_VELOCITIES = (-0.05, 0.05)
 
-LITE6_RP_GRIPPER_OPEN_VELOCITIES = (0.0, 0.0)
-LITE6_RP_GRIPPER_CLOSED_VELOCITIES = (-0.1, 0.1)
+LITE6_RP_GRIPPER_OPEN_VELOCITIES = (0.05, -0.05)
+LITE6_RP_GRIPPER_CLOSED_VELOCITIES = (-0.05, 0.05)
 
 LITE6_TABLE_HEIGHT = 0.7366
 

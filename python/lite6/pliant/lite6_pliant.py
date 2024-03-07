@@ -94,6 +94,7 @@ def create_lite6_pliant_for_hardware(
         lite6_model_type=config.lite6_model_type,
         place_on_table=True,
     )
+    plant.Finalize()
 
     (
         positions_desired,

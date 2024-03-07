@@ -37,10 +37,15 @@
 
   <link name="link_lite6_position"/>
 
+  <!-- 
+  Position the table such that the lite6 base is at (x, y) = (0, 0) in world coordinates
+  when placed on the appropriate position on the table.
+  -->
+
   <joint name="joint_world_to_lite6_table" type="fixed">
     <parent link="world"/>
     <child link="link_lite6_table"/>
-    <origin xyz="0 0 0.3683" rpy="0 0 0"/>
+    <origin xyz="0.1778 0 0.3683" rpy="0 0 0"/>
   </joint>
 
   <!--

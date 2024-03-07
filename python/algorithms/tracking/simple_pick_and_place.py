@@ -53,6 +53,7 @@ def _construct_trajectory_sources(
     X_WG: RigidTransform,
     X_WOPick: RigidTransform,
     X_WOPlace: RigidTransform,
+    X_WOEnd: RigidTransform,
 ) -> Tuple[TrajectorySource, Lite6GripperStatusSource]:
     X_OG = RigidTransform(
         R=RotationMatrix.MakeXRotation(theta=np.pi),
@@ -63,6 +64,7 @@ def _construct_trajectory_sources(
     )
     X_WGPick = X_WOPick @ X_OG
     X_WGPlace = X_WOPlace @ X_OG
+    X_WEnd = X_WOEnd @ X_OG
 
     X_WFPick = X_WGPick @ X_GF
     X_WFPlace = X_WGPlace @ X_GF
@@ -119,19 +121,19 @@ def _construct_trajectory_sources(
 
     gripper_times = [
         0.0,
-        #LITE6_GRIPPER_ACTIVATION_TIME,
+        # LITE6_GRIPPER_ACTIVATION_TIME,
         GFPick_time + G_F_TIME,
         place_time,
         place_time + G_WAIT_TIME + G_F_TIME,
-        #place_time + G_WAIT_TIME + G_F_TIME + LITE6_GRIPPER_ACTIVATION_TIME,
+        # place_time + G_WAIT_TIME + G_F_TIME + LITE6_GRIPPER_ACTIVATION_TIME,
     ]
     gripper_statuses = [
         Lite6GripperStatus.OPEN,
-        #Lite6GripperStatus.NEUTRAL,
+        # Lite6GripperStatus.NEUTRAL,
         Lite6GripperStatus.CLOSED,
         Lite6GripperStatus.OPEN,
         Lite6GripperStatus.CLOSED,
-        #Lite6GripperStatus.NEUTRAL,
+        # Lite6GripperStatus.NEUTRAL,
     ]
 
     gripper_status_source = Lite6GripperStatusSource(
@@ -146,6 +148,7 @@ def execute_simple_pick_and_place(
     config: Lite6PliantConfig,
     X_WOPick: RigidTransform,
     X_WOPlace: RigidTransform,
+    X_WOEnd: RigidTransform,
 ) -> None:
 
     unactuated_lite6_model_type = get_unactuated_parallel_gripper_counterpart(
@@ -180,6 +183,7 @@ def execute_simple_pick_and_place(
         X_WG=X_WG,
         X_WOPick=X_WOPick,
         X_WOPlace=X_WOPlace,
+        X_WOEnd=X_WOEnd,
     )
 
     gripper_V_trajectory_source = builder.AddSystem(
@@ -235,7 +239,7 @@ def execute_simple_pick_and_place(
 
     diagram.ForcedPublish(simulator_context)
 
-    with lite6_pliant_container.auto_meshcat_visualization(record=True):
+    with lite6_pliant_container.auto_meshcat_visualization(record=False):
         simulator.AdvanceTo(
             boundary_time=25.0,
             interruptible=True,
@@ -244,8 +248,9 @@ def execute_simple_pick_and_place(
 
 if __name__ == "__main__":
 
-    pick_xy = np.array([0.0, 0.0])
-    place_xy = np.array([-0.05, -0.15])
+    pick_xy = np.array([0.17, 0.0])
+    place_xy = np.array([0.12, -0.15])
+    end_xy = np.array([0.12, 0.0])
     place_height_padding = 0.005
 
     lite6_model_type = Lite6ModelType.ROBOT_WITH_ARP_GRIPPER
@@ -255,7 +260,7 @@ if __name__ == "__main__":
         lite6_control_type=lite6_control_type,
     )
     time_step = 0.001
-    hardware_control_loop_time_step = 0.001
+    hardware_control_loop_time_step = 0.02
     plant_config = MultibodyPlantConfig(
         time_step=time_step,
         # TODO: Better way to get this string?
@@ -309,11 +314,15 @@ if __name__ == "__main__":
     place_position = np.copy(green_cube.position)
     place_position[2] += 0.01 * 2.54 + place_height_padding
 
+    end_position = np.hstack((end_xy, cube_base_height))
+
     X_WOPick = RigidTransform(p=pick_position)
     X_WOPlace = RigidTransform(p=place_position)
+    X_WOEnd = RigidTransform(p=end_position)
 
     execute_simple_pick_and_place(
         config=lite6_pliant_config,
         X_WOPick=X_WOPick,
         X_WOPlace=X_WOPlace,
+        X_WOEnd=X_WOEnd,
     )

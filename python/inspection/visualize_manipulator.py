@@ -81,7 +81,7 @@ if __name__ == "__main__":
             object_model_type=ObjectModelType.CUBE_1_INCH_BLUE,
             position=np.array(
                 [
-                    0.0,
+                    0.2,
                     0.0,
                     get_default_height_for_object_model_type(
                         ObjectModelType.CUBE_1_INCH_BLUE

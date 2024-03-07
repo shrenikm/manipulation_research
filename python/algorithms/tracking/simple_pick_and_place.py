@@ -250,7 +250,7 @@ if __name__ == "__main__":
 
     lite6_model_type = Lite6ModelType.ROBOT_WITH_ARP_GRIPPER
     lite6_control_type = Lite6ControlType.VELOCITY
-    lite6_pliant_type = Lite6PliantType.SIMULATION
+    lite6_pliant_type = Lite6PliantType.HARDWARE
     id_controller_pid_gains = get_tuned_pid_gains_for_pliant_id_controller(
         lite6_control_type=lite6_control_type,
     )

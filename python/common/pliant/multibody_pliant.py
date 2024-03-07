@@ -18,7 +18,7 @@ class MultibodyPliantContainer:
     """
 
     pliant_diagram: Diagram
-    plant: Optional[MultibodyPlant] = None
+    plant: MultibodyPlant
     scene_graph: Optional[SceneGraph] = None
     meshcat: Optional[Meshcat] = None
 

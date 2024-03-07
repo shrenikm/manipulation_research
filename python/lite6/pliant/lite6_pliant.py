@@ -86,6 +86,15 @@ def create_lite6_pliant_for_hardware(
 ) -> MultibodyPliantContainer:
     builder: DiagramBuilder = DiagramBuilder()
 
+    # Create plant for hardware.
+    plant = MultibodyPlant(time_step=config.plant_config.time_step)
+    ApplyMultibodyPlantConfig(config=config.plant_config, plant=plant)
+    add_lite6_model_to_plant(
+        plant=plant,
+        lite6_model_type=config.lite6_model_type,
+        place_on_table=True,
+    )
+
     (
         positions_desired,
         velocities_desired,
@@ -150,6 +159,7 @@ def create_lite6_pliant_for_hardware(
 
     return MultibodyPliantContainer(
         pliant_diagram=diagram,
+        plant=plant,
         post_run_hook=_post_run_hook,
     )
 
@@ -169,8 +179,7 @@ def create_lite6_pliant_for_simulation(
         builder=builder,
     )
 
-    if config.plant_config is not None:
-        ApplyMultibodyPlantConfig(config.plant_config, main_plant)
+    ApplyMultibodyPlantConfig(config.plant_config, main_plant)
 
     # Load the model
     lite6_model = add_lite6_model_to_plant(

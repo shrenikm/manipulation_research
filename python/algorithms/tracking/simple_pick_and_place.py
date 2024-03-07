@@ -44,7 +44,7 @@ from python.lite6.utils.lite6_model_utils import (
 )
 
 OBJECT_TO_GRIPPER_Z = 0.0
-G_TO_F_Z = -0.02
+G_TO_F_Z = -0.03
 G_F_TIME = 2.0
 G_WAIT_TIME = 2.0
 
@@ -124,14 +124,14 @@ def _construct_trajectory_sources(
         LITE6_GRIPPER_ACTIVATION_TIME,
         GFPick_time + G_F_TIME,
         pick_time + GPickFPlace_time + G_F_TIME,
-        pick_time + GPickFPlace_time + G_F_TIME + LITE6_GRIPPER_ACTIVATION_TIME,
+        #pick_time + GPickFPlace_time + G_F_TIME + LITE6_GRIPPER_ACTIVATION_TIME,
     ]
     gripper_statuses = [
         Lite6GripperStatus.OPEN,
         Lite6GripperStatus.NEUTRAL,
         Lite6GripperStatus.CLOSED,
         Lite6GripperStatus.OPEN,
-        Lite6GripperStatus.NEUTRAL,
+        #Lite6GripperStatus.NEUTRAL,
     ]
 
     gripper_status_source = Lite6GripperStatusSource(
@@ -236,25 +236,18 @@ def execute_simple_pick_and_place(
 
     diagram.ForcedPublish(simulator_context)
 
-    # def simulation_end_monitor(*_):
-    #    if choreographer_controller.is_done():
-    #        return EventStatus.ReachedTermination(
-    #            diagram, "Choreography and recording done!"
-    #        )
-
-    ## Monitor to stop the simulation after choreography is done.
-    # simulator.set_monitor(
-    #    monitor=simulation_end_monitor,
-    # )
-
-    with lite6_pliant_container.auto_meshcat_visualization(record=False):
+    with lite6_pliant_container.auto_meshcat_visualization(record=True):
         simulator.AdvanceTo(
-            boundary_time=10.0,
+            boundary_time=20.0,
             interruptible=True,
         )
 
 
 if __name__ == "__main__":
+
+    pick_xy = np.array([0.0, 0.0])
+    place_xy = np.array([-0.05, -0.15])
+    place_height_padding = 0.005
 
     lite6_model_type = Lite6ModelType.ROBOT_WITH_ARP_GRIPPER
     lite6_control_type = Lite6ControlType.VELOCITY
@@ -270,21 +263,35 @@ if __name__ == "__main__":
         contact_model="hydroelastic_with_fallback",
     )
 
+    cube_base_height = get_default_height_for_object_model_type(
+        ObjectModelType.CUBE_1_INCH_BLUE,
+    )
+    # Blue cube is the cube to pick.
+    blue_cube = ObjectModelConfig(
+        object_model_type=ObjectModelType.CUBE_1_INCH_BLUE,
+        position=np.hstack((pick_xy, cube_base_height)),
+    )
+
+    # Stack of the other 3 cubes.
+    yellow_cube = ObjectModelConfig(
+        object_model_type=ObjectModelType.CUBE_1_INCH_YELLOW,
+        position=np.hstack((place_xy, cube_base_height)),
+    )
+    red_cube = ObjectModelConfig(
+        object_model_type=ObjectModelType.CUBE_1_INCH_RED,
+        position=np.hstack((place_xy, cube_base_height + 0.01 * 2.54)),
+    )
+    green_cube = ObjectModelConfig(
+        object_model_type=ObjectModelType.CUBE_1_INCH_GREEN,
+        position=np.hstack((place_xy, cube_base_height + 2 * 0.01 * 2.54)),
+    )
+
     object_model_configs = [
-        ObjectModelConfig(
-            object_model_type=ObjectModelType.CUBE_1_INCH_YELLOW,
-            position=np.array(
-                [
-                    0.0,
-                    0.0,
-                    get_default_height_for_object_model_type(
-                        ObjectModelType.CUBE_1_INCH_RED
-                    ),
-                ]
-            ),
-        ),
+        blue_cube,
+        yellow_cube,
+        red_cube,
+        green_cube,
     ]
-    pick_object = object_model_configs[0]
 
     lite6_pliant_config = Lite6PliantConfig(
         lite6_model_type=lite6_model_type,
@@ -296,12 +303,12 @@ if __name__ == "__main__":
         object_model_configs=object_model_configs,
     )
 
-    pick_position = np.copy(pick_object.position)
-    place_position = np.copy(pick_object.position)
+    # Blue cube is the one to pick
+    pick_position = np.copy(blue_cube.position)
 
-    # place_position[0] += 0.1
-    # place_position[1] -= 0.01
-    place_position[2] += 0.05
+    # The blue cube needs to be placed over the green cube (top of the stack of cubes)
+    place_position = np.copy(green_cube.position)
+    place_position[2] += 0.01 * 2.54 + place_height_padding
 
     X_WOPick = RigidTransform(p=pick_position)
     X_WOPlace = RigidTransform(p=place_position)

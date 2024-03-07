@@ -4,9 +4,6 @@
 
   <material name="brown">
     <color rgba="0.7 0.4 0.0 1.0"/>
-    <!--
-    <color rgba="0.3 0.1 0.0 1.0"/>
-    -->
   </material>
 
   <link name="world"/>
@@ -23,8 +20,7 @@
       <geometry>
         <box size="0.6096 1.1016 0.7366"/>
       </geometry>
-        <!--
-        -->
+      <origin xyz="0 0 0" rpy="0 0 0"/>
       <drake:proximity_properties>
         <drake:compliant_hydroelastic/>
         <drake:hydroelastic_modulus value="1e6"/>

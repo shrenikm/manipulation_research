@@ -1,22 +1,22 @@
 <?xml version="1.0" ?>
 
-<!-- Green cube of size 1 inch that can be manipulated -->
+<!-- Yellow cube of size 1 inch that can be manipulated -->
 
-<robot name="cube_1_inch_green">
+<robot name="cube_1_inch_yellow">
 
-  <material name="green">
-    <color rgba="0.18 0.46 0.18 1.0"/>
+  <material name="yellow">
+    <color rgba="1. 0.8 0. 1.0"/>
   </material>
 
   <link name="world"/>
 
-  <link name="link_cube_1_inch_green">
+  <link name="link_cube_1_inch_yellow">
     <visual>
       <origin xyz="0 0 0" rpy="0 0 0"/>
       <geometry>
         <box size="0.0254 0.0254 0.0254"/>
       </geometry>
-      <material name="green"/>
+      <material name="yellow"/>
     </visual>
 
     <collision>

@@ -115,7 +115,7 @@ def get_tuned_pid_gains_for_pliant_id_controller(
 ) -> PIDGains:
     if lite6_control_type == Lite6ControlType.VELOCITY:
         # Note that because of how velocity control is implemented in the pliant,
-        # only the pd gains matter. This is because in the ID controller, desired
+        # only the kd gains matter. This is because in the ID controller, desired
         # positions is set to estimated positions, and so this difference is always
         # zero.
         # The joint gains have been tuned using the analysis plots of the choreographer. (See lite6_pliant_analysis.py)
@@ -127,7 +127,7 @@ def get_tuned_pid_gains_for_pliant_id_controller(
             ),
             ki=np.array([0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 50.0, 50.0], dtype=np.float64),
             kd=np.array(
-                [50.0, 50.0, 50.0, 75.0, 75.0, 75.0, 50.0, 50.0], dtype=np.float64
+                [50.0, 50.0, 50.0, 75.0, 75.0, 75.0, 500.0, 500.0], dtype=np.float64
             ),
         )
     else:

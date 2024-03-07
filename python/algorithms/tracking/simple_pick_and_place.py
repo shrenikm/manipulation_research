@@ -7,7 +7,7 @@ import numpy as np
 from pydrake.all import DiagramBuilder
 from pydrake.common.value import Value
 from pydrake.math import RigidTransform, RotationMatrix
-from pydrake.multibody.plant import MultibodyPlantConfig
+from pydrake.multibody.plant import ContactModel, MultibodyPlantConfig
 from pydrake.systems.framework import Diagram, EventStatus
 from pydrake.systems.primitives import Demultiplexer, Multiplexer, TrajectorySource
 from pydrake.trajectories import PiecewisePose
@@ -247,7 +247,7 @@ def execute_simple_pick_and_place(
     #    monitor=simulation_end_monitor,
     # )
 
-    with lite6_pliant_container.auto_meshcat_visualization(record=True):
+    with lite6_pliant_container.auto_meshcat_visualization(record=False):
         simulator.AdvanceTo(
             boundary_time=10.0,
             interruptible=True,
@@ -264,17 +264,21 @@ if __name__ == "__main__":
     )
     time_step = 0.001
     hardware_control_loop_time_step = 0.001
-    plant_config = MultibodyPlantConfig(time_step=time_step)
+    plant_config = MultibodyPlantConfig(
+        time_step=time_step,
+        # TODO: Better way to get this string?
+        contact_model="hydroelastic_with_fallback",
+    )
 
     object_model_configs = [
         ObjectModelConfig(
-            object_model_type=ObjectModelType.CUBE_1_INCH,
+            object_model_type=ObjectModelType.CUBE_1_INCH_GREEN,
             position=np.array(
                 [
                     0.0,
                     0.0,
                     get_default_height_for_object_model_type(
-                        ObjectModelType.CUBE_1_INCH
+                        ObjectModelType.CUBE_1_INCH_GREEN
                     ),
                 ]
             ),

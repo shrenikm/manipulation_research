@@ -47,9 +47,22 @@ LITE6_NP_GRIPPER_CLOSED_POSITIONS = (0.0, 0.0)
 LITE6_RP_GRIPPER_OPEN_POSITIONS = (0.008, -0.008)
 LITE6_RP_GRIPPER_CLOSED_POSITIONS = (0.0, 0.0)
 
+# Gripper open and closed velocities from the URDF
+# Velocity is computed approximately as:
+# v = d/t = 1.6 cm / 200 ms (as the gripper takes 200 ms to open/close)
+# = 0.08 m/s approx 0.1 m/s
+# We want to be on the higher end of the estimate to ensure gripping during pick place.
+# Also the force dynamics for the gripper for the Lite6 are not that important.
+LITE6_NP_GRIPPER_OPEN_VELOCITIES = (0.0, 0.0)
+LITE6_NP_GRIPPER_CLOSED_VELOCITIES = (-0.1, 0.1)
+
+LITE6_RP_GRIPPER_OPEN_VELOCITIES = (0.0, 0.0)
+LITE6_RP_GRIPPER_CLOSED_VELOCITIES = (-0.1, 0.1)
+
 LITE6_TABLE_HEIGHT = 0.7366
-# This is a conservative estimate. The gripper takes ~200-250 ms to open/close
-LITE6_GRIPPER_ACTIVATION_TIME = 0.3
+
+# Approximate time it takes to open/close the gripper.
+LITE6_GRIPPER_ACTIVATION_TIME = 0.2
 
 
 class Lite6ControlType(Enum):
@@ -178,9 +191,13 @@ def get_default_height_for_object_model_type(
     """
     Default height of object models where they lie on the lite6 table.
     """
-    return {ObjectModelType.CUBE_1_INCH: LITE6_TABLE_HEIGHT + 0.5 * 0.0254}[
-        object_model_type
-    ]
+    # TODO: Clean this up.
+    return {
+        ObjectModelType.CUBE_1_INCH_RED: LITE6_TABLE_HEIGHT + 0.5 * 0.0254,
+        ObjectModelType.CUBE_1_INCH_GREEN: LITE6_TABLE_HEIGHT + 0.5 * 0.0254,
+        ObjectModelType.CUBE_1_INCH_BLUE: LITE6_TABLE_HEIGHT + 0.5 * 0.0254,
+        ObjectModelType.CUBE_1_INCH_YELLOW: LITE6_TABLE_HEIGHT + 0.5 * 0.0254,
+    }[object_model_type]
 
 
 def get_lite6_urdf_base_frame_name(lite6_model_type: Lite6ModelType) -> str:
@@ -312,7 +329,6 @@ def add_joint_velocities_to_lite6_state(
         return state_vector_with_added_velocities
 
 
-# TODO: Test.
 def get_parallel_gripper_positions(
     lite6_model_type: Lite6ModelType,
     lite6_gripper_status: Lite6GripperStatus,
@@ -351,6 +367,42 @@ def get_parallel_gripper_positions(
         raise NotImplementedError
 
 
+def get_parallel_gripper_velocities(
+    lite6_model_type: Lite6ModelType,
+    lite6_gripper_status: Lite6GripperStatus,
+) -> Tuple[float, float]:
+    # Only for actuated parallel gripper models.
+    assert (
+        lite6_model_type
+        in Lite6ModelGroups.LITE6_ROBOT_WITH_ACTUATED_PARALLEL_GRIPPER_MODELS
+    )
+    # For neutral position, the velocities are 0.
+    if lite6_gripper_status == Lite6GripperStatus.NEUTRAL:
+        return (0.0, 0.0)
+    if (
+        lite6_model_type == Lite6ModelType.ROBOT_WITH_ANP_GRIPPER
+        and lite6_gripper_status == Lite6GripperStatus.OPEN
+    ):
+        return LITE6_NP_GRIPPER_OPEN_VELOCITIES
+    elif (
+        lite6_model_type == Lite6ModelType.ROBOT_WITH_ANP_GRIPPER
+        and lite6_gripper_status == Lite6GripperStatus.CLOSED
+    ):
+        return LITE6_NP_GRIPPER_CLOSED_VELOCITIES
+    elif (
+        lite6_model_type == Lite6ModelType.ROBOT_WITH_ARP_GRIPPER
+        and lite6_gripper_status == Lite6GripperStatus.OPEN
+    ):
+        return LITE6_RP_GRIPPER_OPEN_VELOCITIES
+    elif (
+        lite6_model_type == Lite6ModelType.ROBOT_WITH_ARP_GRIPPER
+        and lite6_gripper_status == Lite6GripperStatus.CLOSED
+    ):
+        return LITE6_RP_GRIPPER_CLOSED_VELOCITIES
+    else:
+        raise NotImplementedError
+
+
 def add_gripper_positions_and_velocities_to_lite6_state(
     lite6_model_type: Lite6ModelType,
     state_vector: StateVector,
@@ -382,11 +434,14 @@ def add_gripper_status_to_lite6_state(
     Returns a new state vector with the gripper positions and velocities using
     the desired gripper closed status. (Note that this is only the lite6 robot
     models with parallel grippers).
-    If the gripper needs to be closed, we set the positions of the grippers as
-    such and the velocities to zero. Similary for the open position with the
-    velocities still being set to zero.
+    If the gripper needs to be closed, we set the positions and velocities of the grippers as
+    such. Similary for the open position.
     """
     parallel_gripper_positions = get_parallel_gripper_positions(
+        lite6_model_type=lite6_model_type,
+        lite6_gripper_status=lite6_gripper_status,
+    )
+    parallel_gripper_velocities = get_parallel_gripper_velocities(
         lite6_model_type=lite6_model_type,
         lite6_gripper_status=lite6_gripper_status,
     )
@@ -394,7 +449,7 @@ def add_gripper_status_to_lite6_state(
         lite6_model_type=lite6_model_type,
         state_vector=state_vector,
         gripper_positions=parallel_gripper_positions,
-        gripper_velocities=(0.0, 0.0),
+        gripper_velocities=parallel_gripper_velocities,
     )
 
 

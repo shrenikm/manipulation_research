@@ -75,16 +75,16 @@ if __name__ == "__main__":
 
     meshcat = StartMeshcat()
 
-    lite6_model_type = Lite6ModelType.ROBOT_WITH_ANP_GRIPPER
+    lite6_model_type = Lite6ModelType.ROBOT_WITH_ARP_GRIPPER
     object_model_configs = [
         ObjectModelConfig(
-            object_model_type=ObjectModelType.CUBE_1_INCH,
+            object_model_type=ObjectModelType.CUBE_1_INCH_BLUE,
             position=np.array(
                 [
                     0.0,
                     0.0,
                     get_default_height_for_object_model_type(
-                        ObjectModelType.CUBE_1_INCH
+                        ObjectModelType.CUBE_1_INCH_BLUE
                     ),
                 ]
             ),

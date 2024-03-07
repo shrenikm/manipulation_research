@@ -20,7 +20,10 @@ ROBOT_MODELS_DRAKE_URDF_DIRNAME = "drake_urdf"
 
 
 class ObjectModelType(StrEnum):
-    CUBE_1_INCH = "cube_1_inch.urdf"
+    CUBE_1_INCH_RED = "cube_1_inch_red.urdf"
+    CUBE_1_INCH_GREEN = "cube_1_inch_green.urdf"
+    CUBE_1_INCH_BLUE = "cube_1_inch_blue.urdf"
+    CUBE_1_INCH_YELLOW = "cube_1_inch_yellow.urdf"
 
 
 @attr.frozen

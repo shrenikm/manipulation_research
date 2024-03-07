@@ -5,6 +5,14 @@ import pytest
 
 from python.common.testing_utils import execute_pytest_file
 from python.lite6.utils.lite6_model_utils import (
+    LITE6_NP_GRIPPER_CLOSED_POSITIONS,
+    LITE6_NP_GRIPPER_CLOSED_VELOCITIES,
+    LITE6_NP_GRIPPER_OPEN_POSITIONS,
+    LITE6_NP_GRIPPER_OPEN_VELOCITIES,
+    LITE6_RP_GRIPPER_CLOSED_POSITIONS,
+    LITE6_RP_GRIPPER_CLOSED_VELOCITIES,
+    LITE6_RP_GRIPPER_OPEN_POSITIONS,
+    LITE6_RP_GRIPPER_OPEN_VELOCITIES,
     Lite6GripperStatus,
     Lite6ModelGroups,
     Lite6ModelType,
@@ -27,6 +35,8 @@ from python.lite6.utils.lite6_model_utils import (
     get_lite6_table_urdf_path,
     get_lite6_urdf_base_frame_name,
     get_lite6_urdf_eef_tip_frame_name,
+    get_parallel_gripper_positions,
+    get_parallel_gripper_velocities,
     get_positions_from_lite6_state,
     get_unactuated_parallel_gripper_counterpart,
     get_velocities_from_lite6_state,
@@ -468,6 +478,118 @@ def test_add_joint_velocities_to_lite6_state() -> None:
         )
 
 
+def test_get_parallel_gripper_positions() -> None:
+    # Test for non supported model types.
+    for lite6_model_type in (
+        Lite6ModelType.NP_GRIPPER,
+        Lite6ModelType.RP_GRIPPER,
+        Lite6ModelType.V_GRIPPER,
+        Lite6ModelType.ROBOT_WITH_V_GRIPPER,
+        Lite6ModelType.ROBOT_WITHOUT_GRIPPER,
+        Lite6ModelType.ROBOT_WITH_UNP_GRIPPER,
+        Lite6ModelType.ROBOT_WITH_URP_GRIPPER,
+    ):
+        with pytest.raises(AssertionError):
+            get_parallel_gripper_positions(
+                lite6_model_type=lite6_model_type,
+                lite6_gripper_status=Lite6GripperStatus.CLOSED,
+            )
+
+    for (
+        lite6_model_type
+    ) in Lite6ModelGroups.LITE6_ROBOT_WITH_ACTUATED_PARALLEL_GRIPPER_MODELS:
+        # Neutral status gives (0, 0) positions.
+        np.testing.assert_array_equal(
+            get_parallel_gripper_positions(
+                lite6_model_type=lite6_model_type,
+                lite6_gripper_status=Lite6GripperStatus.NEUTRAL,
+            ),
+            (0.0, 0.0),
+        )
+
+        # Open position.
+        if lite6_model_type == Lite6ModelType.ROBOT_WITH_ANP_GRIPPER:
+            expected_gp = LITE6_NP_GRIPPER_OPEN_POSITIONS
+        else:
+            expected_gp = LITE6_RP_GRIPPER_OPEN_POSITIONS
+        np.testing.assert_array_equal(
+            get_parallel_gripper_positions(
+                lite6_model_type=lite6_model_type,
+                lite6_gripper_status=Lite6GripperStatus.OPEN,
+            ),
+            expected_gp,
+        )
+
+        # Closed position.
+        if lite6_model_type == Lite6ModelType.ROBOT_WITH_ANP_GRIPPER:
+            expected_gp = LITE6_NP_GRIPPER_CLOSED_POSITIONS
+        else:
+            expected_gp = LITE6_RP_GRIPPER_CLOSED_POSITIONS
+        np.testing.assert_array_equal(
+            get_parallel_gripper_positions(
+                lite6_model_type=lite6_model_type,
+                lite6_gripper_status=Lite6GripperStatus.CLOSED,
+            ),
+            expected_gp,
+        )
+
+
+def test_get_parallel_gripper_velocities() -> None:
+    # Test for non supported model types.
+    for lite6_model_type in (
+        Lite6ModelType.NP_GRIPPER,
+        Lite6ModelType.RP_GRIPPER,
+        Lite6ModelType.V_GRIPPER,
+        Lite6ModelType.ROBOT_WITH_V_GRIPPER,
+        Lite6ModelType.ROBOT_WITHOUT_GRIPPER,
+        Lite6ModelType.ROBOT_WITH_UNP_GRIPPER,
+        Lite6ModelType.ROBOT_WITH_URP_GRIPPER,
+    ):
+        with pytest.raises(AssertionError):
+            get_parallel_gripper_velocities(
+                lite6_model_type=lite6_model_type,
+                lite6_gripper_status=Lite6GripperStatus.CLOSED,
+            )
+
+    for (
+        lite6_model_type
+    ) in Lite6ModelGroups.LITE6_ROBOT_WITH_ACTUATED_PARALLEL_GRIPPER_MODELS:
+        # Neutral status gives (0, 0) velocities.
+        np.testing.assert_array_equal(
+            get_parallel_gripper_velocities(
+                lite6_model_type=lite6_model_type,
+                lite6_gripper_status=Lite6GripperStatus.NEUTRAL,
+            ),
+            (0.0, 0.0),
+        )
+
+        # Open position.
+        if lite6_model_type == Lite6ModelType.ROBOT_WITH_ANP_GRIPPER:
+            expected_gv = LITE6_NP_GRIPPER_OPEN_VELOCITIES
+        else:
+            expected_gv = LITE6_RP_GRIPPER_OPEN_VELOCITIES
+        np.testing.assert_array_equal(
+            get_parallel_gripper_velocities(
+                lite6_model_type=lite6_model_type,
+                lite6_gripper_status=Lite6GripperStatus.OPEN,
+            ),
+            expected_gv,
+        )
+
+        # Closed position.
+        if lite6_model_type == Lite6ModelType.ROBOT_WITH_ANP_GRIPPER:
+            expected_gv = LITE6_NP_GRIPPER_CLOSED_VELOCITIES
+        else:
+            expected_gv = LITE6_RP_GRIPPER_CLOSED_VELOCITIES
+        np.testing.assert_array_equal(
+            get_parallel_gripper_velocities(
+                lite6_model_type=lite6_model_type,
+                lite6_gripper_status=Lite6GripperStatus.CLOSED,
+            ),
+            expected_gv,
+        )
+
+
 def test_add_gripper_status_to_lite6_state() -> None:
     # Test for non supported model types.
     for lite6_model_type in (
@@ -548,8 +670,8 @@ def test_add_gripper_status_to_lite6_state() -> None:
                 11.0,
                 12.0,
                 13.0,
-                0.0,
-                0.0,
+                -0.1,
+                0.1,
             ],
         )
 
@@ -635,8 +757,8 @@ def test_create_lite6_state() -> None:
                 3.0,
                 2.0,
                 1.0,
-                0.0,
-                0.0,
+                -0.1,
+                0.1,
             ],
         )
 
@@ -664,8 +786,8 @@ def test_create_lite6_state() -> None:
                 3.0,
                 2.0,
                 1.0,
-                0.0,
-                0.0,
+                0.,
+                0.,
             ],
         )
 

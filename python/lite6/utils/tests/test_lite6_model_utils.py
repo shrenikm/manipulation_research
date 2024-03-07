@@ -670,8 +670,8 @@ def test_add_gripper_status_to_lite6_state() -> None:
                 11.0,
                 12.0,
                 13.0,
-                -0.1,
-                0.1,
+                -0.05,
+                0.05,
             ],
         )
 
@@ -701,8 +701,8 @@ def test_add_gripper_status_to_lite6_state() -> None:
                 11.0,
                 12.0,
                 13.0,
-                0.0,
-                0.0,
+                0.05,
+                -0.05,
             ],
         )
 
@@ -757,8 +757,8 @@ def test_create_lite6_state() -> None:
                 3.0,
                 2.0,
                 1.0,
-                -0.1,
-                0.1,
+                -0.05,
+                0.05,
             ],
         )
 
@@ -786,8 +786,8 @@ def test_create_lite6_state() -> None:
                 3.0,
                 2.0,
                 1.0,
-                0.,
-                0.,
+                0.05,
+                -0.05,
             ],
         )
 

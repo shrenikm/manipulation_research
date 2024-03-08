@@ -8,7 +8,7 @@ from pydrake.all import DiagramBuilder
 from pydrake.common.value import Value
 from pydrake.math import RigidTransform, RotationMatrix
 from pydrake.multibody.plant import ContactModel, MultibodyPlantConfig
-from pydrake.systems.framework import Diagram, EventStatus
+from pydrake.systems.framework import Context, Diagram, EventStatus
 from pydrake.systems.primitives import Demultiplexer, Multiplexer, TrajectorySource
 from pydrake.trajectories import PiecewisePose
 
@@ -45,8 +45,8 @@ from python.lite6.utils.lite6_model_utils import (
 
 OBJECT_TO_GRIPPER_Z = 0.0
 G_TO_F_Z = -0.03
-G_F_TIME = 2.0
-G_WAIT_TIME = 2.0
+G_WAIT_TIME = 1.0
+EEF_LINEAR_VELOCITY = 0.05
 
 
 def _construct_trajectory_sources(
@@ -54,7 +54,7 @@ def _construct_trajectory_sources(
     X_WOPick: RigidTransform,
     X_WOPlace: RigidTransform,
     X_WOEnd: RigidTransform,
-) -> Tuple[TrajectorySource, Lite6GripperStatusSource]:
+) -> Tuple[float, TrajectorySource, Lite6GripperStatusSource]:
     X_OG = RigidTransform(
         R=RotationMatrix.MakeXRotation(theta=np.pi),
         p=np.array([0.0, 0.0, OBJECT_TO_GRIPPER_Z], dtype=np.float64),
@@ -84,31 +84,32 @@ def _construct_trajectory_sources(
     ]
     # To compute the times estimate, we use an estimated required gripper velocity and the
     # Euclidean distance between poses.
-    gripper_velocity = 0.03
     GFPick_distance = np.linalg.norm(X_WG.translation() - X_WFPick.translation())
-    GFPick_time = GFPick_distance / gripper_velocity
+    GFPick_time = GFPick_distance / EEF_LINEAR_VELOCITY
 
     GPickFPlace_distance = np.linalg.norm(
         X_WGPick.translation() - X_WFPlace.translation()
     )
-    GPickFPlace_time = GPickFPlace_distance / gripper_velocity
+    GPickFPlace_time = GPickFPlace_distance / EEF_LINEAR_VELOCITY
 
     FPlaceG_distance = np.linalg.norm(X_WFPlace.translation() - X_WG.translation())
-    FPlaceG_time = FPlaceG_distance / gripper_velocity
+    FPlaceG_time = FPlaceG_distance / EEF_LINEAR_VELOCITY
 
-    pick_time = GFPick_time + G_F_TIME + G_WAIT_TIME
-    place_time = pick_time + GPickFPlace_time + G_F_TIME
+    g_f_time = np.abs(G_TO_F_Z / EEF_LINEAR_VELOCITY)
+
+    pick_time = GFPick_time + g_f_time + G_WAIT_TIME
+    place_time = pick_time + GPickFPlace_time + g_f_time
 
     times = [
         0.0,
         GFPick_time,
-        GFPick_time + G_F_TIME,
+        GFPick_time + g_f_time,
         pick_time,
         pick_time + GPickFPlace_time,
         place_time,
         place_time + G_WAIT_TIME,
-        place_time + G_WAIT_TIME + G_F_TIME,
-        place_time + G_WAIT_TIME + G_F_TIME + FPlaceG_time,
+        place_time + G_WAIT_TIME + g_f_time,
+        place_time + G_WAIT_TIME + g_f_time + FPlaceG_time,
     ]
 
     X_WG_trajectory = PiecewisePose.MakeLinear(
@@ -116,24 +117,23 @@ def _construct_trajectory_sources(
         poses=poses,
     )
     V_WG_trajectory = X_WG_trajectory.MakeDerivative(derivative_order=1)
+    end_time = V_WG_trajectory.end_time()
 
-    gripper_V_trajectory_source = TrajectorySource(V_WG_trajectory)
+    gripper_V_trajectory_source = TrajectorySource(
+        trajectory=V_WG_trajectory,
+    )
 
     gripper_times = [
         0.0,
-        # LITE6_GRIPPER_ACTIVATION_TIME,
-        GFPick_time + G_F_TIME,
+        GFPick_time + g_f_time,
         place_time,
-        place_time + G_WAIT_TIME + G_F_TIME,
-        # place_time + G_WAIT_TIME + G_F_TIME + LITE6_GRIPPER_ACTIVATION_TIME,
+        place_time + G_WAIT_TIME + g_f_time,
     ]
     gripper_statuses = [
         Lite6GripperStatus.OPEN,
-        # Lite6GripperStatus.NEUTRAL,
         Lite6GripperStatus.CLOSED,
         Lite6GripperStatus.OPEN,
         Lite6GripperStatus.CLOSED,
-        # Lite6GripperStatus.NEUTRAL,
     ]
 
     gripper_status_source = Lite6GripperStatusSource(
@@ -141,7 +141,7 @@ def _construct_trajectory_sources(
         statuses=gripper_statuses,
     )
 
-    return gripper_V_trajectory_source, gripper_status_source
+    return end_time, gripper_V_trajectory_source, gripper_status_source
 
 
 def execute_simple_pick_and_place(
@@ -179,7 +179,11 @@ def execute_simple_pick_and_place(
         ),
     )
 
-    gripper_V_trajectory_source, gripper_status_source = _construct_trajectory_sources(
+    (
+        end_time,
+        gripper_V_trajectory_source,
+        gripper_status_source,
+    ) = _construct_trajectory_sources(
         X_WG=X_WG,
         X_WOPick=X_WOPick,
         X_WOPlace=X_WOPlace,
@@ -239,23 +243,36 @@ def execute_simple_pick_and_place(
 
     diagram.ForcedPublish(simulator_context)
 
+    # Set up the monitor to end the simulation.
+    def simulation_end_monitor(context: Context):
+        if context.get_time() > end_time:
+            return EventStatus.ReachedTermination(
+                diagram,
+                "Trajectory end time reached. Stopping simulation!",
+            )
+
+    # Monitor to stop the simulation after choreography is done.
+    simulator.set_monitor(
+        monitor=simulation_end_monitor,
+    )
+
     with lite6_pliant_container.auto_meshcat_visualization(record=False):
         simulator.AdvanceTo(
-            boundary_time=25.0,
+            boundary_time=np.inf,
             interruptible=True,
         )
 
 
 if __name__ == "__main__":
 
-    pick_xy = np.array([0.17, 0.0])
-    place_xy = np.array([0.12, -0.15])
+    pick_xy = np.array([0.20, 0.0])
+    place_xy = np.array([0.17, -0.12])
     end_xy = np.array([0.12, 0.0])
     place_height_padding = 0.005
 
     lite6_model_type = Lite6ModelType.ROBOT_WITH_ARP_GRIPPER
     lite6_control_type = Lite6ControlType.VELOCITY
-    lite6_pliant_type = Lite6PliantType.HARDWARE
+    lite6_pliant_type = Lite6PliantType.SIMULATION
     id_controller_pid_gains = get_tuned_pid_gains_for_pliant_id_controller(
         lite6_control_type=lite6_control_type,
     )

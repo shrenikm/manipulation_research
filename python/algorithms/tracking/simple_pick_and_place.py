@@ -256,7 +256,7 @@ def execute_simple_pick_and_place(
         monitor=simulation_end_monitor,
     )
 
-    with lite6_pliant_container.auto_meshcat_visualization(record=False):
+    with lite6_pliant_container.auto_meshcat_visualization(record=True):
         simulator.AdvanceTo(
             boundary_time=np.inf,
             interruptible=True,

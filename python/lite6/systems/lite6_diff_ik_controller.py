@@ -1,5 +1,4 @@
 import numpy as np
-from pydrake.common.value import Value
 from pydrake.multibody.inverse_kinematics import (
     DifferentialInverseKinematicsParameters,
     DifferentialInverseKinematicsStatus,
@@ -10,7 +9,6 @@ from pydrake.multibody.tree import JacobianWrtVariable
 from pydrake.systems.framework import BasicVector, Context, LeafSystem
 
 from python.common.exceptions import Lite6SystemError
-from python.lite6.pliant.lite6_pliant_utils import Lite6PliantConfig
 from python.lite6.utils.lite6_model_utils import (
     LITE6_DOF,
     LITE6_GRIPPER_DOF,
@@ -60,11 +58,11 @@ class Lite6DiffIKController(LeafSystem):
             num_positions=plant.num_positions(),
             num_velocities=plant.num_velocities(),
         )
-        # self._diff_ik_parameters.set_nominal_joint_position(
-        #   get_default_lite6_joint_positions(
-        #       lite6_model_type=config.lite6_model_type,
-        #   ),
-        # )
+        self._diff_ik_parameters.set_nominal_joint_position(
+            get_default_lite6_joint_positions(
+                lite6_model_type=lite6_model_type,
+            ),
+        )
         self._diff_ik_parameters.set_time_step(dt=plant.time_step())
         self._diff_ik_parameters.set_joint_position_limits(
             (plant.GetPositionLowerLimits(), plant.GetPositionUpperLimits()),
@@ -117,12 +115,6 @@ class Lite6DiffIKController(LeafSystem):
             frame_A=self._plant.world_frame(),
             frame_E=self._plant.world_frame(),
         )
-        # Removing the gripper information from the Jacobian.
-        # jacobian = jacobian[:, :LITE6_DOF]
-        # print(joint_q.round(2))
-        # print(joint_v.round(2))
-        # print(jacobian.round(2))
-        # print("=====")
 
         diff_ik_result = DoDifferentialInverseKinematics(
             joint_q,

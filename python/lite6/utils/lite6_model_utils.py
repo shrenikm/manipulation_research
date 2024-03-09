@@ -9,7 +9,6 @@ from pydrake.multibody.tree import ModelInstanceIndex
 
 from python.common.class_utils import StrEnum
 from python.common.custom_types import (
-    FileName,
     FilePath,
     PositionsVector,
     StateVector,

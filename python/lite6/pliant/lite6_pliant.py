@@ -1,12 +1,9 @@
-from typing import Optional, Tuple
+from typing import Tuple
 
-import numpy as np
 from pydrake.common.value import Value
-from pydrake.geometry import Meshcat, MeshcatParams, SceneGraph, StartMeshcat
-from pydrake.multibody.parsing import Parser
+from pydrake.geometry import Meshcat, MeshcatParams, SceneGraph
 from pydrake.multibody.plant import (
     AddMultibodyPlant,
-    AddMultibodyPlantSceneGraph,
     ApplyMultibodyPlantConfig,
     MultibodyPlant,
 )
@@ -15,11 +12,9 @@ from pydrake.systems.framework import Diagram, DiagramBuilder, System
 from pydrake.systems.primitives import PassThrough
 from pydrake.visualization import AddDefaultVisualization
 
-from python.common.class_utils import StrEnum
 from python.common.model_utils import add_object_models_to_plant
 from python.common.pliant.multibody_pliant import MultibodyPliantContainer
 from python.lite6.pliant.lite6_pliant_utils import (
-    LITE6_PLIANT_DEFAULT_MESHCAT_PORT,
     LITE6_PLIANT_GSD_IP_NAME,
     LITE6_PLIANT_GSD_OP_NAME,
     LITE6_PLIANT_GSE_OP_NAME,

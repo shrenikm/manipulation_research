@@ -5,18 +5,12 @@ from typing import Tuple
 
 import numpy as np
 from pydrake.all import DiagramBuilder
-from pydrake.common.value import Value
 from pydrake.math import RigidTransform, RotationMatrix
-from pydrake.multibody.plant import ContactModel, MultibodyPlantConfig
+from pydrake.multibody.plant import MultibodyPlantConfig
 from pydrake.systems.framework import Context, Diagram, EventStatus
-from pydrake.systems.primitives import Demultiplexer, Multiplexer, TrajectorySource
+from pydrake.systems.primitives import TrajectorySource
 from pydrake.trajectories import PiecewisePose
 
-from python.analysis.pliant_analysis.lite6_pliant_analysis_choreographer import (
-    Lite6PliantChoreographer,
-    Lite6PliantChoreographerController,
-    get_choreographer_config_yaml_filepath,
-)
 from python.common.model_utils import ObjectModelConfig, ObjectModelType
 from python.lite6.pliant.lite6_pliant import create_lite6_pliant
 from python.lite6.pliant.lite6_pliant_utils import (
@@ -32,8 +26,6 @@ from python.lite6.pliant.lite6_pliant_utils import (
 from python.lite6.systems.lite6_diff_ik_controller import Lite6DiffIKController
 from python.lite6.systems.lite6_gripper_status_source import Lite6GripperStatusSource
 from python.lite6.utils.lite6_model_utils import (
-    LITE6_DOF,
-    LITE6_GRIPPER_ACTIVATION_TIME,
     Lite6ControlType,
     Lite6GripperStatus,
     Lite6ModelType,

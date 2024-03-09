@@ -13,6 +13,9 @@ from python.lite6.pliant.lite6_pliant_utils import (
 )
 from python.lite6.utils.lite6_model_utils import Lite6ModelType, get_lite6_num_positions
 
+# TODO: Figure out how to bypass the socket connection for the actual
+# hardware pliant so that it can be tested. For now just testing simulation
+# pliants.
 
 @pytest.mark.parametrize(
     "unsupported_model_type",
@@ -27,9 +30,14 @@ from python.lite6.utils.lite6_model_utils import Lite6ModelType, get_lite6_num_p
     "lite6_control_type",
     [control_type for control_type in Lite6ControlType],
 )
+@pytest.mark.parametrize(
+    "lite6_pliant_type",
+    [Lite6PliantType.SIMULATION],
+)
 def test_create_lite6_pliant_with_unsupported_model_type(
     unsupported_model_type: Lite6ModelType,
     lite6_control_type: Lite6ControlType,
+    lite6_pliant_type: Lite6PliantType,
 ) -> None:
 
     nq = get_lite6_num_positions(lite6_model_type=unsupported_model_type)
@@ -43,7 +51,7 @@ def test_create_lite6_pliant_with_unsupported_model_type(
     config = Lite6PliantConfig(
         lite6_model_type=unsupported_model_type,
         lite6_control_type=lite6_control_type,
-        lite6_pliant_type=Lite6PliantType.SIMULATION,
+        lite6_pliant_type=lite6_pliant_type,
         inverse_dynamics_pid_gains=id_pid_gains,
         plant_config=MultibodyPlantConfig(time_step=0.001),
         hardware_control_loop_time_step=0.001,
@@ -61,9 +69,14 @@ def test_create_lite6_pliant_with_unsupported_model_type(
     "lite6_control_type",
     [control_type for control_type in Lite6ControlType],
 )
+@pytest.mark.parametrize(
+    "lite6_pliant_type",
+    [Lite6PliantType.SIMULATION],
+)
 def test_create_lite6_pliant_with_supported_type(
     lite6_model_type: Lite6ModelType,
     lite6_control_type: Lite6ControlType,
+    lite6_pliant_type: Lite6PliantType,
 ) -> None:
 
     nq = get_lite6_num_positions(lite6_model_type=lite6_model_type)
@@ -77,7 +90,7 @@ def test_create_lite6_pliant_with_supported_type(
     config = Lite6PliantConfig(
         lite6_model_type=lite6_model_type,
         lite6_control_type=lite6_control_type,
-        lite6_pliant_type=Lite6PliantType.SIMULATION,
+        lite6_pliant_type=lite6_pliant_type,
         inverse_dynamics_pid_gains=id_pid_gains,
         plant_config=MultibodyPlantConfig(time_step=0.001),
         hardware_control_loop_time_step=0.001,
@@ -91,4 +104,4 @@ def test_create_lite6_pliant_with_supported_type(
 
 
 if __name__ == "__main__":
-    execute_pytest_file("test_create_lite6_pliant_with_supported_type")
+    execute_pytest_file()

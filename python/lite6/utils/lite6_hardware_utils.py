@@ -5,7 +5,6 @@ from pydrake.common.value import AbstractValue, Value
 from pydrake.systems.framework import (
     BasicVector,
     Context,
-    DependencyTicket,
     DiscreteValues,
     EventStatus,
     LeafSystem,
@@ -136,7 +135,8 @@ class Lite6HardwareInterface(LeafSystem):
         # It is important that we set the mode and then set the state.
         # This order is important for the API to work (smh).
         self.arm.set_state(state=0)
-        # Default state of the gripper is closed. Close and then stop the gripper.
+        # Default state of the gripper is closed. Close and then stop the gripper so that it doesn't keep running.
+        # We maintain a neutral closed position.
         self.arm.close_lite6_gripper()
         time.sleep(1.0)
         self.arm.stop_lite6_gripper()
@@ -269,6 +269,8 @@ class Lite6HardwareInterface(LeafSystem):
                 )
                 or ret_code
             )
+            if ret_code != 0:
+                self._logger.warning(f"Failed to set joint state.")
         elif self.config.lite6_control_type == Lite6ControlType.VELOCITY:
             ret_code = (
                 self.arm.vc_set_joint_velocity(
@@ -278,6 +280,8 @@ class Lite6HardwareInterface(LeafSystem):
                 )
                 or ret_code
             )
+            if ret_code != 0:
+                self._logger.warning(f"Failed to set joint velocities.")
         else:
             raise NotImplementedError("Invalid control type")
 
@@ -297,9 +301,6 @@ class Lite6HardwareInterface(LeafSystem):
             self._gripper_status = gripper_status_desired
             return EventStatus.Succeeded()
         else:
-            # self._logger.info(
-            #    f"Warning: Failed to set gripper to {gripper_status_desired}"
-            # )
             return EventStatus.Failed()
 
     def _compute_positions_estimated_output(
@@ -326,5 +327,4 @@ class Lite6HardwareInterface(LeafSystem):
         output_value: AbstractValue,
     ) -> None:
 
-        output_value.set_value(self._gripper_status)
         output_value.set_value(self._gripper_status)

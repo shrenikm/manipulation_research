@@ -16,7 +16,6 @@ from python.common.model_utils import (
     ObjectModelType,
     add_object_models_to_plant,
 )
-from python.lite6.pliant.lite6_pliant import create_lite6_pliant_for_simulation
 from python.lite6.utils.lite6_model_utils import (
     Lite6ModelType,
     add_lite6_model_to_plant,

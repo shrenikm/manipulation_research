@@ -2,13 +2,13 @@ from __future__ import annotations
 
 import os
 from enum import Enum, auto
-from typing import Iterator, Sequence, Tuple
+from typing import Sequence, Tuple
 
 import attr
 import matplotlib.pyplot as plt
 import numpy as np
 import yaml
-from pydrake.systems.framework import BasicVector, Context, EventStatus, LeafSystem
+from pydrake.systems.framework import BasicVector, Context, LeafSystem
 
 from python.common.control.signals import (
     ControlSignal,
@@ -34,7 +34,6 @@ def get_choreographer_config_yaml_filepath() -> FilePath:
     )
 
 
-# TODO: Maybe move to common if generally useful
 @attr.frozen
 class ChoreographedSection:
     start_time_delay: float

@@ -14,7 +14,6 @@ def test_choreographer_from_yaml() -> None:
         yaml_filepath=yaml_filepath,
     )
     assert isinstance(choreographer, Lite6PliantChoreographer)
-    # TODO: Finish test.
 
 
 if __name__ == "__main__":

@@ -1,16 +1,13 @@
-from contextlib import contextmanager
 from enum import Enum, auto
-from typing import Generator, Optional, Sequence
+from typing import Optional, Sequence
 
 import attr
 import numpy as np
 from pydrake.common.value import AbstractValue, Value
-from pydrake.geometry import Meshcat
 from pydrake.multibody.plant import MultibodyPlantConfig
 from pydrake.systems.analysis import Simulator
 from pydrake.systems.framework import BasicVector, Context, Diagram, LeafSystem
 
-from python.common.class_utils import StrEnum
 from python.common.control.constructs import PIDGains
 from python.common.model_utils import ObjectModelConfig
 from python.lite6.utils.lite6_model_utils import (
@@ -25,9 +22,7 @@ from python.lite6.utils.lite6_model_utils import (
     get_gripper_velocities_from_lite6_state,
     get_joint_positions_from_lite6_state,
     get_joint_velocities_from_lite6_state,
-    get_lite6_num_positions,
     get_lite6_num_states,
-    get_lite6_num_velocities,
 )
 
 LITE6_PLIANT_DEFAULT_MESHCAT_PORT = 7000

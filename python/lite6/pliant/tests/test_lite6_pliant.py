@@ -32,7 +32,7 @@ from python.lite6.utils.lite6_model_utils import Lite6ModelType, get_lite6_num_p
 )
 @pytest.mark.parametrize(
     "lite6_pliant_type",
-    [Lite6PliantType.SIMULATION],
+    [pliant_type for pliant_type in Lite6PliantType],
 )
 def test_create_lite6_pliant_with_unsupported_model_type(
     unsupported_model_type: Lite6ModelType,
@@ -71,7 +71,7 @@ def test_create_lite6_pliant_with_unsupported_model_type(
 )
 @pytest.mark.parametrize(
     "lite6_pliant_type",
-    [Lite6PliantType.SIMULATION],
+    [pliant_type for pliant_type in Lite6PliantType],
 )
 def test_create_lite6_pliant_with_supported_type(
     lite6_model_type: Lite6ModelType,

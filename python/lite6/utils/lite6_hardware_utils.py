@@ -113,7 +113,8 @@ class Lite6HardwareInterface(LeafSystem):
                 port=LITE6_ROBOT_IP,
                 is_radian=True,
             )
-        except RuntimeError as e:
+        # The API throws a generic Exception.
+        except Exception as e:
             self._logger.warning(
                 f"Could not connect to the arm, hardware pliant will be mocked!. Error: {e}"
             )

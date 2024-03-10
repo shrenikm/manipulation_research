@@ -1,5 +1,6 @@
 import time
 
+import mock
 import numpy as np
 from pydrake.common.value import AbstractValue, Value
 from pydrake.systems.framework import (
@@ -104,15 +105,22 @@ class Lite6HardwareInterface(LeafSystem):
         # Set up the connection to the robot and enable motion.
         self._logger.info("Connecting to the robot ...")
 
-        # import mock
-        # self.arm = mock.MagicMock()
-
-        self.arm = XArmAPI(
-            port=LITE6_ROBOT_IP,
-            is_radian=True,
-        )
-
-        self._logger.info("Connected to the robot!")
+        # For tests and other situations where we might need to create a hardware pliant,
+        # this will throw an error if not connected to the robot.
+        # Hence we mock this object out if it raises an exception, taking care to log.
+        try:
+            self.arm = XArmAPI(
+                port=LITE6_ROBOT_IP,
+                is_radian=True,
+            )
+        # The API throws a generic Exception.
+        except Exception as e:
+            self._logger.warning(
+                f"Could not connect to the arm, hardware pliant will be mocked!. Error: {e}"
+            )
+            self.arm = mock.MagicMock()
+        else:
+            self._logger.info("Connected to the robot!")
 
         self._logger.info("Resetting the robot before start.")
 

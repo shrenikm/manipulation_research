@@ -62,7 +62,7 @@ def visualize_manipulator(
                     scene_graph=scene_graph,
                     plant=plant,
                     body=body,
-                    length=0.2,
+                    length=0.15,
                     radius=0.001,
                 )
 

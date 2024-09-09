@@ -1,26 +1,24 @@
 import os
-from enum import Enum, auto
+from enum import Enum, StrEnum, auto
 from typing import Optional, Tuple
 
 import numpy as np
-from pydrake.multibody.parsing import Parser
-from pydrake.multibody.plant import MultibodyPlant
-from pydrake.multibody.tree import ModelInstanceIndex
-
-from python.common.class_utils import StrEnum
-from python.common.custom_types import (
+from manr.common.custom_types import (
     FilePath,
     PositionsVector,
     StateVector,
     VelocitiesVector,
 )
-from python.common.model_utils import (
+from manr.common.model_utils import (
     ROBOT_MODELS_DRAKE_URDF_DIRNAME,
     ObjectModelType,
     add_robot_models_to_package_map,
     get_environment_models_directory_path,
     get_robot_models_directory_path,
 )
+from pydrake.multibody.parsing import Parser
+from pydrake.multibody.plant import MultibodyPlant
+from pydrake.multibody.tree import ModelInstanceIndex
 
 LITE6_URDF_DESCRIPTION_EXTENSION = "urdf"
 LITE6_TABLE_FILENAME = "lite6_table.urdf"
@@ -151,7 +149,6 @@ class Lite6ModelGroups:
 
 
 def get_drake_lite6_urdf_path(lite6_model_type: Lite6ModelType) -> FilePath:
-
     lite6_urdf_filename = (
         lite6_model_type.value + "." + LITE6_URDF_DESCRIPTION_EXTENSION
     )
@@ -415,9 +412,9 @@ def add_gripper_positions_and_velocities_to_lite6_state(
     )
 
     state_vector_with_added_gripper_state = np.copy(state_vector)
-    state_vector_with_added_gripper_state[
-        LITE6_DOF : LITE6_DOF + LITE6_GRIPPER_DOF
-    ] = gripper_positions
+    state_vector_with_added_gripper_state[LITE6_DOF : LITE6_DOF + LITE6_GRIPPER_DOF] = (
+        gripper_positions
+    )
     state_vector_with_added_gripper_state[
         2 * LITE6_DOF + LITE6_GRIPPER_DOF : 2 * LITE6_DOF + 2 * LITE6_GRIPPER_DOF
     ] = gripper_velocities
@@ -561,7 +558,6 @@ def get_gripper_status_from_lite6_state(
     state_vector: StateVector,
     tolerance: float = 1e-4,
 ) -> Lite6GripperStatus:
-
     assert (
         lite6_model_type
         in Lite6ModelGroups.LITE6_ROBOT_WITH_ACTUATED_PARALLEL_GRIPPER_MODELS

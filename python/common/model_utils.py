@@ -1,14 +1,13 @@
 import os
+from enum import StrEnum
 from typing import List, Optional, Sequence
 
 import attr
+from manr.common.custom_types import DirPath, FilePath, PositionsVector
 from pydrake.multibody.parsing import PackageMap, Parser
 from pydrake.multibody.plant import MultibodyPlant
 from pydrake.multibody.tree import ModelInstanceIndex
 from pydrake.systems.all import RigidTransform
-
-from python.common.class_utils import StrEnum
-from python.common.custom_types import DirPath, FilePath, PositionsVector
 
 MODELS_DIRNAME = "models"
 ENVIRONMENT_MODELS_DIRNAME = "environment"
@@ -28,7 +27,6 @@ class ObjectModelType(StrEnum):
 
 @attr.frozen
 class ObjectModelConfig:
-
     object_model_type: ObjectModelType
     position: Optional[PositionsVector] = None
 

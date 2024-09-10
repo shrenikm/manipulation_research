@@ -25,7 +25,6 @@ dependencies = [
 # [tool.setuptools.package-dir]
 # manr = "python"
 
-
 [tool.isort]
 profile = "black"
 py_version = 312
@@ -57,7 +56,9 @@ select = [
   # Remove unused imports
   "F401",
 ]
-fixable = ["ALL"]
+# Fix re-organize imports and unused imports
+# These will provide code actions.
+fixable = ["I001", "F401"]
 
 [tool.ruff.format]
 quote-style = "double"

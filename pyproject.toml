@@ -25,15 +25,18 @@ dependencies = [
 # [tool.setuptools.package-dir]
 # manr = "python"
 
+[tool.black]
+line-length = 120
+
 [tool.isort]
 profile = "black"
 py_version = 312
 skip_gitignore = "True"
 multi_line_output = 3
-line_length = 88
+line_length = 120
 
 [tool.ruff]
-line-length = 88
+line-length = 120
 indent-width = 4
 target-version = "py312"
 respect-gitignore = true

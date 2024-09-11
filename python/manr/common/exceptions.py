@@ -6,11 +6,11 @@ class Lite6PliantError(Lite6Error):
     pass
 
 
-class Lite6SimulationPliant(Lite6PliantError):
+class Lite6SimulationPliantError(Lite6PliantError):
     pass
 
 
-class Lite6HardwarePliant(Lite6PliantError):
+class Lite6HardwarePliantError(Lite6PliantError):
     pass
 
 

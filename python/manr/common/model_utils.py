@@ -33,9 +33,7 @@ class ObjectModelConfig:
 
 
 def get_models_directory_path() -> DirPath:
-    current_directory_path = os.path.dirname(
-        os.path.expanduser(os.path.realpath(__file__))
-    )
+    current_directory_path = os.path.dirname(os.path.expanduser(os.path.realpath(__file__)))
     models_directory_path = os.path.join(
         current_directory_path,
         "..",
@@ -60,9 +58,7 @@ def get_object_models_directory_path() -> DirPath:
 
 
 def get_robot_models_directory_path() -> DirPath:
-    current_directory_path = os.path.dirname(
-        os.path.expanduser(os.path.realpath(__file__))
-    )
+    current_directory_path = os.path.dirname(os.path.expanduser(os.path.realpath(__file__)))
     robot_models_directory_path = os.path.join(
         current_directory_path,
         "..",
@@ -119,9 +115,7 @@ def add_object_models_to_plant(
         )[0]
         model_instances.append(model_instance)
 
-        body = plant.get_body(
-            body_index=plant.GetBodyIndices(model_instance=model_instance)[0]
-        )
+        body = plant.get_body(body_index=plant.GetBodyIndices(model_instance=model_instance)[0])
 
         if object_model_config.position is not None:
             plant.SetDefaultFreeBodyPose(

@@ -7,8 +7,8 @@ from pydrake.geometry import Meshcat, SceneGraph
 from pydrake.multibody.plant import MultibodyPlant
 from pydrake.systems.framework import Diagram
 
-from python.common.exceptions import Lite6Error
-from python.common.logging_utils import MRLogger
+from manr.common.exceptions import Lite6Error
+from manr.common.logging_utils import MRLogger
 
 
 @attr.define

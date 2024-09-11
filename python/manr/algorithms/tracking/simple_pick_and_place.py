@@ -1,6 +1,7 @@
 """
 Simple pick and place of a 1 inch block.
 """
+
 from typing import Tuple
 
 import numpy as np
@@ -11,9 +12,9 @@ from pydrake.systems.framework import Context, Diagram, EventStatus
 from pydrake.systems.primitives import TrajectorySource
 from pydrake.trajectories import PiecewisePose
 
-from python.common.model_utils import ObjectModelConfig, ObjectModelType
-from python.lite6.pliant.lite6_pliant import create_lite6_pliant
-from python.lite6.pliant.lite6_pliant_utils import (
+from manr.common.model_utils import ObjectModelConfig, ObjectModelType
+from manr.lite6.pliant.lite6_pliant import create_lite6_pliant
+from manr.lite6.pliant.lite6_pliant_utils import (
     LITE6_PLIANT_GSD_IP_NAME,
     LITE6_PLIANT_PE_OP_NAME,
     LITE6_PLIANT_VD_IP_NAME,
@@ -23,9 +24,9 @@ from python.lite6.pliant.lite6_pliant_utils import (
     create_simulator_for_lite6_pliant,
     get_tuned_pid_gains_for_pliant_id_controller,
 )
-from python.lite6.systems.lite6_diff_ik_controller import Lite6DiffIKController
-from python.lite6.systems.lite6_gripper_status_source import Lite6GripperStatusSource
-from python.lite6.utils.lite6_model_utils import (
+from manr.lite6.systems.lite6_diff_ik_controller import Lite6DiffIKController
+from manr.lite6.systems.lite6_gripper_status_source import Lite6GripperStatusSource
+from manr.lite6.utils.lite6_model_utils import (
     Lite6ControlType,
     Lite6GripperStatus,
     Lite6ModelType,
@@ -79,9 +80,7 @@ def _construct_trajectory_sources(
     GFPick_distance = np.linalg.norm(X_WG.translation() - X_WFPick.translation())
     GFPick_time = GFPick_distance / EEF_LINEAR_VELOCITY
 
-    GPickFPlace_distance = np.linalg.norm(
-        X_WGPick.translation() - X_WFPlace.translation()
-    )
+    GPickFPlace_distance = np.linalg.norm(X_WGPick.translation() - X_WFPlace.translation())
     GPickFPlace_time = GPickFPlace_distance / EEF_LINEAR_VELOCITY
 
     FPlaceG_distance = np.linalg.norm(X_WFPlace.translation() - X_WG.translation())
@@ -142,7 +141,6 @@ def execute_simple_pick_and_place(
     X_WOPlace: RigidTransform,
     X_WOEnd: RigidTransform,
 ) -> None:
-
     unactuated_lite6_model_type = get_unactuated_parallel_gripper_counterpart(
         lite6_model_type=config.lite6_model_type,
     )
@@ -256,7 +254,6 @@ def execute_simple_pick_and_place(
 
 
 if __name__ == "__main__":
-
     pick_xy = np.array([0.20, 0.0])
     place_xy = np.array([0.17, -0.12])
     end_xy = np.array([0.12, 0.0])

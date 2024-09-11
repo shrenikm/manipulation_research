@@ -12,9 +12,9 @@ from pydrake.systems.framework import (
 )
 from xarm.wrapper import XArmAPI
 
-from python.common.exceptions import Lite6PliantError
-from python.common.logging_utils import MRLogger
-from python.lite6.pliant.lite6_pliant_utils import (
+from manr.common.exceptions import Lite6PliantError
+from manr.common.logging_utils import MRLogger
+from manr.lite6.pliant.lite6_pliant_utils import (
     LITE6_PLIANT_GSD_IP_NAME,
     LITE6_PLIANT_GSE_OP_NAME,
     LITE6_PLIANT_PD_IP_NAME,
@@ -23,7 +23,7 @@ from python.lite6.pliant.lite6_pliant_utils import (
     LITE6_PLIANT_VE_OP_NAME,
     Lite6PliantConfig,
 )
-from python.lite6.utils.lite6_model_utils import (
+from manr.lite6.utils.lite6_model_utils import (
     LITE6_DOF,
     Lite6ControlType,
     Lite6GripperStatus,

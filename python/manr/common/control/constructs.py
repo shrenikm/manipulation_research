@@ -3,7 +3,7 @@ from __future__ import annotations
 import attr
 import numpy as np
 
-from python.common.custom_types import GainsVector
+from manr.common.custom_types import GainsVector
 
 
 @attr.frozen

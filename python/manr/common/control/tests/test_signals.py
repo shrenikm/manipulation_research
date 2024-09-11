@@ -1,9 +1,9 @@
 import matplotlib.pyplot as plt
 import numpy as np
 
-from python.common.control.signals import SineControlSignal, StepControlSignal
-from python.common.custom_types import ControlSignalVector, TimesVector
-from python.common.testing_utils import execute_pytest_file
+from manr.common.control.signals import SineControlSignal, StepControlSignal
+from manr.common.custom_types import ControlSignalVector, TimesVector
+from manr.common.testing_utils import execute_pytest_file
 
 
 def _plot_signals(
@@ -19,7 +19,6 @@ def _plot_signals(
 
 
 def test_step_control_signal(debug: bool = False) -> None:
-
     value = 0.3
     delay_time = 0.5
     signal = StepControlSignal(
@@ -41,7 +40,6 @@ def test_step_control_signal(debug: bool = False) -> None:
 
 
 def test_sine_control_signal(debug: bool = False) -> None:
-
     # Test basic sine wave without any phase shift or offsets.
     amplitude = 0.3
     frequency = 2.0
@@ -68,7 +66,6 @@ def test_sine_control_signal(debug: bool = False) -> None:
 
 
 def test_sine_standard_positive_signal(debug: bool = False) -> None:
-
     amplitude = 0.3
     frequency = 2.0
 

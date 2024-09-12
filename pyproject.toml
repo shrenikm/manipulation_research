@@ -1,16 +1,12 @@
 [build-system]
-requires = ["hatchling"]
+requires = ["hatchling", "setuptools", "pip"]
 build-backend = "hatchling.build"
 
 [tool.hatch.build.targets.wheel]
 packages = ["python/manr"]
 
-# [tool.hatch.build.targets.wheel.force-include]
-# "third_party/xarm_py/xarm" = "manr/xarm"
-
 [tool.hatch.build.hooks.custom]
 path = "hooks/install_xarm.py"
-
 
 [project]
 name = "manr"
@@ -30,9 +26,6 @@ dependencies = [
   "mock==5.1.0",
   "drake==1.26.0",
 ]
-
-# [tool.setuptools.package-dir]
-# manr = "python"
 
 [tool.black]
 line-length = 120

@@ -8,9 +8,9 @@ from pydrake.multibody.plant import MultibodyPlantConfig
 from pydrake.systems.analysis import Simulator
 from pydrake.systems.framework import BasicVector, Context, Diagram, LeafSystem
 
-from python.common.control.constructs import PIDGains
-from python.common.model_utils import ObjectModelConfig
-from python.lite6.utils.lite6_model_utils import (
+from manr.common.control.constructs import PIDGains
+from manr.common.model_utils import ObjectModelConfig
+from manr.lite6.utils.lite6_model_utils import (
     LITE6_DOF,
     Lite6ControlType,
     Lite6GripperStatus,

@@ -3,6 +3,10 @@ from enum import Enum, StrEnum, auto
 from typing import Optional, Tuple
 
 import numpy as np
+from pydrake.multibody.parsing import Parser
+from pydrake.multibody.plant import MultibodyPlant
+from pydrake.multibody.tree import ModelInstanceIndex
+
 from manr.common.custom_types import (
     FilePath,
     PositionsVector,
@@ -16,9 +20,6 @@ from manr.common.model_utils import (
     get_environment_models_directory_path,
     get_robot_models_directory_path,
 )
-from pydrake.multibody.parsing import Parser
-from pydrake.multibody.plant import MultibodyPlant
-from pydrake.multibody.tree import ModelInstanceIndex
 
 LITE6_URDF_DESCRIPTION_EXTENSION = "urdf"
 LITE6_TABLE_FILENAME = "lite6_table.urdf"

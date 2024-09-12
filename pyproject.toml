@@ -5,6 +5,13 @@ build-backend = "hatchling.build"
 [tool.hatch.build.targets.wheel]
 packages = ["python/manr"]
 
+# [tool.hatch.build.targets.wheel.force-include]
+# "third_party/xarm_py/xarm" = "manr/xarm"
+
+[tool.hatch.build.hooks.custom]
+path = "hooks/install_xarm.py"
+
+
 [project]
 name = "manr"
 version = "0.0.1"
@@ -15,6 +22,7 @@ readme = "README.md"
 license = { file = "LICENSE" }
 classifiers = []
 dependencies = [
+  "hatchling==1.25.0",
   "attrs==24.2.0",
   # Drake requires Numpy <2.0.0
   "numpy==1.26.4",

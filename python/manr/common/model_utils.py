@@ -33,7 +33,7 @@ class ObjectModelConfig:
 
 
 def get_models_directory_path() -> DirPath:
-    current_directory_path = os.path.dirname(os.path.expanduser(os.path.realpath(__file__)))
+    current_directory_path = os.path.expanduser(os.path.realpath(__file__))
     models_directory_path = os.path.join(
         current_directory_path,
         "..",
@@ -58,7 +58,7 @@ def get_object_models_directory_path() -> DirPath:
 
 
 def get_robot_models_directory_path() -> DirPath:
-    current_directory_path = os.path.dirname(os.path.expanduser(os.path.realpath(__file__)))
+    current_directory_path = os.path.expanduser(os.path.realpath(__file__))
     robot_models_directory_path = os.path.join(
         current_directory_path,
         "..",

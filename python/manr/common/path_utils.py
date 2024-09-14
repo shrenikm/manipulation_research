@@ -3,9 +3,33 @@ Utilities for working with paths.
 """
 
 import os
-from typing import List
+import shutil
+import tempfile
+from contextlib import contextmanager
+from typing import Generator, List, Optional
 
 from manr.common.custom_types import DirPath, FilePath
+
+
+@contextmanager
+def create_temporary_directory(
+    prefix: Optional[str] = None,
+    suffix: Optional[str] = None,
+    dirpath: Optional[DirPath] = None,
+) -> Generator[DirPath, None, None]:
+    """
+    Creates a temporary directory, yields the path to the directory, and then deletes the directory.
+    """
+
+    temp_dir = tempfile.mkdtemp(
+        prefix=prefix,
+        suffix=suffix,
+        dir=dirpath,
+    )
+    try:
+        yield temp_dir
+    finally:
+        shutil.rmtree(temp_dir)
 
 
 def list_directories_in_path(

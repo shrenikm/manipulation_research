@@ -2,6 +2,7 @@ import os
 
 import numpy as np
 import pytest
+
 from manr.common.testing_utils import execute_pytest_file
 from manr.lite6.utils.lite6_model_utils import (
     LITE6_NP_GRIPPER_CLOSED_POSITIONS,
@@ -54,92 +55,32 @@ def test_lite6_model_groups() -> None:
     assert Lite6ModelType.ROBOT_WITH_V_GRIPPER in Lite6ModelGroups.LITE6_ROBOT_MODELS
     assert Lite6ModelType.ROBOT_WITHOUT_GRIPPER in Lite6ModelGroups.LITE6_ROBOT_MODELS
 
-    assert (
-        Lite6ModelType.ROBOT_WITH_ANP_GRIPPER
-        in Lite6ModelGroups.LITE6_ROBOT_WITH_GRIPPER_MODELS
-    )
-    assert (
-        Lite6ModelType.ROBOT_WITH_ARP_GRIPPER
-        in Lite6ModelGroups.LITE6_ROBOT_WITH_GRIPPER_MODELS
-    )
-    assert (
-        Lite6ModelType.ROBOT_WITH_UNP_GRIPPER
-        in Lite6ModelGroups.LITE6_ROBOT_WITH_GRIPPER_MODELS
-    )
-    assert (
-        Lite6ModelType.ROBOT_WITH_URP_GRIPPER
-        in Lite6ModelGroups.LITE6_ROBOT_WITH_GRIPPER_MODELS
-    )
-    assert (
-        Lite6ModelType.ROBOT_WITH_V_GRIPPER
-        in Lite6ModelGroups.LITE6_ROBOT_WITH_GRIPPER_MODELS
-    )
+    assert Lite6ModelType.ROBOT_WITH_ANP_GRIPPER in Lite6ModelGroups.LITE6_ROBOT_WITH_GRIPPER_MODELS
+    assert Lite6ModelType.ROBOT_WITH_ARP_GRIPPER in Lite6ModelGroups.LITE6_ROBOT_WITH_GRIPPER_MODELS
+    assert Lite6ModelType.ROBOT_WITH_UNP_GRIPPER in Lite6ModelGroups.LITE6_ROBOT_WITH_GRIPPER_MODELS
+    assert Lite6ModelType.ROBOT_WITH_URP_GRIPPER in Lite6ModelGroups.LITE6_ROBOT_WITH_GRIPPER_MODELS
+    assert Lite6ModelType.ROBOT_WITH_V_GRIPPER in Lite6ModelGroups.LITE6_ROBOT_WITH_GRIPPER_MODELS
 
-    assert (
-        Lite6ModelType.ROBOT_WITH_ANP_GRIPPER
-        in Lite6ModelGroups.LITE6_ROBOT_WITH_PARALLEL_GRIPPER_MODELS
-    )
-    assert (
-        Lite6ModelType.ROBOT_WITH_ARP_GRIPPER
-        in Lite6ModelGroups.LITE6_ROBOT_WITH_PARALLEL_GRIPPER_MODELS
-    )
-    assert (
-        Lite6ModelType.ROBOT_WITH_UNP_GRIPPER
-        in Lite6ModelGroups.LITE6_ROBOT_WITH_PARALLEL_GRIPPER_MODELS
-    )
-    assert (
-        Lite6ModelType.ROBOT_WITH_URP_GRIPPER
-        in Lite6ModelGroups.LITE6_ROBOT_WITH_PARALLEL_GRIPPER_MODELS
-    )
+    assert Lite6ModelType.ROBOT_WITH_ANP_GRIPPER in Lite6ModelGroups.LITE6_ROBOT_WITH_PARALLEL_GRIPPER_MODELS
+    assert Lite6ModelType.ROBOT_WITH_ARP_GRIPPER in Lite6ModelGroups.LITE6_ROBOT_WITH_PARALLEL_GRIPPER_MODELS
+    assert Lite6ModelType.ROBOT_WITH_UNP_GRIPPER in Lite6ModelGroups.LITE6_ROBOT_WITH_PARALLEL_GRIPPER_MODELS
+    assert Lite6ModelType.ROBOT_WITH_URP_GRIPPER in Lite6ModelGroups.LITE6_ROBOT_WITH_PARALLEL_GRIPPER_MODELS
 
-    assert (
-        Lite6ModelType.ROBOT_WITH_V_GRIPPER
-        in Lite6ModelGroups.LITE6_ROBOT_WITH_VACUUM_GRIPPER_MODELS
-    )
+    assert Lite6ModelType.ROBOT_WITH_V_GRIPPER in Lite6ModelGroups.LITE6_ROBOT_WITH_VACUUM_GRIPPER_MODELS
 
-    assert (
-        Lite6ModelType.ROBOT_WITH_ANP_GRIPPER
-        in Lite6ModelGroups.LITE6_ROBOT_WITH_ACTUATED_GRIPPER_MODELS
-    )
-    assert (
-        Lite6ModelType.ROBOT_WITH_ARP_GRIPPER
-        in Lite6ModelGroups.LITE6_ROBOT_WITH_ACTUATED_GRIPPER_MODELS
-    )
+    assert Lite6ModelType.ROBOT_WITH_ANP_GRIPPER in Lite6ModelGroups.LITE6_ROBOT_WITH_ACTUATED_GRIPPER_MODELS
+    assert Lite6ModelType.ROBOT_WITH_ARP_GRIPPER in Lite6ModelGroups.LITE6_ROBOT_WITH_ACTUATED_GRIPPER_MODELS
 
-    assert (
-        Lite6ModelType.ROBOT_WITH_ANP_GRIPPER
-        in Lite6ModelGroups.LITE6_ROBOT_WITH_ACTUATED_PARALLEL_GRIPPER_MODELS
-    )
-    assert (
-        Lite6ModelType.ROBOT_WITH_ARP_GRIPPER
-        in Lite6ModelGroups.LITE6_ROBOT_WITH_ACTUATED_PARALLEL_GRIPPER_MODELS
-    )
+    assert Lite6ModelType.ROBOT_WITH_ANP_GRIPPER in Lite6ModelGroups.LITE6_ROBOT_WITH_ACTUATED_PARALLEL_GRIPPER_MODELS
+    assert Lite6ModelType.ROBOT_WITH_ARP_GRIPPER in Lite6ModelGroups.LITE6_ROBOT_WITH_ACTUATED_PARALLEL_GRIPPER_MODELS
 
-    assert (
-        Lite6ModelType.ROBOT_WITH_UNP_GRIPPER
-        in Lite6ModelGroups.LITE6_ROBOT_WITH_UNACTUATED_PARALLEL_GRIPPER_MODELS
-    )
-    assert (
-        Lite6ModelType.ROBOT_WITH_URP_GRIPPER
-        in Lite6ModelGroups.LITE6_ROBOT_WITH_UNACTUATED_PARALLEL_GRIPPER_MODELS
-    )
+    assert Lite6ModelType.ROBOT_WITH_UNP_GRIPPER in Lite6ModelGroups.LITE6_ROBOT_WITH_UNACTUATED_PARALLEL_GRIPPER_MODELS
+    assert Lite6ModelType.ROBOT_WITH_URP_GRIPPER in Lite6ModelGroups.LITE6_ROBOT_WITH_UNACTUATED_PARALLEL_GRIPPER_MODELS
 
-    assert (
-        Lite6ModelType.ROBOT_WITH_UNP_GRIPPER
-        in Lite6ModelGroups.LITE6_ROBOT_WITH_UNACTUATED_GRIPPER_MODELS
-    )
-    assert (
-        Lite6ModelType.ROBOT_WITH_URP_GRIPPER
-        in Lite6ModelGroups.LITE6_ROBOT_WITH_UNACTUATED_GRIPPER_MODELS
-    )
-    assert (
-        Lite6ModelType.ROBOT_WITH_V_GRIPPER
-        in Lite6ModelGroups.LITE6_ROBOT_WITH_UNACTUATED_GRIPPER_MODELS
-    )
-    assert (
-        Lite6ModelType.ROBOT_WITHOUT_GRIPPER
-        in Lite6ModelGroups.LITE6_ROBOT_WITH_UNACTUATED_GRIPPER_MODELS
-    )
+    assert Lite6ModelType.ROBOT_WITH_UNP_GRIPPER in Lite6ModelGroups.LITE6_ROBOT_WITH_UNACTUATED_GRIPPER_MODELS
+    assert Lite6ModelType.ROBOT_WITH_URP_GRIPPER in Lite6ModelGroups.LITE6_ROBOT_WITH_UNACTUATED_GRIPPER_MODELS
+    assert Lite6ModelType.ROBOT_WITH_V_GRIPPER in Lite6ModelGroups.LITE6_ROBOT_WITH_UNACTUATED_GRIPPER_MODELS
+    assert Lite6ModelType.ROBOT_WITHOUT_GRIPPER in Lite6ModelGroups.LITE6_ROBOT_WITH_UNACTUATED_GRIPPER_MODELS
 
 
 def test_get_drake_lite6_urdf_path() -> None:
@@ -179,13 +120,9 @@ def test_get_lite6_urdf_eef_tip_frame_name() -> None:
         Lite6ModelType.ROBOT_WITH_V_GRIPPER,
     ]
     for lite6_model_type in valid_model_types:
-        assert isinstance(
-            get_lite6_urdf_eef_tip_frame_name(lite6_model_type=lite6_model_type), str
-        )
+        assert isinstance(get_lite6_urdf_eef_tip_frame_name(lite6_model_type=lite6_model_type), str)
 
-    for lite6_model_type in set(Lite6ModelType.get_all_fields()) - set(
-        valid_model_types
-    ):
+    for lite6_model_type in set(Lite6ModelType.get_all_fields()) - set(valid_model_types):
         with pytest.raises(AssertionError):
             get_lite6_urdf_eef_tip_frame_name(lite6_model_type=lite6_model_type)
 
@@ -205,9 +142,7 @@ def test_get_unactuated_parallel_gripper_counterpart() -> None:
         Lite6ModelType.ROBOT_WITHOUT_GRIPPER,
     ]:
         with pytest.raises(AssertionError):
-            get_unactuated_parallel_gripper_counterpart(
-                lite6_model_type=lite6_model_type
-            )
+            get_unactuated_parallel_gripper_counterpart(lite6_model_type=lite6_model_type)
     assert (
         get_unactuated_parallel_gripper_counterpart(
             lite6_model_type=Lite6ModelType.ROBOT_WITH_ANP_GRIPPER,
@@ -494,9 +429,7 @@ def test_get_parallel_gripper_positions() -> None:
                 lite6_gripper_status=Lite6GripperStatus.CLOSED,
             )
 
-    for (
-        lite6_model_type
-    ) in Lite6ModelGroups.LITE6_ROBOT_WITH_ACTUATED_PARALLEL_GRIPPER_MODELS:
+    for lite6_model_type in Lite6ModelGroups.LITE6_ROBOT_WITH_ACTUATED_PARALLEL_GRIPPER_MODELS:
         # Neutral status gives (0, 0) positions.
         np.testing.assert_array_equal(
             get_parallel_gripper_positions(
@@ -550,9 +483,7 @@ def test_get_parallel_gripper_velocities() -> None:
                 lite6_gripper_status=Lite6GripperStatus.CLOSED,
             )
 
-    for (
-        lite6_model_type
-    ) in Lite6ModelGroups.LITE6_ROBOT_WITH_ACTUATED_PARALLEL_GRIPPER_MODELS:
+    for lite6_model_type in Lite6ModelGroups.LITE6_ROBOT_WITH_ACTUATED_PARALLEL_GRIPPER_MODELS:
         # Neutral status gives (0, 0) velocities.
         np.testing.assert_array_equal(
             get_parallel_gripper_velocities(

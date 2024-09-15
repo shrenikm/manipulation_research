@@ -88,7 +88,7 @@ def test_get_drake_lite6_urdf_path() -> None:
     Test that each a valid and existing model path can be obtained
     for each lite6 model type.
     """
-    for lite6_model_type in Lite6ModelType.get_all_fields():
+    for lite6_model_type in Lite6ModelType:
         urdf_path = get_drake_lite6_urdf_path(
             lite6_model_type=lite6_model_type,
         )
@@ -104,7 +104,7 @@ def test_get_lite6_table_urdf_path() -> None:
 
 
 def test_lite6_urdf_base_frame_name() -> None:
-    for lite6_model_type in Lite6ModelType.get_all_fields():
+    for lite6_model_type in Lite6ModelType:
         base_frame_name = get_lite6_urdf_base_frame_name(
             lite6_model_type=lite6_model_type,
         )
@@ -122,7 +122,7 @@ def test_get_lite6_urdf_eef_tip_frame_name() -> None:
     for lite6_model_type in valid_model_types:
         assert isinstance(get_lite6_urdf_eef_tip_frame_name(lite6_model_type=lite6_model_type), str)
 
-    for lite6_model_type in set(Lite6ModelType.get_all_fields()) - set(valid_model_types):
+    for lite6_model_type in set(Lite6ModelType) - set(valid_model_types):
         with pytest.raises(AssertionError):
             get_lite6_urdf_eef_tip_frame_name(lite6_model_type=lite6_model_type)
 

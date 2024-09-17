@@ -2,19 +2,15 @@ from typing import Tuple
 
 from pydrake.common.value import Value
 from pydrake.geometry import Meshcat, MeshcatParams, SceneGraph
-from pydrake.multibody.plant import (
-    AddMultibodyPlant,
-    ApplyMultibodyPlantConfig,
-    MultibodyPlant,
-)
+from pydrake.multibody.plant import AddMultibodyPlant, ApplyMultibodyPlantConfig, MultibodyPlant
 from pydrake.systems.controllers import InverseDynamicsController
 from pydrake.systems.framework import Diagram, DiagramBuilder, System
 from pydrake.systems.primitives import PassThrough
 from pydrake.visualization import AddDefaultVisualization
 
-from python.common.model_utils import add_object_models_to_plant
-from python.common.pliant.multibody_pliant import MultibodyPliantContainer
-from python.lite6.pliant.lite6_pliant_utils import (
+from manr.common.model_utils import add_object_models_to_plant
+from manr.common.pliant.multibody_pliant import MultibodyPliantContainer
+from manr.lite6.pliant.lite6_pliant_utils import (
     LITE6_PLIANT_GSD_IP_NAME,
     LITE6_PLIANT_GSD_OP_NAME,
     LITE6_PLIANT_GSE_OP_NAME,
@@ -30,8 +26,8 @@ from python.lite6.pliant.lite6_pliant_utils import (
     Lite6PliantMultiplexer,
     Lite6PliantType,
 )
-from python.lite6.utils.lite6_hardware_utils import Lite6HardwareInterface
-from python.lite6.utils.lite6_model_utils import (
+from manr.lite6.utils.lite6_hardware_utils import Lite6HardwareInterface
+from manr.lite6.utils.lite6_model_utils import (
     LITE6_DOF,
     Lite6GripperStatus,
     add_lite6_model_to_plant,
@@ -148,9 +144,7 @@ def create_lite6_pliant_for_hardware(
     diagram.set_name(config.get_name())
 
     def _post_run_hook(pliant_diagram: Diagram) -> None:
-        lite6_hardware_interface = pliant_diagram.GetSubsystemByName(
-            name=Lite6HardwareInterface.get_system_name()
-        )
+        lite6_hardware_interface = pliant_diagram.GetSubsystemByName(name=Lite6HardwareInterface.get_system_name())
         lite6_hardware_interface.reset()
 
     return MultibodyPliantContainer(

@@ -4,7 +4,7 @@ import numpy as np
 from pydrake.common.value import AbstractValue, Value
 from pydrake.systems.framework import Context, LeafSystem
 
-from python.lite6.utils.lite6_model_utils import Lite6GripperStatus
+from manr.lite6.utils.lite6_model_utils import Lite6GripperStatus
 
 LITE6_GSS_OP_NAME = "gss_output"
 
@@ -51,9 +51,7 @@ class Lite6GripperStatusSource(LeafSystem):
             return
 
         current_time = context.get_time()
-        while (
-            self._index < self._n - 1 and current_time >= self._times[self._index + 1]
-        ):
+        while self._index < self._n - 1 and current_time >= self._times[self._index + 1]:
             self._index += 1
 
         output_value.set_value(self._statuses[self._index])

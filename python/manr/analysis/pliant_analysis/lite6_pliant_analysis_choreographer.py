@@ -10,16 +10,12 @@ import numpy as np
 import yaml
 from pydrake.systems.framework import BasicVector, Context, LeafSystem
 
-from python.common.control.signals import (
-    ControlSignal,
-    SineControlSignal,
-    StepControlSignal,
-)
-from python.common.custom_types import FilePath, PositionsVector
-from python.common.exceptions import Lite6PliantChoreographerError, Lite6PliantError
-from python.common.logging_utils import MRLogger
-from python.lite6.pliant.lite6_pliant_utils import Lite6PliantConfig
-from python.lite6.utils.lite6_model_utils import LITE6_DOF, Lite6ControlType
+from manr.common.control.signals import ControlSignal, SineControlSignal, StepControlSignal
+from manr.common.custom_types import FilePath, PositionsVector
+from manr.common.exceptions import Lite6PliantChoreographerError, Lite6PliantError
+from manr.common.logging_utils import MRLogger
+from manr.lite6.pliant.lite6_pliant_utils import Lite6PliantConfig
+from manr.lite6.utils.lite6_model_utils import LITE6_DOF, Lite6ControlType
 
 CC_PE_INPUT_PORT = "cc_pe_input_port"
 CC_VE_INPUT_PORT = "cc_ve_input_port"
@@ -92,9 +88,7 @@ class Lite6PliantChoreographer:
                     start_time_delay=sections_dict.pop("start_time_delay"),
                     end_time_delay=sections_dict.pop("end_time_delay"),
                     active_time=sections_dict.pop("active_time"),
-                    start_joint_positions=np.array(
-                        sections_dict.pop("start_joint_positions")
-                    ),
+                    start_joint_positions=np.array(sections_dict.pop("start_joint_positions")),
                     control_signal=control_signal,
                 )
                 sections.append(cs)
@@ -151,15 +145,9 @@ class Lite6PliantChoreographerController(LeafSystem):
         self._current_recorded_times = np.empty(0, dtype=np.float64)
         self._current_recorded_target_velocities = np.empty(0, dtype=np.float64)
         self._current_recorded_estimated_velocities = np.empty(0, dtype=np.float64)
-        self._times_map = {
-            joint_ind: {} for joint_ind in range(self.num_choreographed_joints)
-        }
-        self._target_velocities_map = {
-            joint_ind: {} for joint_ind in range(self.num_choreographed_joints)
-        }
-        self._estimated_velocities_map = {
-            joint_ind: {} for joint_ind in range(self.num_choreographed_joints)
-        }
+        self._times_map = {joint_ind: {} for joint_ind in range(self.num_choreographed_joints)}
+        self._target_velocities_map = {joint_ind: {} for joint_ind in range(self.num_choreographed_joints)}
+        self._estimated_velocities_map = {joint_ind: {} for joint_ind in range(self.num_choreographed_joints)}
 
         self.cc_pe_input_port = self.DeclareVectorInputPort(
             name=CC_PE_INPUT_PORT,
@@ -201,9 +189,7 @@ class Lite6PliantChoreographerController(LeafSystem):
             )
             joint_index = self.choreographer[joint_ind].joint_index
             num_sections = len(self._times_map[joint_ind])
-            nrows, ncols = self._get_subplots_size_for_num_sections(
-                num_sections=num_sections
-            )
+            nrows, ncols = self._get_subplots_size_for_num_sections(num_sections=num_sections)
             fig, axes = plt.subplots(
                 nrows=nrows,
                 ncols=ncols,
@@ -281,9 +267,7 @@ class Lite6PliantChoreographerController(LeafSystem):
                 )
             else:
                 # P controller to get the joints to the start positions.
-                velocities_output_vector = self.kp * (
-                    cs.start_joint_positions - pe_vector
-                )
+                velocities_output_vector = self.kp * (cs.start_joint_positions - pe_vector)
         elif self._status == ChoreographedSectionStatus.ACTIVE:
             assert self._section_active_time is not None
             if current_time - self._section_active_time > cs.active_time:
@@ -291,38 +275,28 @@ class Lite6PliantChoreographerController(LeafSystem):
                 self._status = ChoreographedSectionStatus.END_DELAY
 
                 # Active section is done. Add the current recorded data to the maps.
-                self._times_map[self._current_joint_ind][
-                    self._current_section_ind
-                ] = np.copy(self._current_recorded_times)
-                self._target_velocities_map[self._current_joint_ind][
-                    self._current_section_ind
-                ] = np.copy(self._current_recorded_target_velocities)
-                self._estimated_velocities_map[self._current_joint_ind][
-                    self._current_section_ind
-                ] = np.copy(self._current_recorded_estimated_velocities)
+                self._times_map[self._current_joint_ind][self._current_section_ind] = np.copy(
+                    self._current_recorded_times
+                )
+                self._target_velocities_map[self._current_joint_ind][self._current_section_ind] = np.copy(
+                    self._current_recorded_target_velocities
+                )
+                self._estimated_velocities_map[self._current_joint_ind][self._current_section_ind] = np.copy(
+                    self._current_recorded_estimated_velocities
+                )
 
                 # Clear out the existing current data vectors.
                 self._current_recorded_times = np.empty(0, dtype=np.float64)
                 self._current_recorded_target_velocities = np.empty(0, dtype=np.float64)
-                self._current_recorded_estimated_velocities = np.empty(
-                    0, dtype=np.float64
-                )
+                self._current_recorded_estimated_velocities = np.empty(0, dtype=np.float64)
 
-                self._logger.info(
-                    f"[Joint {joint_index + 1}][Section {self._current_section_ind + 1}] Active done."
-                )
+                self._logger.info(f"[Joint {joint_index + 1}][Section {self._current_section_ind + 1}] Active done.")
             else:
-                signal = cs.control_signal.compute_signal(
-                    time_step=current_time - self._section_active_time
-                )
+                signal = cs.control_signal.compute_signal(time_step=current_time - self._section_active_time)
                 velocities_output_vector[joint_index] = signal
                 # Record data.
-                self._current_recorded_times = np.hstack(
-                    (self._current_recorded_times, current_time)
-                )
-                self._current_recorded_target_velocities = np.hstack(
-                    (self._current_recorded_target_velocities, signal)
-                )
+                self._current_recorded_times = np.hstack((self._current_recorded_times, current_time))
+                self._current_recorded_target_velocities = np.hstack((self._current_recorded_target_velocities, signal))
                 self._current_recorded_estimated_velocities = np.hstack(
                     (
                         self._current_recorded_estimated_velocities,
@@ -338,9 +312,7 @@ class Lite6PliantChoreographerController(LeafSystem):
                 # Move to active.
                 self._section_end_wait_time = None
                 self._status = ChoreographedSectionStatus.START_DELAY
-                self._logger.info(
-                    f"[Joint {joint_index + 1}][Section {self._current_section_ind + 1}] End delay done."
-                )
+                self._logger.info(f"[Joint {joint_index + 1}][Section {self._current_section_ind + 1}] End delay done.")
 
                 # If this is the last section, we go to the next joint and reset the section index to 0
                 if self._current_section_ind == len(jcs) - 1:

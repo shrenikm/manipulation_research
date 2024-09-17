@@ -2,20 +2,21 @@ import pytest
 from pydrake.multibody.plant import MultibodyPlant, MultibodyPlantConfig
 from pydrake.systems.framework import Diagram
 
-from python.common.control.constructs import PIDGains
-from python.common.testing_utils import execute_pytest_file
-from python.lite6.pliant.lite6_pliant import create_lite6_pliant
-from python.lite6.pliant.lite6_pliant_utils import (
+from manr.common.control.constructs import PIDGains
+from manr.common.testing_utils import execute_pytest_file
+from manr.lite6.pliant.lite6_pliant import create_lite6_pliant
+from manr.lite6.pliant.lite6_pliant_utils import (
     LITE6_PLIANT_SUPPORTED_MODEL_TYPES,
     Lite6ControlType,
     Lite6PliantConfig,
     Lite6PliantType,
 )
-from python.lite6.utils.lite6_model_utils import Lite6ModelType, get_lite6_num_positions
+from manr.lite6.utils.lite6_model_utils import Lite6ModelType, get_lite6_num_positions
 
 # TODO: Figure out how to bypass the socket connection for the actual
 # hardware pliant so that it can be tested. For now just testing simulation
 # pliants.
+
 
 @pytest.mark.parametrize(
     "unsupported_model_type",
@@ -39,7 +40,6 @@ def test_create_lite6_pliant_with_unsupported_model_type(
     lite6_control_type: Lite6ControlType,
     lite6_pliant_type: Lite6PliantType,
 ) -> None:
-
     nq = get_lite6_num_positions(lite6_model_type=unsupported_model_type)
     id_pid_gains = PIDGains.from_scalar_gains(
         size=nq,
@@ -78,7 +78,6 @@ def test_create_lite6_pliant_with_supported_type(
     lite6_control_type: Lite6ControlType,
     lite6_pliant_type: Lite6PliantType,
 ) -> None:
-
     nq = get_lite6_num_positions(lite6_model_type=lite6_model_type)
     id_pid_gains = PIDGains.from_scalar_gains(
         size=nq,

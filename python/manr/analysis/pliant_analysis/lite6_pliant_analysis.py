@@ -4,13 +4,13 @@ from pydrake.common.value import Value
 from pydrake.multibody.plant import MultibodyPlantConfig
 from pydrake.systems.framework import Diagram, EventStatus
 
-from python.analysis.pliant_analysis.lite6_pliant_analysis_choreographer import (
+from manr.analysis.pliant_analysis.lite6_pliant_analysis_choreographer import (
     Lite6PliantChoreographer,
     Lite6PliantChoreographerController,
     get_choreographer_config_yaml_filepath,
 )
-from python.lite6.pliant.lite6_pliant import create_lite6_pliant
-from python.lite6.pliant.lite6_pliant_utils import (
+from manr.lite6.pliant.lite6_pliant import create_lite6_pliant
+from manr.lite6.pliant.lite6_pliant_utils import (
     LITE6_PLIANT_GSD_IP_NAME,
     LITE6_PLIANT_PE_OP_NAME,
     LITE6_PLIANT_VD_IP_NAME,
@@ -20,18 +20,13 @@ from python.lite6.pliant.lite6_pliant_utils import (
     create_simulator_for_lite6_pliant,
     get_tuned_pid_gains_for_pliant_id_controller,
 )
-from python.lite6.utils.lite6_model_utils import (
-    Lite6ControlType,
-    Lite6GripperStatus,
-    Lite6ModelType,
-)
+from manr.lite6.utils.lite6_model_utils import Lite6ControlType, Lite6GripperStatus, Lite6ModelType
 
 
 def analyze_lite6_pliant(
     config: Lite6PliantConfig,
     choreographer: Lite6PliantChoreographer,
 ) -> None:
-
     builder = DiagramBuilder()
 
     lite6_pliant_container = create_lite6_pliant(
@@ -79,9 +74,7 @@ def analyze_lite6_pliant(
 
     def simulation_end_monitor(*_):
         if choreographer_controller.is_done():
-            return EventStatus.ReachedTermination(
-                diagram, "Choreography and recording done!"
-            )
+            return EventStatus.ReachedTermination(diagram, "Choreography and recording done!")
 
     # Monitor to stop the simulation after choreography is done.
     simulator.set_monitor(
@@ -98,7 +91,6 @@ def analyze_lite6_pliant(
 
 
 if __name__ == "__main__":
-
     lite6_model_type = Lite6ModelType.ROBOT_WITH_ARP_GRIPPER
     lite6_control_type = Lite6ControlType.VELOCITY
     lite6_pliant_type = Lite6PliantType.SIMULATION

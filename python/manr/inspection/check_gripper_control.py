@@ -5,8 +5,8 @@ from pydrake.all import DiagramBuilder
 from pydrake.multibody.plant import MultibodyPlantConfig
 from pydrake.systems.framework import Diagram
 
-from python.lite6.pliant.lite6_pliant import create_lite6_pliant
-from python.lite6.pliant.lite6_pliant_utils import (
+from manr.lite6.pliant.lite6_pliant import create_lite6_pliant
+from manr.lite6.pliant.lite6_pliant_utils import (
     LITE6_PLIANT_GSD_IP_NAME,
     LITE6_PLIANT_PD_IP_NAME,
     LITE6_PLIANT_VD_IP_NAME,
@@ -15,13 +15,8 @@ from python.lite6.pliant.lite6_pliant_utils import (
     create_simulator_for_lite6_pliant,
     get_tuned_pid_gains_for_pliant_id_controller,
 )
-from python.lite6.systems.lite6_gripper_status_source import Lite6GripperStatusSource
-from python.lite6.utils.lite6_model_utils import (
-    LITE6_DOF,
-    Lite6ControlType,
-    Lite6GripperStatus,
-    Lite6ModelType,
-)
+from manr.lite6.systems.lite6_gripper_status_source import Lite6GripperStatusSource
+from manr.lite6.utils.lite6_model_utils import LITE6_DOF, Lite6ControlType, Lite6GripperStatus, Lite6ModelType
 
 
 def check_gripper_control(
@@ -29,7 +24,6 @@ def check_gripper_control(
     times: List[float],
     statuses: List[Lite6GripperStatus],
 ) -> None:
-
     builder = DiagramBuilder()
 
     lite6_pliant_container = create_lite6_pliant(
@@ -74,7 +68,6 @@ def check_gripper_control(
 
 
 if __name__ == "__main__":
-
     lite6_model_type = Lite6ModelType.ROBOT_WITH_ARP_GRIPPER
     lite6_control_type = Lite6ControlType.VELOCITY
     lite6_pliant_type = Lite6PliantType.SIMULATION

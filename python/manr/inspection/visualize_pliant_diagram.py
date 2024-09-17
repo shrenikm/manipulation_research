@@ -6,19 +6,18 @@ from pydrake.all import DiagramBuilder
 from pydrake.multibody.plant import MultibodyPlantConfig
 from pydrake.systems.framework import Diagram
 
-from python.lite6.pliant.lite6_pliant import create_lite6_pliant
-from python.lite6.pliant.lite6_pliant_utils import (
+from manr.lite6.pliant.lite6_pliant import create_lite6_pliant
+from manr.lite6.pliant.lite6_pliant_utils import (
     Lite6PliantConfig,
     Lite6PliantType,
     get_tuned_pid_gains_for_pliant_id_controller,
 )
-from python.lite6.utils.lite6_model_utils import Lite6ControlType, Lite6ModelType
+from manr.lite6.utils.lite6_model_utils import Lite6ControlType, Lite6ModelType
 
 
 def visualize_lite6_pliant_diagram(
     config: Lite6PliantConfig,
 ) -> None:
-
     builder = DiagramBuilder()
 
     lite6_pliant_container = create_lite6_pliant(
@@ -34,7 +33,6 @@ def visualize_lite6_pliant_diagram(
 
 
 if __name__ == "__main__":
-
     lite6_model_type = Lite6ModelType.ROBOT_WITH_ARP_GRIPPER
     lite6_control_type = Lite6ControlType.VELOCITY
     lite6_pliant_type = Lite6PliantType.HARDWARE

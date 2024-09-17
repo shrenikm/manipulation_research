@@ -8,11 +8,9 @@ from pydrake.multibody.plant import MultibodyPlant
 from pydrake.multibody.tree import JacobianWrtVariable
 from pydrake.systems.framework import BasicVector, Context, LeafSystem
 
-from python.common.exceptions import Lite6SystemError
-from python.lite6.utils.lite6_model_utils import (
+from manr.common.exceptions import Lite6SystemError
+from manr.lite6.utils.lite6_model_utils import (
     LITE6_DOF,
-    LITE6_GRIPPER_DOF,
-    Lite6ControlType,
     Lite6ModelGroups,
     Lite6ModelType,
     get_default_lite6_joint_positions,
@@ -32,10 +30,7 @@ class Lite6DiffIKController(LeafSystem):
         plant: MultibodyPlant,
     ):
         # Only supports unactuated gripper models
-        if (
-            lite6_model_type
-            not in Lite6ModelGroups.LITE6_ROBOT_WITH_UNACTUATED_GRIPPER_MODELS
-        ):
+        if lite6_model_type not in Lite6ModelGroups.LITE6_ROBOT_WITH_UNACTUATED_GRIPPER_MODELS:
             raise Lite6SystemError("Invalid lite6 model type.")
 
         super().__init__()

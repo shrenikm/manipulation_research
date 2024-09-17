@@ -1,22 +1,13 @@
 from typing import Optional, Sequence
 
 import numpy as np
-from pydrake.all import (
-    AddMultibodyPlantSceneGraph,
-    DiagramBuilder,
-    JointSliders,
-    StartMeshcat,
-)
+from pydrake.all import AddMultibodyPlantSceneGraph, DiagramBuilder, JointSliders, StartMeshcat
 from pydrake.multibody.plant import MultibodyPlant
-from pydrake.multibody.tree import FrameIndex, RigidBody
+from pydrake.multibody.tree import RigidBody
 from pydrake.visualization import AddDefaultVisualization, AddFrameTriadIllustration
 
-from python.common.model_utils import (
-    ObjectModelConfig,
-    ObjectModelType,
-    add_object_models_to_plant,
-)
-from python.lite6.utils.lite6_model_utils import (
+from manr.common.model_utils import ObjectModelConfig, ObjectModelType, add_object_models_to_plant
+from manr.lite6.utils.lite6_model_utils import (
     Lite6ModelType,
     add_lite6_model_to_plant,
     get_default_height_for_object_model_type,
@@ -71,7 +62,6 @@ def visualize_manipulator(
 
 
 if __name__ == "__main__":
-
     meshcat = StartMeshcat()
 
     lite6_model_type = Lite6ModelType.ROBOT_WITH_ARP_GRIPPER
@@ -82,9 +72,7 @@ if __name__ == "__main__":
                 [
                     0.2,
                     0.0,
-                    get_default_height_for_object_model_type(
-                        ObjectModelType.CUBE_1_INCH_BLUE
-                    ),
+                    get_default_height_for_object_model_type(ObjectModelType.CUBE_1_INCH_BLUE),
                 ]
             ),
         ),

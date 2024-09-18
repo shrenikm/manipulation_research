@@ -3,11 +3,14 @@ from enum import Enum, StrEnum, auto
 from typing import Optional, Tuple
 
 import numpy as np
-from pydrake.multibody.parsing import Parser
-from pydrake.multibody.plant import MultibodyPlant
-from pydrake.multibody.tree import ModelInstanceIndex
-
-from manr.common.custom_types import FilePath, PositionsVector, StateVector, VelocitiesVector
+from manr.common.custom_types import (
+    FilePath,
+    JointPositionsVector,
+    JointVelocitiesVector,
+    PositionsVector,
+    StateVector,
+    VelocitiesVector,
+)
 from manr.common.model_utils import (
     ROBOT_MODELS_DRAKE_URDF_DIRNAME,
     ObjectModelType,
@@ -15,6 +18,9 @@ from manr.common.model_utils import (
     get_environment_models_directory_path,
     get_robot_models_directory_path,
 )
+from pydrake.multibody.parsing import Parser
+from pydrake.multibody.plant import MultibodyPlant
+from pydrake.multibody.tree import ModelInstanceIndex
 
 LITE6_URDF_DESCRIPTION_EXTENSION = "urdf"
 LITE6_TABLE_FILENAME = "lite6_table.urdf"
@@ -271,42 +277,42 @@ def get_lite6_num_states(lite6_model_type: Lite6ModelType) -> int:
     )
 
 
-def add_joint_positions_to_lite6_state(
+def add_joint_positions_vector_to_lite6_state_vector(
     lite6_model_type: Lite6ModelType,
     state_vector: StateVector,
-    positions_vector: PositionsVector,
+    joint_positions_vector: JointPositionsVector,
 ) -> StateVector:
     """
     Returns a new state vector with the positions at the correct indices.
     """
     assert lite6_model_type in Lite6ModelGroups.LITE6_ROBOT_MODELS
-    assert positions_vector.size == LITE6_DOF
+    assert joint_positions_vector.size == LITE6_DOF
 
     state_vector_with_added_positions = np.copy(state_vector)
-    state_vector_with_added_positions[:LITE6_DOF] = positions_vector
+    state_vector_with_added_positions[:LITE6_DOF] = joint_positions_vector
     return state_vector_with_added_positions
 
 
-def add_joint_velocities_to_lite6_state(
+def add_joint_velocities_vector_to_lite6_state_vector(
     lite6_model_type: Lite6ModelType,
     state_vector: StateVector,
-    velocities_vector: VelocitiesVector,
+    joint_velocities_vector: JointVelocitiesVector,
 ) -> VelocitiesVector:
     """
     Returns a new state vector with the velocities at the correct indices.
     """
     assert lite6_model_type in Lite6ModelGroups.LITE6_ROBOT_MODELS
-    assert velocities_vector.size == LITE6_DOF
+    assert joint_velocities_vector.size == LITE6_DOF
 
     state_vector_with_added_velocities = np.copy(state_vector)
 
     if lite6_model_type in Lite6ModelGroups.LITE6_ROBOT_WITH_ACTUATED_PARALLEL_GRIPPER_MODELS:
         state_vector_with_added_velocities[LITE6_DOF + LITE6_GRIPPER_DOF : 2 * LITE6_DOF + LITE6_GRIPPER_DOF] = (
-            velocities_vector
+            joint_velocities_vector
         )
         return state_vector_with_added_velocities
     else:
-        state_vector_with_added_velocities[LITE6_DOF:] = velocities_vector
+        state_vector_with_added_velocities[LITE6_DOF:] = joint_velocities_vector
         return state_vector_with_added_velocities
 
 
@@ -362,7 +368,7 @@ def get_parallel_gripper_velocities(
         raise NotImplementedError
 
 
-def add_gripper_positions_and_velocities_to_lite6_state(
+def add_gripper_positions_and_velocities_to_lite6_state_vector(
     lite6_model_type: Lite6ModelType,
     state_vector: StateVector,
     gripper_positions: Tuple[float, float],
@@ -379,7 +385,7 @@ def add_gripper_positions_and_velocities_to_lite6_state(
     return state_vector_with_added_gripper_state
 
 
-def add_gripper_status_to_lite6_state(
+def add_gripper_status_to_lite6_state_vector(
     lite6_model_type: Lite6ModelType,
     state_vector: StateVector,
     lite6_gripper_status: Lite6GripperStatus,
@@ -399,7 +405,7 @@ def add_gripper_status_to_lite6_state(
         lite6_model_type=lite6_model_type,
         lite6_gripper_status=lite6_gripper_status,
     )
-    return add_gripper_positions_and_velocities_to_lite6_state(
+    return add_gripper_positions_and_velocities_to_lite6_state_vector(
         lite6_model_type=lite6_model_type,
         state_vector=state_vector,
         gripper_positions=parallel_gripper_positions,
@@ -407,10 +413,10 @@ def add_gripper_status_to_lite6_state(
     )
 
 
-def create_lite6_state(
+def create_lite6_state_vector(
     lite6_model_type: Lite6ModelType,
-    positions_vector: PositionsVector,
-    velocities_vector: VelocitiesVector,
+    joint_positions_vector: JointPositionsVector,
+    joint_velocities_vector: JointVelocitiesVector,
     lite6_gripper_status: Lite6GripperStatus,
 ) -> StateVector:
     """
@@ -419,17 +425,17 @@ def create_lite6_state(
     # Only for actuated parallel gripper models.
     assert lite6_model_type in Lite6ModelGroups.LITE6_ROBOT_WITH_ACTUATED_PARALLEL_GRIPPER_MODELS
     state_vector = np.zeros(get_lite6_num_states(lite6_model_type), dtype=np.float64)
-    state_vector = add_joint_positions_to_lite6_state(
+    state_vector = add_joint_positions_vector_to_lite6_state_vector(
         lite6_model_type=lite6_model_type,
         state_vector=state_vector,
-        positions_vector=positions_vector,
+        joint_positions_vector=joint_positions_vector,
     )
-    state_vector = add_joint_velocities_to_lite6_state(
+    state_vector = add_joint_velocities_vector_to_lite6_state_vector(
         lite6_model_type=lite6_model_type,
         state_vector=state_vector,
-        velocities_vector=velocities_vector,
+        joint_velocities_vector=joint_velocities_vector,
     )
-    state_vector = add_gripper_status_to_lite6_state(
+    state_vector = add_gripper_status_to_lite6_state_vector(
         lite6_model_type=lite6_model_type,
         state_vector=state_vector,
         lite6_gripper_status=lite6_gripper_status,
@@ -437,15 +443,15 @@ def create_lite6_state(
     return state_vector
 
 
-def get_joint_positions_from_lite6_state(
+def get_joint_positions_vector_from_lite6_state_vector(
     lite6_model_type: Lite6ModelType,
     state_vector: StateVector,
-) -> PositionsVector:
+) -> JointPositionsVector:
     assert lite6_model_type in Lite6ModelGroups.LITE6_ROBOT_MODELS
-    return state_vector[:LITE6_DOF]
+    return state_vector[: get_lite6_num_positions(lite6_model_type=lite6_model_type)]
 
 
-def get_joint_velocities_from_lite6_state(
+def get_joint_velocities_vector_from_lite6_state_vector(
     lite6_model_type: Lite6ModelType,
     state_vector: StateVector,
 ) -> VelocitiesVector:
@@ -458,23 +464,7 @@ def get_joint_velocities_from_lite6_state(
         return state_vector[nq:]
 
 
-def get_positions_from_lite6_state(
-    lite6_model_type: Lite6ModelType,
-    state_vector: StateVector,
-) -> PositionsVector:
-    assert lite6_model_type in Lite6ModelGroups.LITE6_ROBOT_MODELS
-    return state_vector[: get_lite6_num_positions(lite6_model_type=lite6_model_type)]
-
-
-def get_velocities_from_lite6_state(
-    lite6_model_type: Lite6ModelType,
-    state_vector: StateVector,
-) -> VelocitiesVector:
-    assert lite6_model_type in Lite6ModelGroups.LITE6_ROBOT_MODELS
-    return state_vector[get_lite6_num_positions(lite6_model_type=lite6_model_type) :]
-
-
-def get_gripper_positions_from_lite6_state(
+def get_gripper_positions_from_lite6_state_vector(
     lite6_model_type: Lite6ModelType,
     state_vector: StateVector,
 ) -> Tuple[float, float]:
@@ -485,7 +475,7 @@ def get_gripper_positions_from_lite6_state(
     return state_vector[LITE6_DOF], state_vector[LITE6_DOF + 1]
 
 
-def get_gripper_velocities_from_lite6_state(
+def get_gripper_velocities_from_lite6_state_vector(
     lite6_model_type: Lite6ModelType,
     state_vector: StateVector,
 ) -> Tuple[float, float]:
@@ -499,7 +489,7 @@ def get_gripper_velocities_from_lite6_state(
     )
 
 
-def get_gripper_status_from_lite6_state(
+def get_gripper_status_from_lite6_state_vector(
     lite6_model_type: Lite6ModelType,
     state_vector: StateVector,
     tolerance: float = 1e-4,
@@ -538,20 +528,20 @@ def get_gripper_status_from_lite6_state(
     return Lite6GripperStatus.NEUTRAL
 
 
-def get_default_lite6_joint_positions(
+def get_default_lite6_joint_positions_vector(
     lite6_model_type: Lite6ModelType,
-) -> PositionsVector:
+) -> JointPositionsVector:
     assert lite6_model_type in Lite6ModelGroups.LITE6_ROBOT_MODELS
     state_vector = np.zeros(get_lite6_num_states(lite6_model_type), dtype=np.float64)
 
     if lite6_model_type in Lite6ModelGroups.LITE6_ROBOT_WITH_ACTUATED_PARALLEL_GRIPPER_MODELS:
         # Default gripper state is closed.
-        state_vector = add_gripper_status_to_lite6_state(
+        state_vector = add_gripper_status_to_lite6_state_vector(
             lite6_model_type=lite6_model_type,
             state_vector=state_vector,
             lite6_gripper_status=Lite6GripperStatus.CLOSED,
         )
-    return get_positions_from_lite6_state(
+    return get_joint_positions_vector_from_lite6_state_vector(
         lite6_model_type=lite6_model_type,
         state_vector=state_vector,
     )

@@ -31,3 +31,10 @@ VelocitiesVector = NpVectorNf64
 StateVector = NpVectorNf64
 GainsVector = NpVectorNf64
 ControlSignalVector = NpVectorNf64
+
+JointPositionsVector = NpVectorNf64
+JointVelocitiesVector = NpVectorNf64
+JointStateVector = NpVectorNf64
+
+GripperPositionsVector = NpVectorNf64
+GripperVelocitiesVector = NpVectorNf64

@@ -32,7 +32,7 @@ from manr.lite6.utils.lite6_model_utils import (
     Lite6GripperStatus,
     add_lite6_model_to_plant,
     create_lite6_plant_for_system,
-    get_default_lite6_joint_positions,
+    get_default_lite6_joint_positions_vector,
 )
 
 
@@ -186,7 +186,7 @@ def create_lite6_pliant_for_simulation(
     # Set the default starting joint positions.
     main_plant.SetDefaultPositions(
         model_instance=lite6_model,
-        q_instance=get_default_lite6_joint_positions(
+        q_instance=get_default_lite6_joint_positions_vector(
             lite6_model_type=config.lite6_model_type,
         ),
     )
@@ -219,7 +219,7 @@ def create_lite6_pliant_for_simulation(
     # Set the default starting joint positions for the controller plant as well.
     lite6_controller_plant.SetDefaultPositions(
         model_instance=lite6_controller_model,
-        q_instance=get_default_lite6_joint_positions(
+        q_instance=get_default_lite6_joint_positions_vector(
             lite6_model_type=config.lite6_model_type,
         ),
     )

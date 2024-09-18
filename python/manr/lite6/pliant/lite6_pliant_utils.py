@@ -15,13 +15,13 @@ from manr.lite6.utils.lite6_model_utils import (
     Lite6ControlType,
     Lite6GripperStatus,
     Lite6ModelType,
-    add_gripper_positions_and_velocities_to_lite6_state,
-    create_lite6_state,
-    get_gripper_positions_from_lite6_state,
-    get_gripper_status_from_lite6_state,
-    get_gripper_velocities_from_lite6_state,
-    get_joint_positions_from_lite6_state,
-    get_joint_velocities_from_lite6_state,
+    add_gripper_positions_and_velocities_to_lite6_state_vector,
+    create_lite6_state_vector,
+    get_gripper_positions_from_lite6_state_vector,
+    get_gripper_status_from_lite6_state_vector,
+    get_gripper_velocities_from_lite6_state_vector,
+    get_joint_positions_vector_from_lite6_state_vector,
+    get_joint_velocities_vector_from_lite6_state_vector,
     get_lite6_num_states,
 )
 
@@ -203,10 +203,10 @@ class Lite6PliantMultiplexer(LeafSystem):
             # The gripper values are set according to the desired flag. Desired gripper
             # velocity will be 0 with the positions being open/closed according to the
             # GSD port input.
-            state_output_vector = create_lite6_state(
+            state_output_vector = create_lite6_state_vector(
                 lite6_model_type=self.config.lite6_model_type,
-                positions_vector=positions_desired_vector,
-                velocities_vector=velocities_desired_vector,
+                joint_positions_vector=positions_desired_vector,
+                joint_velocities_vector=velocities_desired_vector,
                 lite6_gripper_status=gripper_status_desired,
             )
         elif self.config.lite6_control_type == Lite6ControlType.VELOCITY:
@@ -214,14 +214,14 @@ class Lite6PliantMultiplexer(LeafSystem):
             # state's velocities. The output's positions are obtained from the input
             # estimated positions state. This is the only case where we use the SE input
             # port value.
-            positions_estimated_vector = get_joint_positions_from_lite6_state(
+            positions_estimated_vector = get_joint_positions_vector_from_lite6_state_vector(
                 lite6_model_type=self.config.lite6_model_type,
                 state_vector=state_estimated_vector,
             )
-            state_output_vector = create_lite6_state(
+            state_output_vector = create_lite6_state_vector(
                 lite6_model_type=self.config.lite6_model_type,
-                positions_vector=positions_estimated_vector,
-                velocities_vector=velocities_desired_vector,
+                joint_positions_vector=positions_estimated_vector,
+                joint_velocities_vector=velocities_desired_vector,
                 lite6_gripper_status=gripper_status_desired,
             )
         else:
@@ -232,14 +232,14 @@ class Lite6PliantMultiplexer(LeafSystem):
         # gripper, the same as the estimated state so that the inverse dynamics
         # controller will cancel them out.
         if gripper_status_desired == Lite6GripperStatus.NEUTRAL:
-            state_output_vector = add_gripper_positions_and_velocities_to_lite6_state(
+            state_output_vector = add_gripper_positions_and_velocities_to_lite6_state_vector(
                 lite6_model_type=self.config.lite6_model_type,
                 state_vector=state_output_vector,
-                gripper_positions=get_gripper_positions_from_lite6_state(
+                gripper_positions=get_gripper_positions_from_lite6_state_vector(
                     lite6_model_type=self.config.lite6_model_type,
                     state_vector=state_estimated_vector,
                 ),
-                gripper_velocities=get_gripper_velocities_from_lite6_state(
+                gripper_velocities=get_gripper_velocities_from_lite6_state_vector(
                     lite6_model_type=self.config.lite6_model_type,
                     state_vector=state_estimated_vector,
                 ),
@@ -290,7 +290,7 @@ class Lite6PliantDeMultiplexer(LeafSystem):
     ) -> None:
         state_estimated_vector = self.se_input_port.Eval(context)
 
-        positions_output_vector = get_joint_positions_from_lite6_state(
+        positions_output_vector = get_joint_positions_vector_from_lite6_state_vector(
             lite6_model_type=self.config.lite6_model_type,
             state_vector=state_estimated_vector,
         )
@@ -305,7 +305,7 @@ class Lite6PliantDeMultiplexer(LeafSystem):
     ) -> None:
         state_estimated_vector = self.se_input_port.Eval(context)
 
-        velocities_output_vector = get_joint_velocities_from_lite6_state(
+        velocities_output_vector = get_joint_velocities_vector_from_lite6_state_vector(
             lite6_model_type=self.config.lite6_model_type,
             state_vector=state_estimated_vector,
         )
@@ -320,7 +320,7 @@ class Lite6PliantDeMultiplexer(LeafSystem):
     ) -> None:
         state_estimated_vector = self.se_input_port.Eval(context)
 
-        lite6_gripper_status = get_gripper_status_from_lite6_state(
+        lite6_gripper_status = get_gripper_status_from_lite6_state_vector(
             lite6_model_type=self.config.lite6_model_type,
             state_vector=state_estimated_vector,
         )

@@ -13,7 +13,7 @@ from manr.lite6.utils.lite6_model_utils import (
     LITE6_DOF,
     Lite6ModelGroups,
     Lite6ModelType,
-    get_default_lite6_joint_positions,
+    get_default_lite6_joint_positions_vector,
     get_lite6_urdf_eef_tip_frame_name,
 )
 
@@ -54,7 +54,7 @@ class Lite6DiffIKController(LeafSystem):
             num_velocities=plant.num_velocities(),
         )
         self._diff_ik_parameters.set_nominal_joint_position(
-            get_default_lite6_joint_positions(
+            get_default_lite6_joint_positions_vector(
                 lite6_model_type=lite6_model_type,
             ),
         )

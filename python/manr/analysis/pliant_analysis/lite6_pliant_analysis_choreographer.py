@@ -11,7 +11,7 @@ import yaml
 from pydrake.systems.framework import BasicVector, Context, LeafSystem
 
 from manr.common.control.signals import ControlSignal, SineControlSignal, StepControlSignal
-from manr.common.custom_types import FilePath, PositionsVector
+from manr.common.custom_types import FilePath, JointPositionsVector
 from manr.common.exceptions import Lite6PliantChoreographerError, Lite6PliantError
 from manr.common.logging_utils import MRLogger
 from manr.lite6.pliant.lite6_pliant_utils import Lite6PliantConfig
@@ -35,7 +35,7 @@ class ChoreographedSection:
     start_time_delay: float
     end_time_delay: float
     active_time: float
-    start_joint_positions: PositionsVector
+    start_joint_positions: JointPositionsVector
     control_signal: ControlSignal
 
 

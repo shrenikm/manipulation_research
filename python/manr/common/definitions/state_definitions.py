@@ -1,3 +1,5 @@
+from enum import StrEnum
+
 import attr
 
 from manr.common.custom_types import (
@@ -6,6 +8,18 @@ from manr.common.custom_types import (
     JointPositionsVector,
     JointVelocitiesVector,
 )
+
+
+class ManipulatorGripperStatus(StrEnum):
+    """
+    Enum to represent the status of a manipulator's gripper.
+    """
+
+    OPENING = "opening"
+    CLOSING = "closing"
+    NEUTRAL = "neutral"
+    OPEN = "open"
+    CLOSED = "closed"
 
 
 @attr.frozen

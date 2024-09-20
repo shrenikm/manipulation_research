@@ -1,6 +1,7 @@
 from enum import StrEnum
 
 import attr
+
 from manr.common.custom_types import (
     GripperPositionsVector,
     GripperVelocitiesVector,

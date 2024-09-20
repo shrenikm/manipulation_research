@@ -1,7 +1,6 @@
 from enum import StrEnum
 
 import attr
-
 from manr.common.custom_types import (
     GripperPositionsVector,
     GripperVelocitiesVector,
@@ -29,7 +28,8 @@ class ManipulatorState:
     """
 
     joint_positions: JointPositionsVector
-    gripper_positions: GripperPositionsVector
-
     joint_velocities: JointVelocitiesVector
+
+    gripper_positions: GripperPositionsVector
     gripper_velocities: GripperVelocitiesVector
+    gripper_status: ManipulatorGripperStatus

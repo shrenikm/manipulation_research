@@ -2,16 +2,6 @@ import time
 
 import mock
 import numpy as np
-from pydrake.common.value import AbstractValue, Value
-from pydrake.systems.framework import (
-    BasicVector,
-    Context,
-    DiscreteValues,
-    EventStatus,
-    LeafSystem,
-)
-from xarm.wrapper import XArmAPI
-
 from manr.common.exceptions import Lite6PliantError
 from manr.common.logging_utils import MRLogger
 from manr.lite6.pliant.lite6_pliant_utils import (
@@ -23,11 +13,10 @@ from manr.lite6.pliant.lite6_pliant_utils import (
     LITE6_PLIANT_VE_OP_NAME,
     Lite6PliantConfig,
 )
-from manr.lite6.utils.lite6_model_utils import (
-    LITE6_DOF,
-    Lite6ControlType,
-    Lite6GripperStatus,
-)
+from manr.lite6.utils.lite6_model_utils import LITE6_DOF, Lite6ControlType, Lite6GripperStatus
+from pydrake.common.value import AbstractValue, Value
+from pydrake.systems.framework import BasicVector, Context, DiscreteValues, EventStatus, LeafSystem
+from xarm.wrapper import XArmAPI
 
 LITE6_ROBOT_IP = "192.168.1.178"
 
@@ -52,6 +41,14 @@ class Lite6HardwareInterface(LeafSystem):
             period_sec=self.config.hardware_control_loop_time_step,
             offset_sec=0.0,
             update=self._estimate_state_and_send_commands,
+        )
+
+        # Estimated state output port.
+        self.state_output_port = self.DelcareAbstractOutputPort(
+            name=LITE6_HARDWARE_PREFIX + "state_output",
+            alloc=lambda: Value(Lite6PliantState()),
+            calc=self._compute_estimated_state_output,
+            prerequisites_of_calc={},
         )
 
         # Declare input and output ports.
@@ -115,9 +112,7 @@ class Lite6HardwareInterface(LeafSystem):
             )
         # The API throws a generic Exception.
         except Exception as e:
-            self._logger.warning(
-                f"Could not connect to the arm, hardware pliant will be mocked!. Error: {e}"
-            )
+            self._logger.warning(f"Could not connect to the arm, hardware pliant will be mocked!. Error: {e}")
             self.arm = mock.MagicMock()
         else:
             self._logger.info("Connected to the robot!")
@@ -175,27 +170,22 @@ class Lite6HardwareInterface(LeafSystem):
         discrete_state: DiscreteValues,
     ) -> EventStatus:
         # First we estimate the current state using the xArm API.
-        ret_code, (
-            positions_estimated_list,
-            velocities_estimated_list,
-            _,
+        (
+            ret_code,
+            (
+                positions_estimated_list,
+                velocities_estimated_list,
+                _,
+            ),
         ) = self.arm.get_joint_states(is_radian=True)
         if ret_code != 0:
             self.arm.emergency_stop()
-            raise Lite6PliantError(
-                f"Error while estimating state!. Error code: {ret_code}"
-            )
+            raise Lite6PliantError(f"Error while estimating state!. Error code: {ret_code}")
 
         # The xArm API returns a vector of size 7 for the positions and velocities, so we need to drop the last value.
-        positions_estimated_vector = np.array(
-            positions_estimated_list, dtype=np.float64
-        )[:LITE6_DOF]
-        velocities_estimated_vector = np.array(
-            velocities_estimated_list, dtype=np.float64
-        )[:LITE6_DOF]
-        state_estimated_vector = np.hstack(
-            (positions_estimated_vector, velocities_estimated_vector)
-        )
+        positions_estimated_vector = np.array(positions_estimated_list, dtype=np.float64)[:LITE6_DOF]
+        velocities_estimated_vector = np.array(velocities_estimated_list, dtype=np.float64)[:LITE6_DOF]
+        state_estimated_vector = np.hstack((positions_estimated_vector, velocities_estimated_vector))
 
         discrete_state.set_value(state_estimated_vector)
 
@@ -213,9 +203,7 @@ class Lite6HardwareInterface(LeafSystem):
             )
             if ret_code != 0:
                 self.arm.emergency_stop()
-                raise Lite6PliantError(
-                    f"Error while trying to send position commands! Error code: {ret_code}"
-                )
+                raise Lite6PliantError(f"Error while trying to send position commands! Error code: {ret_code}")
         elif self.config.lite6_control_type == Lite6ControlType.VELOCITY:
             ret_code = self.arm.vc_set_joint_velocity(
                 speeds=velocities_desired_vector,
@@ -224,9 +212,7 @@ class Lite6HardwareInterface(LeafSystem):
             )
             if ret_code != 0:
                 self.arm.emergency_stop()
-                raise Lite6PliantError(
-                    f"Error while trying to send velocity commands! Error code: {ret_code}"
-                )
+                raise Lite6PliantError(f"Error while trying to send velocity commands! Error code: {ret_code}")
         else:
             raise NotImplementedError("Invalid control type")
 
@@ -247,9 +233,7 @@ class Lite6HardwareInterface(LeafSystem):
 
         if ret_code != 0:
             self.arm.emergency_stop()
-            raise Lite6PliantError(
-                f"Error while trying to command the gripper! Error code: {ret_code}"
-            )
+            raise Lite6PliantError(f"Error while trying to command the gripper! Error code: {ret_code}")
 
         # Update the current gripper status.
         if ret_code == 0:
@@ -316,7 +300,6 @@ class Lite6HardwareInterface(LeafSystem):
         context: Context,
         output_vector: BasicVector,
     ) -> None:
-
         state_estimated = context.get_discrete_state_vector().value()
         output_vector.set_value(state_estimated[:LITE6_DOF])
         return
@@ -334,5 +317,4 @@ class Lite6HardwareInterface(LeafSystem):
         context: Context,
         output_value: AbstractValue,
     ) -> None:
-
         output_value.set_value(self._gripper_status)

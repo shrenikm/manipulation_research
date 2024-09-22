@@ -2,6 +2,7 @@ import time
 
 import mock
 import numpy as np
+from manr.common.definitions.state_definitions import ManipulatorState
 from manr.common.exceptions import Lite6PliantError
 from manr.common.logging_utils import MRLogger
 from manr.lite6.pliant.lite6_pliant_utils import (
@@ -44,9 +45,9 @@ class Lite6HardwareInterface(LeafSystem):
         )
 
         # Estimated state output port.
-        self.state_output_port = self.DelcareAbstractOutputPort(
+        self.state_output_port = self.DeclareAbstractOutputPort(
             name=LITE6_HARDWARE_PREFIX + "state_output",
-            alloc=lambda: Value(Lite6PliantState()),
+            alloc=lambda: Value(ManipulatorState.create_dummy()),
             calc=self._compute_estimated_state_output,
             prerequisites_of_calc={},
         )

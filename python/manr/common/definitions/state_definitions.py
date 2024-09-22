@@ -1,7 +1,9 @@
+from __future__ import annotations
+
 from enum import StrEnum
 
 import attr
-
+import numpy as np
 from manr.common.custom_types import (
     GripperPositionsVector,
     GripperVelocitiesVector,
@@ -34,3 +36,17 @@ class ManipulatorState:
     gripper_positions: GripperPositionsVector
     gripper_velocities: GripperVelocitiesVector
     gripper_status: ManipulatorGripperStatus
+
+    @classmethod
+    def create_dummy(cls) -> ManipulatorState:
+        """
+        Create a dummy manipulator state.
+        Useful for declaring abstract states, etc.
+        """
+        return cls(
+            joint_positions=np.empty(0),
+            joint_velocities=np.empty(0),
+            gripper_positions=np.empty(0),
+            gripper_velocities=np.empty(0),
+            gripper_status=ManipulatorGripperStatus.NEUTRAL,
+        )

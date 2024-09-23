@@ -10,7 +10,7 @@ class ManipulatorControlTarget(StrEnum):
     EEF = "eef"
 
 
-class ManipulatorControlTyupe(StrEnum):
+class ManipulatorControlType(StrEnum):
     # Position control. Can be for any control target.
     POSITION = "position"
     # Velocity control. Can be for any control target.
@@ -19,11 +19,13 @@ class ManipulatorControlTyupe(StrEnum):
     STATE = "state"
 
 
-class Lite6GripperStatus(Enum):
+class ManipulatorGripperStatus(StrEnum):
     """
-    Parallel gripper status. Either open or closed.
+    Enum to represent the status of a manipulator's gripper.
     """
 
-    OPEN = auto()
-    CLOSED = auto()
-    NEUTRAL = auto()
+    OPENING = "opening"
+    CLOSING = "closing"
+    NEUTRAL = "neutral"
+    OPEN = "open"
+    CLOSED = "closed"

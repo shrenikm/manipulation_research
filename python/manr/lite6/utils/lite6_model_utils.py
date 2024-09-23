@@ -64,24 +64,6 @@ LITE6_TABLE_HEIGHT = 0.7366
 LITE6_GRIPPER_ACTIVATION_TIME = 0.2
 
 
-class Lite6ControlType(Enum):
-    # Control both q and qdot -- Specify what joint angles to reach and how fast
-    # Each joint should move.
-    STATE = auto()
-    # Control only qdot -- Only specify the instantaneous joint velocities.
-    VELOCITY = auto()
-
-
-class Lite6GripperStatus(Enum):
-    """
-    Parallel gripper status. Either open or closed.
-    """
-
-    OPEN = auto()
-    CLOSED = auto()
-    NEUTRAL = auto()
-
-
 class Lite6ModelType(StrEnum):
     NP_GRIPPER = "lite6_normal_parallel_gripper"
     RP_GRIPPER = "lite6_reverse_parallel_gripper"

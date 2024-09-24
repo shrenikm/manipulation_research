@@ -22,6 +22,7 @@ class ManipulatorControlType(StrEnum):
 class ManipulatorGripperStatus(StrEnum):
     """
     Enum to represent the status of a manipulator's gripper.
+    Assumes parallel gripper for now.
     """
 
     OPENING = "opening"

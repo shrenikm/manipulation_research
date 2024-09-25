@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import attr
 import numpy as np
+
 from manr.common.custom_types import (
     GripperPositionsVector,
     GripperVelocitiesVector,

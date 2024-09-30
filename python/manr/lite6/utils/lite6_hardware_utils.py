@@ -1,7 +1,8 @@
+import mock
 import time
 
-import mock
 import numpy as np
+
 from manr.common.definitions.state_definitions import ManipulatorState
 from manr.common.exceptions import Lite6PliantError
 from manr.common.logging_utils import MRLogger
